@@ -1,18 +1,47 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Book, User, Mail, Lock } from 'lucide-react';
+import {Link} from 'react-router-dom'
 import type { ChangeEvent } from 'react';
+import { checkUsernameValidity, checkEmailValidity , checkPasswordValidity , checkConfirmPasswordValidity} from '../utils/formValidation';
 
 type formData ={
     firstName : string;
-    middleName? : string;
+    middleName : string;
     lastName : string;
     email : string;
     password : string;
     confirmPassword : string;
 }
 
+type passwordError = {
+    symbol : boolean;
+    num : boolean;
+    totalLength : boolean;
+}
+
+type userNameError = {
+    firstName : boolean;
+    lastName : boolean ;
+    totalLength : boolean;
+}
+
+
 export default function SignupForm() {
+    // state variables
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [userNameValidity , setUserNameValidity] = useState<userNameError>(
+      {
+	  firstName : false,
+	  lastName : false,
+	  totalLength : false
+      }
+  )
+  const [passwordValidity , setPasswordValidity] = useState<passwordError>({
+      symbol : false,
+      num : false,
+      totalLength : false
+  })
+  const [emailValidity , setEmailValidity] = useState<boolean>(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   const [formData, setFormData] = useState<formData>({
     firstName: '',
@@ -23,15 +52,77 @@ export default function SignupForm() {
     confirmPassword: ''
   });
 
+  const [confirmPasswordValidity , setConfirmPasswordValidity ] = useState<boolean>(false)
+  const [formValidation , setFormValidation] = useState<boolean>(true)
+
+
+  // function 
+
+
+  const checkForFormValidation : (formData : formData)=>boolean = (formData : formData )=>{
+    const currentUserNameValidity = checkUsernameValidity(formData.firstName , formData.middleName , formData.lastName) 
+    setUserNameValidity(currentUserNameValidity)
+    const currentPasswordValidity = checkPasswordValidity(formData.password)
+    const currentEmailValidity = checkEmailValidity(formData.email)
+    const {firstName , lastName , totalLength} = currentUserNameValidity 
+    const {symbol , num } = currentPasswordValidity
+    const totalLengthPassword = currentPasswordValidity.totalLength
+    const email = currentEmailValidity
+    const confirmPassword = checkConfirmPasswordValidity(formData.password , formData.confirmPassword)
+    if(firstName || lastName || totalLength || symbol || num || totalLengthPassword || email || confirmPassword) return true;
+    else return false
+	
+  }
   const handleChange = (e : ChangeEvent<HTMLInputElement> ) => {
-    setFormData({
+      setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
+
+    const  {firstName , middleName , lastName, email , password, confirmPassword } : formData = {
+	...formData,
+	[e.target.name] : e.target.value
+    }
+
+
+    const currentUserNameValidity = checkUsernameValidity(firstName , middleName , lastName)
+    const currentEmailValidity = checkEmailValidity(email)
+    const currentPasswordValidity = checkPasswordValidity(password)
+    const currentConfirmPasswordValidity = checkConfirmPasswordValidity(password , confirmPassword)
+
+    setUserNameValidity(currentUserNameValidity)
+
+    setPasswordValidity(currentPasswordValidity)
+
+    setEmailValidity(currentEmailValidity)
+
+    setConfirmPasswordValidity(currentConfirmPasswordValidity)
+
+    const newFormData : formData= {
+
+	firstName,
+	middleName,
+	lastName,
+	email,
+	password,
+	confirmPassword
+    }
+
+
+    if(checkForFormValidation(newFormData)){
+	setFormValidation(true)
+    }
+    else {
+	setFormValidation(false)
+    }
+
+
   };
 
-  const handleSubmit = () => {
-    console.log('Form submitted:', formData);
+
+  const handleSubmit : ()=> Promise<void> = async () => {
+    if(checkForFormValidation(formData)) return
+    console.log('Form submitted:', formData)
   };
 
   const handleGoogleSignup = () => {
@@ -39,7 +130,7 @@ export default function SignupForm() {
   };
 
   return (
-    <div className=" h-screen bg-gray-50 flex items-center gap-6 justify-center   w-full">
+    <div className=" h-screen bg-gray-50 flex items-center gap-6 justify-center pt-18  w-full">
       <div 
         className="w-full max-w-md bg-white flex flex-col"
         style={{
@@ -72,6 +163,7 @@ export default function SignupForm() {
                   placeholder="Enter your full name"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
+		{(userNameValidity.firstName) ? <span className ="text-red-900">The first name field can't be null</span> : (userNameValidity.totalLength) ? <span className="text-red-900">The total username length must be greater than 8</span>: <></>}
               </div>
             </div>
 	    
@@ -88,7 +180,7 @@ export default function SignupForm() {
                   onChange={handleChange}
                   placeholder="Enter your full name"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                />
+                />{ (userNameValidity.totalLength) ? <span className="text-red-900">The total username length must be greater than 8</span>: <></>}
               </div>
             </div>
 
@@ -106,6 +198,7 @@ export default function SignupForm() {
                   placeholder="Enter your full name"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
+		{(userNameValidity.lastName) ? <span className ="text-red-900">The last name field can't be null</span> : (userNameValidity.totalLength) ? <span className="text-red-900">The total username length must be greater than 8</span>: <></>}
               </div>
             </div>
 
@@ -123,6 +216,7 @@ export default function SignupForm() {
                   placeholder="Enter your email"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
+		{(emailValidity) ? <span className ="text-red-900">Email isn't in the correct format</span> : <></>}
               </div>
             </div>
 
@@ -140,6 +234,7 @@ export default function SignupForm() {
                   placeholder="Enter your password"
                   className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
+		{(passwordValidity.totalLength) ? <span className ="text-red-900">Password must be atleast 8 characters long</span> : (passwordValidity.symbol) ? <span className ="text-red-900">Password must contain at least one symbol </span>: (passwordValidity.num) ? <span className ="text-red-900">Password must contain atleast one number</span> : <></> }
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -164,6 +259,7 @@ export default function SignupForm() {
                   placeholder="Confirm your password"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
+		{(confirmPasswordValidity) ? <span className="text-red-900">This must match with the actual password</span> : <></>}
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -179,6 +275,7 @@ export default function SignupForm() {
             <button
               onClick={handleSubmit}
               className="w-full bg-slate-800 text-white py-3 rounded-lg font-medium hover:bg-slate-700 transition-colors"
+	      style = { (formValidation) ? {backgroundColor: 'gray' , cursor : 'not-allowed'  } : {backgroundColor : 'rgb(51, 65, 85)', cursor : 'pointer' } }
             >
               Create Account
             </button>
@@ -215,12 +312,12 @@ export default function SignupForm() {
             Continue with Google
           </button>
 
-          <div className="text-center">
+          <div className="text-center mb-8">
             <p className="text-sm text-gray-600">
               Already have an account?{' '}
-              <a href="#" className="text-blue-600 hover:text-blue-700 font-medium">
+              <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
                 Login
-              </a>
+              </Link>
             </p>
           </div>
         </div>
