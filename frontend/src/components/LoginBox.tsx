@@ -1,6 +1,8 @@
 // how are you 
 import { useState } from 'react';
 import { Eye, EyeOff, Book, Mail, Lock } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import axios from 'axios'
 import type { ChangeEvent } from 'react';
 
 type formData ={
@@ -22,8 +24,9 @@ export default function LoginForm() {
     });
   };
 
-  const handleSubmit = () => {
-    console.log('Form submitted:', formData);
+  const handleSubmit : ()=> Promise<void>  = async () => {
+
+    	
   };
 
   const handleGoogleSignup = () => {
@@ -137,9 +140,11 @@ export default function LoginForm() {
           <div className="text-center mb-8">
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <a href="#" className="text-blue-600 hover:text-blue-700 font-medium">
-                Signup
-              </a>
+              <Link to="/signup" className="text-blue-600 hover:text-blue-700 font-medium">
+		
+		signup
+             
+              </Link>
             </p>
           </div>
         </div>
