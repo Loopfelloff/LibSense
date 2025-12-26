@@ -3,6 +3,7 @@ import { Eye, EyeOff, Book, User, Mail, Lock } from 'lucide-react';
 import {Link} from 'react-router-dom'
 import type { ChangeEvent } from 'react';
 import { checkUsernameValidity, checkEmailValidity , checkPasswordValidity , checkConfirmPasswordValidity} from '../utils/formValidation';
+import axios from 'axios';
 
 type formData ={
     firstName : string;
@@ -122,7 +123,20 @@ export default function SignupForm() {
 
   const handleSubmit : ()=> Promise<void> = async () => {
     if(checkForFormValidation(formData)) return
-    console.log('Form submitted:', formData)
+    setFormValidation(true)
+    const response = await axios.post("http://localhost:5000/registerAccount", {
+	firstName : formData.firstName,
+	middleName : formData.middleName,
+	lastName : formData.lastName,
+	email : formData.email,
+	password : formData.password
+    })
+    setFormValidation(false)
+    console.log(response.data)
+    console.log(response.status)
+
+    
+    
   };
 
   const handleGoogleSignup = () => {
@@ -169,7 +183,7 @@ export default function SignupForm() {
 	    
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-		Middle Name
+		Middle Name*
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />

@@ -1,13 +1,21 @@
+import dotenv from 'dotenv' 
+dotenv.config()
 import express from 'express'
-import type {Request , Response} from 'express'
+import { router as verifyEmailHandler} from './routes/signupRoute.js'
+import { corsOptions } from './config/corsConfig.js'
+import cors from 'cors'
 const app = express()
-let port = 5000
 
+
+app.use(cors(corsOptions))
 app.use(express.json())
 
 
-app.listen(port , ()=>{
-    console.log('Listening to port ' , port)
+app.use("/registerAccount", verifyEmailHandler)
+
+
+app.listen(process.env.PORT , ()=>{
+    console.log('Listening to port ' , process.env.PORT)
 })
 
 

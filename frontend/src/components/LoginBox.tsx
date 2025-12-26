@@ -24,7 +24,7 @@ export default function LoginForm() {
     });
   };
 
-  const handleSubmit : ()=> void = async () => {
+  const handleSubmit : ()=> Promise<void>  = async () => {
 
     	
   };
