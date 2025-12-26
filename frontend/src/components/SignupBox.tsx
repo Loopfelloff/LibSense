@@ -144,7 +144,7 @@ export default function SignupForm() {
   };
 
   return (
-    <div className=" h-screen bg-gray-50 flex items-center gap-6 justify-center pt-18  w-full">
+    <div className="grow  bg-gray-50 flex items-center gap-6 justify-center pt-18  w-full">
       <div 
         className="w-full max-w-md bg-white flex flex-col"
         style={{

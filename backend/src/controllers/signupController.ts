@@ -29,7 +29,6 @@ type passwordError = {
 
 const verifyEmailHandler = async (req : Request ,res : Response )=>{
 
-    await redisClient.connect()
     
     try{
 
@@ -118,9 +117,6 @@ const verifyEmailHandler = async (req : Request ,res : Response )=>{
 	}
     }
 
-    finally{
-	await redisClient.disconnect()
-    }
 }
 
 
