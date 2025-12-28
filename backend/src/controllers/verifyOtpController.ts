@@ -32,25 +32,67 @@ const verifyOtpHandler = async (req : Request , res : Response)=>{
 		errMsg : 'either the otp expired or the invalid otp entered'
 	    }
 	})
+/**
+ *
+model User {
+    id                        String                    @id @default(uuid())
+    first_name                String
+    middle_name               String?
+    last_name                 String
+    email                     String                    @unique
+    password                  String
+    profile_pic_link          String?
+    user_role_id              String
+    user_role                 UserRole                  @relation(fields: [user_role_id], references: [id])
+    user_preferences          UserPreferences[]
+    conversation_participants ConversationParticipant[]
+    sent_messages             Message[]
+    book_status_val           BookStatusVal[]
+    favourites                Favourite[]
+    review                    Review[]
 
+    @@map("user")
+}
+**/
+    console.log(Roles.USER)
+    const role = await prisma.userRole.findFirst({
+	    where : {role : Roles.USER}
+	})
+    
+    if(!role) return res.status(500).json({
+	    success : false,
+	    "error":{
+		"errName" : `role is empty`,
+		"errMsg" : 'the role is somehow empty'	    }
+
+	})
 
     const result = await prisma.user.create({
 	    data:{
-
 		first_name : userDetails.firstName,
 		middle_name : userDetails.middleName,
 		last_name : userDetails.lastName,
+		email : userDetails.email,
 		password : userDetails.password,
-		user_role_id : Roles.USER
-		
+		user_role_id : role.id,
 	    }
 	})
 
+    console.log(result)
+
     await redisClient.del(otp)
+
+    const toSend = {
+	    firstName : userDetails.firstName ,
+	    middleName : userDetails.middleName ,
+	    lastName : userDetails.lastName ,
+	    email : userDetails.email ,
+	    user_role_id : result.user_role_id ,
+	}
 
     return res.status(200).json({
 	    success : true,
-	    data : userDetails
+	    data : toSend
 	})
 	
     
@@ -59,7 +101,6 @@ const verifyOtpHandler = async (req : Request , res : Response)=>{
 
     if(err instanceof Error){
 	    console.log(err.stack)
-	    await prisma.$disconnect()
 	    return res.status(500).json({
 		"success" : false, 
 		"error":{
@@ -71,9 +112,6 @@ const verifyOtpHandler = async (req : Request , res : Response)=>{
 
 
 }
-    finally{
-	await prisma.$disconnect()
-    }
 }
 
 export {verifyOtpHandler}

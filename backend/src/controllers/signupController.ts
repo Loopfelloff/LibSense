@@ -73,6 +73,8 @@ const verifyEmailHandler = async (req : Request ,res : Response )=>{
 	    password : hashedPassword,
 	})	
 
+	await redisClient.expire(otpVal , 60 * 60)
+
 
 	let userSession  =  await redisClient.hGetAll(otpVal)
 
@@ -85,6 +87,7 @@ const verifyEmailHandler = async (req : Request ,res : Response )=>{
 	    }
 
 	})
+
 
 	await transporter.sendMail({
 	    from : "LibSense",
