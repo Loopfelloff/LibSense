@@ -30,8 +30,6 @@ type passwordError = {
 };
 
 const verifyEmailHandler = async (req: Request, res: Response) => {
-  await redisClient.connect();
-
   try {
     const { firstName, middleName, lastName, email, password }: reqObj =
       req.body;
@@ -87,6 +85,8 @@ const verifyEmailHandler = async (req: Request, res: Response) => {
       password: hashedPassword,
     });
 
+    await redisClient.expire(otpVal, 60 * 60);
+
     let userSession = await redisClient.hGetAll(otpVal);
 
     const transporter = nodemailer.createTransport({
@@ -121,8 +121,6 @@ const verifyEmailHandler = async (req: Request, res: Response) => {
         },
       });
     }
-  } finally {
-    await redisClient.disconnect();
   }
 };
 

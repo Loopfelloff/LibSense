@@ -1,20 +1,28 @@
 import {useState , useEffect} from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams , useNavigate} from 'react-router-dom';
 import SignupForm from '../components/SignupBox';
 import LoginForm from '../components/LoginBox';
+import EmailVerificationBox from '../components/EmailVerificationBox';
 
-type loginOrSignup = {
-    loginOrSignup : "login" | "signup"; 
-}
+const allowedPages: (string | undefined)[] = ["login" , "signup" , "emailverification"]
 
 export default function LoginOrSignup(){
     
-    const {loginOrSignup}  = useParams<loginOrSignup>()
+   const {loginOrSignup}  = useParams<string>()
+
+   const navigate = useNavigate()
+
+   if(!allowedPages.includes(loginOrSignup)) {
+
+        console.log('allowed xainaraixa')
+	navigate("/pageNotFound")
+
+   }
 
     return(
 	<>
 	{(loginOrSignup === "signup" ) ? 
-	    <SignupForm/> : <LoginForm/>
+	    <SignupForm/> : (loginOrSignup === "login") ? <LoginForm/> : <EmailVerificationBox/>
 	}
 	</>
     ) 
