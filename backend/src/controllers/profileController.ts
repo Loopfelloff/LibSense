@@ -11,13 +11,18 @@ interface Profile {
 }
 
 const getProfileController = async (req: Request, res: Response) => {
+  console.log("HI");
   try {
-    // const { userId } = req.user;
-    const userId = "277714";
+    const userId = "0385fb63-c60e-4e7e-9767-c585f050c164";
     const profileInfo = await prisma.user.findUnique({
       where: { id: userId },
-      omit: {
-        password: true,
+      select: {
+        id: true,
+        first_name: true,
+        last_name: true,
+        middle_name: true,
+        profile_pic_link: true,
+        // password: false, // exclude by simply not selecting it
       },
     });
 
@@ -37,6 +42,8 @@ const getProfileController = async (req: Request, res: Response) => {
       },
     });
   } catch (err: unknown) {
+    console.error("Error in getProfileController:", err);
+
     if (err instanceof Error) {
       console.error(err.message);
       return res.status(500).json({
@@ -47,6 +54,13 @@ const getProfileController = async (req: Request, res: Response) => {
         },
       });
     }
+
+    return res.status(500).json({
+      success: false,
+      error: {
+        errMsg: "An unknown error occurred",
+      },
+    });
   }
 };
 
