@@ -5,6 +5,7 @@ import express from "express";
 import { router as verifyEmailHandler } from "./routes/signupRoute.js";
 import { router as verifyOtpHandler } from "./routes/verifyOtpRoute.js";
 import { profileRouter } from "./routes/profileRoute.js";
+import { favouriteRouter } from "./routes/favouriteRoute.js";
 
 import { corsOptions } from "./config/corsConfig.js";
 import cors from "cors";
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use("/registerAccount", verifyEmailHandler);
 app.use("/verifyOtp", verifyOtpHandler);
 app.use("/profile", profileRouter);
+app.use("/books/favourite", favouriteRouter);
 
 app.listen(process.env.PORT, () => {
   console.log("Listening to port", process.env.PORT);

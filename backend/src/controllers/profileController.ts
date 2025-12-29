@@ -2,14 +2,6 @@ import { prisma } from "../config/prismaClientConfig.js";
 import { redisClient } from "../config/redisConfiguration.js";
 import type { Request, Response } from "express";
 
-interface Profile {
-  id: string;
-  first_name: string;
-  last_name: string;
-  middle_name?: string;
-  profile_pic_link?: string;
-}
-
 const getProfileController = async (req: Request, res: Response) => {
   console.log("HI");
   const userId = "0385fb63-c60e-4e7e-9767-c585f050c164";
