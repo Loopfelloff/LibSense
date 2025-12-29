@@ -5,10 +5,12 @@ import { router as verifyEmailHandler} from './routes/signupRoute.js'
 import {router as verifyOtpHandler} from './routes/verifyOtpRoute.js'
 import { corsOptions } from './config/corsConfig.js'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 const app = express()
 
 
 app.use(cors(corsOptions))
+app.use(cookieParser())
 app.use(express.json())
 
 

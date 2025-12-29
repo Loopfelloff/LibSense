@@ -125,15 +125,31 @@ export default function SignupForm() {
   const handleSubmit : ()=> Promise<void> = async () => {
     if(checkForFormValidation(formData)) return
     setFormValidation(true)
-    const response = await axios.post("http://localhost:5000/registerAccount", {
-	firstName : formData.firstName,
-	middleName : formData.middleName,
-	lastName : formData.lastName,
-	email : formData.email,
-	password : formData.password
-    })
-    setFormValidation(false)
-    if(response.statusText === 'OK') return navigate("/registration")
+    
+    try {
+	const response = await axios.post("http://localhost:5000/registerAccount", {
+	    firstName : formData.firstName,
+	    middleName : formData.middleName,
+	    lastName : formData.lastName,
+	    email : formData.email,
+	    password : formData.password
+	} , {
+	    withCredentials : true
+	})
+	setFormValidation(false)
+	console.log(response.data)
+	return navigate("/emailverification")
+    }
+
+    catch(err){
+	if(axios.isAxiosError(err)){
+	    console.log(err.response?.data)
+	    console.log(err.response?.status)
+	}
+	else{
+	    console.error('unexpected error :' , err)
+	}
+    }
     
   };
 

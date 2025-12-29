@@ -10,14 +10,18 @@ export default function LoginOrSignup(){
     
    const {loginOrSignup}  = useParams<string>()
 
+   console.log(loginOrSignup)
+
    const navigate = useNavigate()
 
-   if(!allowedPages.includes(loginOrSignup)) {
+   useEffect(()=>{
+       if(!allowedPages.includes(loginOrSignup)) {
 
-        console.log('allowed xainaraixa')
-	navigate("/pageNotFound")
+	    console.log('allowed xainaraixa')
+	    navigate("/pageNotFound")
 
-   }
+       }
+   } , [])
 
     return(
 	<>
