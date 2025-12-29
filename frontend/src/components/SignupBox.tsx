@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState , useRef} from 'react';
 import { Eye, EyeOff, Book, User, Mail, Lock } from 'lucide-react';
 import {Link , useNavigate} from 'react-router-dom'
 import type { ChangeEvent } from 'react';
@@ -30,7 +30,10 @@ type userNameError = {
 export default function SignupForm() {
     // state variables
   const navigate = useNavigate()
+  const [isWaiting , setIsWaiting] = useState<boolean>(false)
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [userNameAlreadyExists , setUserNameAlreadyExists] = useState<boolean>(false)
+  const timerId = useRef<ReturnType <typeof setTimeout> | null > (null)
   const [userNameValidity , setUserNameValidity] = useState<userNameError>(
       {
 	  firstName : false,
@@ -56,10 +59,61 @@ export default function SignupForm() {
 
   const [confirmPasswordValidity , setConfirmPasswordValidity ] = useState<boolean>(false)
   const [formValidation , setFormValidation] = useState<boolean>(true)
-
-
   // function 
 
+  const checkForEmailEntry = (email : string)=>{
+
+      if(email.trim() === '') return
+
+
+      if(timerId.current) clearTimeout(timerId.current);
+
+
+      setIsWaiting(true)
+
+	timerId.current = setTimeout(async ()=>{
+
+
+	  try{
+
+	      const response = await axios.get("http://localhost:5000/checkForEmail",  {
+		  params: {
+		      email : email 
+		  }
+	      })
+
+	      console.log(response.data)
+	      console.log(response.status)
+	      setUserNameAlreadyExists(false)
+
+	      if(checkForFormValidation(formData)){
+		    setFormValidation(true)
+	      }
+	      else{
+		  setFormValidation(false)
+	      }
+
+	  }
+	  catch(err){
+	      if(axios.isAxiosError(err)){
+		 console.log(err.response?.data) 
+		 console.log(err.response?.status) 
+		 setUserNameAlreadyExists(true)
+		 setFormValidation(true)
+
+	      }
+	      else{
+		  console.error("Unexpected Error : " , err)
+	      }
+
+	  }
+	  finally{
+	      setIsWaiting(false)
+	  }
+
+      }, 1000)
+
+  }
 
   const checkForFormValidation : (formData : formData)=>boolean = (formData : formData )=>{
     const currentUserNameValidity = checkUsernameValidity(formData.firstName , formData.middleName , formData.lastName) 
@@ -71,11 +125,12 @@ export default function SignupForm() {
     const totalLengthPassword = currentPasswordValidity.totalLength
     const email = currentEmailValidity
     const confirmPassword = checkConfirmPasswordValidity(formData.password , formData.confirmPassword)
-    if(firstName || lastName || totalLength || symbol || num || totalLengthPassword || email || confirmPassword) return true;
+    if(firstName || lastName || totalLength || symbol || num || totalLengthPassword || email || confirmPassword ) return true;
     else return false
 	
   }
   const handleChange = (e : ChangeEvent<HTMLInputElement> ) => {
+      if(e.target.name === 'email') setUserNameAlreadyExists(false)
       setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -111,7 +166,7 @@ export default function SignupForm() {
     }
 
 
-    if(checkForFormValidation(newFormData)){
+    if(checkForFormValidation(newFormData) || userNameAlreadyExists){
 	setFormValidation(true)
     }
     else {
@@ -187,7 +242,9 @@ export default function SignupForm() {
                   type="text"
                   name="firstName"
                   value={formData.firstName}
-                  onChange={handleChange}
+                  onChange={(e : ChangeEvent<HTMLInputElement>) =>{
+		      handleChange(e)
+		  }}
                   placeholder="Enter your full name"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
@@ -205,7 +262,9 @@ export default function SignupForm() {
                   type="text"
                   name="middleName"
                   value={formData.middleName}
-                  onChange={handleChange}
+                  onChange={(e : ChangeEvent<HTMLInputElement>) =>{
+		      handleChange(e)
+		  }}
                   placeholder="Enter your full name"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />{ (userNameValidity.totalLength) ? <span className="text-red-900">The total username length must be greater than 8</span>: <></>}
@@ -222,7 +281,9 @@ export default function SignupForm() {
                   type="text"
                   name="lastName"
                   value={formData.lastName}
-                  onChange={handleChange}
+                  onChange={(e : ChangeEvent<HTMLInputElement>) =>{
+		      handleChange(e)
+		  }}
                   placeholder="Enter your full name"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
@@ -240,11 +301,15 @@ export default function SignupForm() {
                   type="email"
                   name="email"
                   value={formData.email}
-                  onChange={handleChange}
+                  onChange={(e:ChangeEvent<HTMLInputElement>)=>{
+		      checkForEmailEntry(e.currentTarget.value)
+		      handleChange(e)
+		  }}
                   placeholder="Enter your email"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
 		{(emailValidity) ? <span className ="text-red-900">Email isn't in the correct format</span> : <></>}
+		{(userNameAlreadyExists) ? <span className ="text-red-900">Email already in use</span> : <></>}
               </div>
             </div>
 
@@ -303,7 +368,7 @@ export default function SignupForm() {
             <button
               onClick={handleSubmit}
               className="w-full bg-slate-800 text-white py-3 rounded-lg font-medium hover:bg-slate-700 transition-colors"
-	      style = { (formValidation) ? {backgroundColor: 'gray' , cursor : 'not-allowed'  } : {backgroundColor : 'rgb(51, 65, 85)', cursor : 'pointer' } }
+	      style = { (formValidation || isWaiting) ? {backgroundColor: 'gray' , cursor : 'not-allowed'  } : {backgroundColor : 'rgb(51, 65, 85)', cursor : 'pointer' } }
             >
               Create Account
             </button>
