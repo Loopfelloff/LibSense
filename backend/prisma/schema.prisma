@@ -186,6 +186,7 @@ model Favourite {
     user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
     @@unique([book_id, user_id])
+    @@map("favourite")
 }
 
 model Review {
@@ -199,4 +200,5 @@ model Review {
     user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
     @@unique([book_id, user_id])
+    @@map("review")
 }

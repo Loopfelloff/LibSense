@@ -12,17 +12,20 @@ interface Profile {
 
 const getProfileController = async (req: Request, res: Response) => {
   console.log("HI");
+  const userId = "0385fb63-c60e-4e7e-9767-c585f050c164";
   try {
-    const userId = "0385fb63-c60e-4e7e-9767-c585f050c164";
+    const cachedProfileInfo = await redisClient.get(`user:${userId}`);
+    if (cachedProfileInfo) {
+      return res.status(200).json({
+        success: true,
+        data: JSON.parse(cachedProfileInfo),
+      });
+    }
+
     const profileInfo = await prisma.user.findUnique({
       where: { id: userId },
-      select: {
-        id: true,
-        first_name: true,
-        last_name: true,
-        middle_name: true,
-        profile_pic_link: true,
-        // password: false, // exclude by simply not selecting it
+      omit: {
+        password: true,
       },
     });
 
@@ -35,15 +38,15 @@ const getProfileController = async (req: Request, res: Response) => {
       });
     }
 
+    await redisClient.set(`user:${userId}`, JSON.stringify(profileInfo), {
+      EX: 60 * 10,
+    });
+
     return res.status(200).json({
       success: true,
-      data: {
-        ...profileInfo,
-      },
+      data: profileInfo,
     });
   } catch (err: unknown) {
-    console.error("Error in getProfileController:", err);
-
     if (err instanceof Error) {
       console.error(err.message);
       return res.status(500).json({
@@ -54,13 +57,6 @@ const getProfileController = async (req: Request, res: Response) => {
         },
       });
     }
-
-    return res.status(500).json({
-      success: false,
-      error: {
-        errMsg: "An unknown error occurred",
-      },
-    });
   }
 };
 
