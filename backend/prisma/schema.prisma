@@ -125,7 +125,7 @@ model Book {
     description      String
     book_written_by  BookWrittenBy[]
     favourites       Favourite[]
-    review Review[]
+    review           Review[]
 
     @@map("book")
 }
@@ -192,8 +192,8 @@ model Review {
     id          String @id @default(uuid())
     rating      Int
     review_body String
-    user_id String
-    book_id String
+    user_id     String
+    book_id     String
 
     book Book @relation(fields: [book_id], references: [id], onDelete: Cascade)
     user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
