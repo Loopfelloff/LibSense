@@ -1,203 +1,200 @@
 generator client {
-    provider = "prisma-client-js"
-    output   = "../generated/prisma"
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {
-    provider = "postgresql"
+  provider = "postgresql"
 }
 
 enum Genre {
-    FANTASY
-    HIGH_FANTASY
-    LOW_FANTASY
-    SCIENCE_FICTION
-    HORROR
-    THRILLER
-    MYSTERY
-    ROMANCE
-    NONFICTION
-    COMPUTER_SCIENCE
-    ARTIFICIAL_INTELLIGENCE
-    DATA_SCIENCE
-    HISTORY
-    PHILOSOPHY
-    PSYCHOLOGY
-    BUSINESS
-    TRAVEL
-    BIOGRAPHY
-    GRAPHIC_NOVEL
-    MANGA
+  FANTASY
+  HIGH_FANTASY
+  LOW_FANTASY
+  SCIENCE_FICTION
+  HORROR
+  THRILLER
+  MYSTERY
+  ROMANCE
+  NONFICTION
+  COMPUTER_SCIENCE
+  ARTIFICIAL_INTELLIGENCE
+  DATA_SCIENCE
+  HISTORY
+  PHILOSOPHY
+  PSYCHOLOGY
+  BUSINESS
+  TRAVEL
+  BIOGRAPHY
+  GRAPHIC_NOVEL
+  MANGA
 }
 
 enum Roles {
-    SUPERADMIN
-    USER
+  SUPERADMIN
+  USER
 }
 
 enum Status {
-    READING
-    READ
-    WILLREAD
+  READING
+  READ
+  WILLREAD
 }
 
 model User {
-    id                        String                    @id @default(uuid())
-    first_name                String
-    middle_name               String?
-    last_name                 String
-    email                     String                    @unique
-    password                  String?
-    provider_id    	      String?
-    profile_pic_link          String?
-    user_role_id              String
-    user_role                 UserRole                  @relation(fields: [user_role_id], references: [id])
-    user_preferences          UserPreferences[]
-    conversation_participants ConversationParticipant[]
-    sent_messages             Message[]
-    book_status_val           BookStatusVal[]
-    favourites                Favourite[]
-    review                    Review[]
+  id                        String                    @id @default(uuid())
+  first_name                String
+  middle_name               String?
+  last_name                 String
+  email                     String                    @unique
+  password                  String?
+  provider_id               String?
+  profile_pic_link          String?
+  user_role_id              String
+  user_role                 UserRole                  @relation(fields: [user_role_id], references: [id])
+  user_preferences          UserPreferences[]
+  conversation_participants ConversationParticipant[]
+  sent_messages             Message[]
+  book_status_val           BookStatusVal[]
+  favourites                Favourite[]
+  review                    Review[]
 
-    @@map("user")
+  @@map("user")
 }
 
 model UserRole {
-    id    String @id @default(uuid())
-    role  Roles
-    users User[]
+  id    String @id @default(uuid())
+  role  Roles
+  users User[]
 
-    @@map("user_role")
+  @@map("user_role")
 }
 
 model Preference {
-    id               String            @id @default(uuid())
-    genre            Genre
-    user_preferences UserPreferences[]
+  id               String            @id @default(uuid())
+  genre            Genre
+  user_preferences UserPreferences[]
 
-    @@map("preferences")
+  @@map("preferences")
 }
 
 model UserPreferences {
-    id            String     @id @default(uuid())
-    user_id       String
-    preference_id String
-    user          User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
-    preference    Preference @relation(fields: [preference_id], references: [id], onDelete: Cascade)
+  id            String     @id @default(uuid())
+  user_id       String
+  preference_id String
+  user          User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  preference    Preference @relation(fields: [preference_id], references: [id], onDelete: Cascade)
 
-    @@unique([user_id, preference_id])
+  @@unique([user_id, preference_id])
 }
 
 model Conversation {
-    id                        String                    @id @default(uuid())
-    conversation_participants ConversationParticipant[]
-    messages                  Message[]
+  id                        String                    @id @default(uuid())
+  conversation_participants ConversationParticipant[]
+  messages                  Message[]
 
-    @@map("conversation")
+  @@map("conversation")
 }
 
 model ConversationParticipant {
-    id              String       @id @default(uuid())
-    conversation_id String
-    participant_id  String
-    conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
-    user            User         @relation(fields: [participant_id], references: [id], onDelete: Cascade)
+  id              String       @id @default(uuid())
+  conversation_id String
+  participant_id  String
+  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  user            User         @relation(fields: [participant_id], references: [id], onDelete: Cascade)
 
-    @@unique([conversation_id, participant_id])
+  @@unique([conversation_id, participant_id])
 }
 
 model Message {
-    id              String       @id @default(uuid())
-    conversation_id String
-    sender_id       String
-    message_body    String
-    conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
-    sender          User         @relation(fields: [sender_id], references: [id], onDelete: Cascade)
-    sent_date       DateTime     @default(now())
+  id              String       @id @default(uuid())
+  conversation_id String
+  sender_id       String
+  message_body    String
+  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  sender          User         @relation(fields: [sender_id], references: [id], onDelete: Cascade)
+  sent_date       DateTime     @default(now())
 
-    @@map("message")
+  @@map("message")
 }
 
 model Book {
-    id               String          @id @default(uuid())
-    isbn             String          @unique
-    book_title       String
-    book_cover_image String
-    description      String
-    book_written_by  BookWrittenBy[]
-    favourites       Favourite[]
-    review Review[]
+  id               String          @id @default(uuid())
+  isbn             String          @unique
+  book_title       String
+  book_cover_image String
+  description      String
+  book_written_by  BookWrittenBy[]
+  favourites       Favourite[]
+  review           Review[]
+  user_statuses    BookStatusVal[]
 
-    @@map("book")
+  @@map("book")
 }
 
 model BookAuthor {
-    id                String           @id @default(uuid())
-    book_author_names BookAuthorName[]
-    book_written_by   BookWrittenBy[]
+  id                String           @id @default(uuid())
+  book_author_names BookAuthorName[]
+  book_written_by   BookWrittenBy[]
 
-    @@map("book_author")
+  @@map("book_author")
 }
 
 model BookWrittenBy {
-    id             String     @id @default(uuid())
-    book_author_id String
-    book_id        String
-    book           Book       @relation(fields: [book_id], references: [id], onDelete: Cascade)
-    book_author    BookAuthor @relation(fields: [book_author_id], references: [id], onDelete: Cascade)
+  id             String     @id @default(uuid())
+  book_author_id String
+  book_id        String
+  book           Book       @relation(fields: [book_id], references: [id], onDelete: Cascade)
+  book_author    BookAuthor @relation(fields: [book_author_id], references: [id], onDelete: Cascade)
 
-    @@unique([book_author_id, book_id])
+  @@unique([book_author_id, book_id])
 }
 
 model BookAuthorName {
-    id                 String     @id @default(uuid())
-    book_author_id     String
-    author_first_name  String
-    author_middle_name String?
-    author_last_name   String
-    book_author        BookAuthor @relation(fields: [book_author_id], references: [id], onDelete: Cascade)
+  id                 String     @id @default(uuid())
+  book_author_id     String
+  author_first_name  String
+  author_middle_name String?
+  author_last_name   String
+  book_author        BookAuthor @relation(fields: [book_author_id], references: [id], onDelete: Cascade)
 
-    @@map("book_author_name")
-}
-
-model BookStatus {
-    id              String          @id @default(uuid())
-    book_status_val BookStatusVal[]
-
-    @@map("book_status")
+  @@map("book_author_name")
 }
 
 model BookStatusVal {
-    id             String     @id @default(uuid())
-    book_status_id String
-    user_id        String
-    status         Status
-    book_status    BookStatus @relation(fields: [book_status_id], references: [id], onDelete: Cascade)
-    user           User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id      String @id @default(uuid())
+  book_id String
+  user_id String
+  status  Status
+  book    Book   @relation(fields: [book_id], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-    @@unique([book_status_id, user_id])
+  @@unique([book_id, user_id])
+  @@map("book_status_val")
 }
 
 model Favourite {
-    id      String @id @default(uuid())
-    book_id String
-    user_id String
+  id      String @id @default(uuid())
+  book_id String
+  user_id String
 
-    book Book @relation(fields: [book_id], references: [id], onDelete: Cascade)
-    user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [book_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-    @@unique([book_id, user_id])
+  @@unique([book_id, user_id])
+  @@map("favourite")
 }
 
 model Review {
-    id          String @id @default(uuid())
-    rating      Int
-    review_body String
-    user_id String
-    book_id String
+  id          String @id @default(uuid())
+  rating      Int
+  review_body String
+  user_id     String
+  book_id     String
 
-    book Book @relation(fields: [book_id], references: [id], onDelete: Cascade)
-    user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [book_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-    @@unique([book_id, user_id])
+  @@unique([book_id, user_id])
+  @@map("review")
 }
