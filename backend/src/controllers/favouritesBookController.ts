@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { redisClient } from "../config/redisConfiguration.js";
 import { prisma } from "../config/prismaClientConfig.js";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 
 const getFavouriteBook = async (req: Request, res: Response) => {
   try {
@@ -25,10 +26,10 @@ const getFavouriteBook = async (req: Request, res: Response) => {
     });
 
     if (favouriteBooks.length == 0) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          errMsg: "Favourite Book not found",
+      return res.status(200).json({
+        success: true,
+        data: {
+          dataMsg: "Favourite Book not found",
         },
       });
     }
@@ -63,16 +64,24 @@ const postFavouriteBook = async (req: Request, res: Response) => {
   try {
     const bookId = "d6305d28-a733-44ca-a0e7-8176655feaf2";
     const userId = "0385fb63-c60e-4e7e-9767-c585f050c164";
-    const createFavourite = await prisma.favourite.create({
-      data: {
+
+    const favourite = await prisma.favourite.upsert({
+      where: {
+        book_id_user_id: {
+          book_id: bookId,
+          user_id: userId,
+        },
+      },
+      update: {},
+      create: {
         user_id: userId,
         book_id: bookId,
       },
     });
     await redisClient.del(`favourite:${userId}`);
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
-      data: createFavourite,
+      data: favourite,
     });
   } catch (err: unknown) {
     if (err instanceof Error) {
@@ -92,28 +101,15 @@ const removeFavouriteBook = async (req: Request, res: Response) => {
   try {
     const bookId = "d6305d28-a733-44ca-a0e7-8176655feaf2";
     const userId = "0385fb63-c60e-4e7e-9767-c585f050c164";
-    const deleteFavourite = await prisma.favourite.delete({
+    const deleteFavourite = await prisma.favourite.deleteMany({
       where: {
-        book_id_user_id: {
-          book_id: bookId,
-          user_id: userId,
-        },
+        book_id: bookId,
+        user_id: userId,
       },
     });
-    if (!deleteFavourite) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          errorMsg: "No such favourite book for the user",
-        },
-      });
-    }
 
     await redisClient.del(`favourite:${userId}`);
-    return res.status(201).json({
-      succes: true,
-      data: deleteFavourite,
-    });
+    return res.status(204);
   } catch (err: unknown) {
     if (err instanceof Error) {
       console.error(err.message);

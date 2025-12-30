@@ -17,7 +17,7 @@ app.use(express.json());
 app.use("/registerAccount", verifyEmailHandler);
 app.use("/verifyOtp", verifyOtpHandler);
 app.use("/profile", profileRouter);
-app.use("/books/favourite", favouriteRouter);
+app.use("/users/favourites", favouriteRouter);
 
 app.listen(process.env.PORT, () => {
   console.log("Listening to port", process.env.PORT);
