@@ -1,12 +1,16 @@
 import type { Request, Response } from "express";
 import { redisClient } from "../config/redisConfiguration.js";
 import { prisma } from "../config/prismaClientConfig.js";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 
 const getFavouriteBook = async (req: Request, res: Response) => {
   try {
-    const userId = "0385fb63-c60e-4e7e-9767-c585f050c164";
+    const userId = "403d1a57-d529-45db-a6d6-38f4204e2b8b";
     const key = `user:${userId}:favourites`;
     const cachedFavourite = await redisClient.get(key);
+    // const limit = 10;
+    // let totalPages = Number(await redisClient.get(`user:${userId}:totalPages`));
+
     if (cachedFavourite) {
       return res.status(200).json({
         success: true,
@@ -14,6 +18,20 @@ const getFavouriteBook = async (req: Request, res: Response) => {
       });
     }
 
+    // if (!totalPages) {
+    //   const totalFavourites = await prisma.book.count({
+    //     where: {
+    //       favourites: {
+    //         some: {
+    //           user_id: userId,
+    //         },
+    //       },
+    //     },
+    //   });
+    //   totalPages = totalFavourites / limit;
+    //   await redisClient.set(`user:${userId}:totalPages:`, totalPages);
+    // }
+    //
     const favouriteBooks = await prisma.book.findMany({
       where: {
         favourites: {
@@ -22,13 +40,15 @@ const getFavouriteBook = async (req: Request, res: Response) => {
           },
         },
       },
+      // skip: (totalPages - 1) * limit,
+      // take: limit,
     });
 
     if (favouriteBooks.length == 0) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          errMsg: "Favourite Book not found",
+      return res.status(200).json({
+        success: true,
+        data: {
+          dataMsg: "Favourite Book not found",
         },
       });
     }
@@ -62,17 +82,25 @@ const getFavouriteBook = async (req: Request, res: Response) => {
 const postFavouriteBook = async (req: Request, res: Response) => {
   try {
     const bookId = "d6305d28-a733-44ca-a0e7-8176655feaf2";
-    const userId = "0385fb63-c60e-4e7e-9767-c585f050c164";
-    const createFavourite = await prisma.favourite.create({
-      data: {
+    const userId = "403d1a57-d529-45db-a6d6-38f4204e2b8b";
+
+    const favourite = await prisma.favourite.upsert({
+      where: {
+        book_id_user_id: {
+          book_id: bookId,
+          user_id: userId,
+        },
+      },
+      update: {},
+      create: {
         user_id: userId,
         book_id: bookId,
       },
     });
     await redisClient.del(`favourite:${userId}`);
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
-      data: createFavourite,
+      data: favourite,
     });
   } catch (err: unknown) {
     if (err instanceof Error) {
@@ -91,28 +119,17 @@ const postFavouriteBook = async (req: Request, res: Response) => {
 const removeFavouriteBook = async (req: Request, res: Response) => {
   try {
     const bookId = "d6305d28-a733-44ca-a0e7-8176655feaf2";
-    const userId = "0385fb63-c60e-4e7e-9767-c585f050c164";
-    const deleteFavourite = await prisma.favourite.delete({
+    const userId = "403d1a57-d529-45db-a6d6-38f4204e2b8b";
+    const deleteFavourite = await prisma.favourite.deleteMany({
       where: {
-        book_id_user_id: {
-          book_id: bookId,
-          user_id: userId,
-        },
+        book_id: bookId,
+        user_id: userId,
       },
     });
-    if (!deleteFavourite) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          errorMsg: "No such favourite book for the user",
-        },
-      });
-    }
 
     await redisClient.del(`favourite:${userId}`);
-    return res.status(201).json({
-      succes: true,
-      data: deleteFavourite,
+    return res.status(200).json({
+      success: true,
     });
   } catch (err: unknown) {
     if (err instanceof Error) {
