@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Book, User, Mail, Lock } from 'lucide-react';
-import {Link} from 'react-router-dom'
+import {Link , useNavigate} from 'react-router-dom'
 import type { ChangeEvent } from 'react';
 import { checkUsernameValidity, checkEmailValidity , checkPasswordValidity , checkConfirmPasswordValidity} from '../utils/formValidation';
 import axios from 'axios';
@@ -29,6 +29,7 @@ type userNameError = {
 
 export default function SignupForm() {
     // state variables
+  const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [userNameValidity , setUserNameValidity] = useState<userNameError>(
       {
@@ -132,10 +133,7 @@ export default function SignupForm() {
 	password : formData.password
     })
     setFormValidation(false)
-    console.log(response.data)
-    console.log(response.status)
-
-    
+    if(response.statusText === 'OK') return navigate("/registration")
     
   };
 
@@ -144,7 +142,7 @@ export default function SignupForm() {
   };
 
   return (
-    <div className=" h-screen bg-gray-50 flex items-center gap-6 justify-center pt-18  w-full">
+    <div className="grow  bg-gray-50 flex items-center gap-6 justify-center pt-18  w-full">
       <div 
         className="w-full max-w-md bg-white flex flex-col"
         style={{
