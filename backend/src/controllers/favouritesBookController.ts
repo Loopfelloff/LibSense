@@ -128,7 +128,9 @@ const removeFavouriteBook = async (req: Request, res: Response) => {
     });
 
     await redisClient.del(`favourite:${userId}`);
-    return res.status(204);
+    return res.status(200).json({
+      success: true,
+    });
   } catch (err: unknown) {
     if (err instanceof Error) {
       console.error(err.message);
