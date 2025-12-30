@@ -5,7 +5,8 @@ import { prisma } from "../config/prismaClientConfig.js";
 const getFavouriteBook = async (req: Request, res: Response) => {
   try {
     const userId = "0385fb63-c60e-4e7e-9767-c585f050c164";
-    const cachedFavourite = await redisClient.get(`favourite:${userId}`);
+    const key = `user:${userId}:favourites`;
+    const cachedFavourite = await redisClient.get(key);
     if (cachedFavourite) {
       return res.status(200).json({
         success: true,
@@ -22,6 +23,7 @@ const getFavouriteBook = async (req: Request, res: Response) => {
         },
       },
     });
+
     if (favouriteBooks.length == 0) {
       return res.status(400).json({
         success: false,
@@ -67,7 +69,7 @@ const postFavouriteBook = async (req: Request, res: Response) => {
         book_id: bookId,
       },
     });
-
+    await redisClient.del(`favourite:${userId}`);
     return res.status(201).json({
       success: true,
       data: createFavourite,
@@ -106,6 +108,8 @@ const removeFavouriteBook = async (req: Request, res: Response) => {
         },
       });
     }
+
+    await redisClient.del(`favourite:${userId}`);
     return res.status(201).json({
       succes: true,
       data: deleteFavourite,

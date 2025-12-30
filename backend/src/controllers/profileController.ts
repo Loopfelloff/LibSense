@@ -3,10 +3,9 @@ import { redisClient } from "../config/redisConfiguration.js";
 import type { Request, Response } from "express";
 
 const getProfileController = async (req: Request, res: Response) => {
-  console.log("HI");
   const userId = "0385fb63-c60e-4e7e-9767-c585f050c164";
   try {
-    const cachedProfileInfo = await redisClient.get(`user:${userId}`);
+    const cachedProfileInfo = await redisClient.get(`user:${userId}:profile`);
     if (cachedProfileInfo) {
       return res.status(200).json({
         success: true,
@@ -30,9 +29,13 @@ const getProfileController = async (req: Request, res: Response) => {
       });
     }
 
-    await redisClient.set(`user:${userId}`, JSON.stringify(profileInfo), {
-      EX: 60 * 10,
-    });
+    await redisClient.set(
+      `user:${userId}:profile`,
+      JSON.stringify(profileInfo),
+      {
+        EX: 60 * 10,
+      },
+    );
 
     return res.status(200).json({
       success: true,
