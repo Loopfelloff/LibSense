@@ -4,6 +4,8 @@ import express from 'express'
 import { router as verifyEmailHandler} from './routes/signupRoute.js'
 import {router as verifyOtpHandler} from './routes/verifyOtpRoute.js'
 import {router as loginHandler} from './routes/loginRoute.js'
+import {router as googleLoginHandler} from './routes/googleLoginRoute.js'
+import {router as failureHandler} from './routes/failureRoute.js'
 import { checkForEmailEntryHandler } from './controllers/checkForEmailEntryController.js'
 import { corsOptions } from './config/corsConfig.js'
 import cors from 'cors'
@@ -20,6 +22,8 @@ app.use("/registerAccount", verifyEmailHandler)
 app.use("/verifyOtp", verifyOtpHandler)
 app.use("/checkForEmail" , checkForEmailEntryHandler)
 app.use("/login", loginHandler)
+app.use("/auth",  googleLoginHandler)
+app.use("/failure",  failureHandler)
 
 
 app.listen(process.env.PORT , ()=>{

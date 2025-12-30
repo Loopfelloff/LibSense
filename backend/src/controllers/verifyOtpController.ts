@@ -88,7 +88,7 @@ const verifyOtpHandler = async (req : Request , res : Response)=>{
 	    user_role_id : result.user_role_id ,
 	}
 
-    return res.status(200).json({
+    return res.status(201).json({
 	    success : true,
 	    data : toSend
 	})

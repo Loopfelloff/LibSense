@@ -8,9 +8,11 @@ const loginHandler = async (req : Request , res : Response)=>{
     
     try{
 
-	const {email , password} = req.body
+	let {email , password} = req.body;
 
-	const errMsg : string = (!email) ? 'missing email in the request header' : (!password) ? 'missing password in the request header' : ''
+	[email , password] = [email.trim() , password.trim()]
+	    
+	const errMsg : string = (!email || email === "") ? 'missing email in the request header' : (!password || password === "") ? 'missing password in the request header' : ''
 
 	const errJson =  {
 	    success : false,
