@@ -19,7 +19,6 @@ export default function LoginOrSignup(){
 
 	    console.log('allowed xainaraixa')
 	    navigate("/pageNotFound")
-
        }
    } , [])
 
