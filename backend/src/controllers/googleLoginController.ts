@@ -99,17 +99,17 @@ const googleLoginHandler = async (req : Request , res : Response)=>{
 
 	const accessToken =  jwt.sign({
 	    email : user.email,
-	    first_name : user.firstName,
-	    middle_name : user.middleName,
-	    last_name : user.lastName
+	    firstName : user.firstName,
+	    middleName : user.middleName,
+	    lastName: user.lastName
 	} , String(process.env.ACCESS_TOKEN_SECRET) , {
 	    expiresIn : '30m'
 	    })
 	const refreshToken =  jwt.sign({
 	    email : user.email,
-	    first_name : user.firstName,
-	    middle_name : user.middleName,
-	    last_name : user.lastName
+	    firstName : user.firstName,
+	    middleName : user.middleName,
+	    lastName : user.lastName
 	} , String(process.env.REFRESH_TOKEN_SECRET) , {
 	    expiresIn : '30d'
 	    })
@@ -122,7 +122,7 @@ const googleLoginHandler = async (req : Request , res : Response)=>{
 	return res.redirect("http://localhost:5173/home")
 
     }
-    catch(err){
+    catch(err : unknown){
 
 	if(err instanceof Error){
 	    console.log(err.stack)

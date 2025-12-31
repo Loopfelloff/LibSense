@@ -16,8 +16,6 @@ export default function LoginOrSignup(){
 
    useEffect(()=>{
        if(!allowedPages.includes(loginOrSignup)) {
-
-	    console.log('allowed xainaraixa')
 	    navigate("/pageNotFound")
        }
    } , [])

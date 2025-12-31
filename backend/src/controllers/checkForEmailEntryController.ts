@@ -50,7 +50,7 @@ const checkForEmailEntryHandler = async (req : Request , res : Response) =>{
 	})
 
     }
-    catch(err){
+    catch(err : unknown){
 
 	if(err instanceof Error){
 	    return res.status(500).json({

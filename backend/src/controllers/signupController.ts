@@ -108,7 +108,7 @@ const verifyEmailHandler = async (req : Request ,res : Response )=>{
 
 	
     }
-    catch(err){
+    catch(err : unknown){
 	if(err instanceof Error)
 	    {
 	    console.log(err.stack)

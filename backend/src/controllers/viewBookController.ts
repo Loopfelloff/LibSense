@@ -6,6 +6,9 @@ const viewBookHandler = async (req : Request , res : Response)=>{
 
 	const bookId = req.query?.bookId  as string
 
+	console.log('from the book handler')
+	console.log(req.user)
+
 	if(!bookId) return res.status(400).json({
 	    success : false,
 	    errDetails : {
@@ -45,7 +48,7 @@ const viewBookHandler = async (req : Request , res : Response)=>{
 
 
     }
-    catch(err){
+    catch(err : unknown){
 	if(err instanceof Error){
 	    console.log(err.stack)
 	    return res.status(500).json({

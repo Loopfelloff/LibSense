@@ -41,7 +41,7 @@ const loginHandler = async (req : Request , res : Response)=>{
 
 	if(!foundUser) return res.status(404).json(errJson)
 
-	const isAMatch = compareSync(password,  foundUser.password)
+	const isAMatch = compareSync(password,  String(foundUser.password))
 
 	errJson.errDetail.errMsg = `the password is incorrect`
 
@@ -51,9 +51,9 @@ const loginHandler = async (req : Request , res : Response)=>{
 	const refreshTokenSecret : string = String(process.env.REFRESH_TOKEN_SECRET)
 
     
-	const accessToken  = jwt.sign({email : email , first_name : foundUser.first_name  , last_name : foundUser.last_name , middle_name : foundUser.middle_name  } , accessTokenSecret  , {expiresIn : '30m'})
+	const accessToken  = jwt.sign({email : email , firstName : foundUser.first_name  , lastName : foundUser.last_name , middleName : foundUser.middle_name  } , accessTokenSecret  , {expiresIn : '30m'})
 
-	const refreshToken = jwt.sign({email : email , first_name : foundUser.first_name  , last_name : foundUser.last_name , middle_name : foundUser.middle_name  },  refreshTokenSecret , {expiresIn : '30d'})
+	const refreshToken  = jwt.sign({email : email , firstName : foundUser.first_name  , lastName : foundUser.last_name , middleName : foundUser.middle_name  } , refreshTokenSecret  , {expiresIn : '30d'})
 
 	res.cookie('accessToken', accessToken , {
 	    maxAge : 30*24*60*60*1000,
@@ -77,7 +77,7 @@ const loginHandler = async (req : Request , res : Response)=>{
 
 	
     }
-    catch(err){
+    catch(err : unknown){
 	if(err instanceof Error){
 	    console.log(err.stack)
 	    res.status(500).json({
