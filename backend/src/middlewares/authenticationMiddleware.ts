@@ -38,9 +38,10 @@ const authenticationMiddleware = async (
       String(process.env.ACCESS_TOKEN_SECRET),
     );
 
-    const { email, firstName, lastName, middleName } = result;
+    const { id, email, firstName, lastName, middleName } = result;
 
     req.user = {
+      id,
       email: email,
       firstName: firstName,
       lastName: lastName,

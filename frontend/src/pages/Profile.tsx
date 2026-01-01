@@ -28,7 +28,6 @@ export function Profile() {
 
     userInformation(userId);
   }, []);
-  console.log(user);
 
   return (
     <div className="min-h-screen w-screen bg-white">
@@ -72,16 +71,16 @@ export function Profile() {
                 {readingBooks.map((book) => (
                   <div
                     key={book.id}
-                    className="flex gap-3 p-3 border border-gray-300 w-full"
+                    className="flex gap-3 p-3 w-fit border border-gray-300 "
                   >
                     <img
                       src={book.book_cover_image}
                       alt={book.book_title}
                       className="w-16 h-20 object-cover bg-gray-200"
                     />
-                    <div className="flex-1">
+                    <span className="">
                       <h3 className="text-gray-900 mb-1">{book.book_title}</h3>
-                    </div>
+                    </span>
                   </div>
                 ))}
               </div>
@@ -103,7 +102,7 @@ export function Profile() {
                 {readBooks.map((book) => (
                   <div
                     key={book.id}
-                    className="flex gap-3 p-3 border border-gray-300 w-full"
+                    className="flex gap-3 p-3 w-fit border border-gray-300 "
                   >
                     <img
                       src={book.book_cover_image}

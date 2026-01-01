@@ -4,6 +4,7 @@ import LoginOrSignup from "./pages/LoginOrSignup";
 import { Dashboard } from "./pages/Dashboard";
 import RestrictedPage from "./pages/restrictedPage";
 import { Profile } from "./pages/Profile";
+
 function App() {
   return (
     <div className="flex min-w-screen min-h-screen  flex-col items-center bg-white relative">

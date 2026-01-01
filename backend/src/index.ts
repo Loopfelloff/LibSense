@@ -38,6 +38,8 @@ app.listen(process.env.PORT, () => {
 
 app.use("/registerAccount", verifyEmailHandler);
 app.use("/verifyOtp", verifyOtpHandler);
+
+app.use("/users", authenticationMiddleware);
 app.use("/users/profile", profileRouter);
 app.use("/users/books/favourites", favouriteRouter);
 app.use("/users/books/status", bookStatusRouter);
