@@ -297,5 +297,68 @@ const deleteReviewHandler = async(req : Request , res:Response)=>{
 
 } 
 
+const getReveiwHandler = async (req:Request , res : Response)=>{
+    try{
 
-export {addReviewHandler ,updateReviewHandler , deleteReviewHandler} 
+	const {bookId} = req.query as {bookId : string}
+	console.log(bookId)
+
+	if(!bookId || bookId.trim() === '') return res.status(400).json({
+	    success : false,
+	    errDetails : {
+		errMsg : 'missing bookid in the request header'
+	    }
+	})
+
+	const foundBook = await prisma.book.findUnique({
+	    where : {
+		id : bookId
+	    }
+	})
+
+	if(!foundBook) return res.status(404).json({
+	    success : false,
+	    errDetails : {
+		errMsg : `the book doesn't exists`
+	    }
+	})
+    
+	const reviews = await prisma.book.findUnique({
+	    where : {
+		id : bookId
+	    },
+
+	    include : {
+		review : {
+		    include : {
+			user : true
+		    }
+		},	
+		
+	    }
+	})
+
+	return res.status(200).json({
+	    success : true,
+	    data : reviews
+	})
+
+
+    }
+    catch(err : unknown){
+	if(err instanceof Error){
+	    console.log(err.stack)
+	    return res.status(500).json({
+		success : true,
+		errMsg : err.message,
+		errName : err.name
+	    })
+	}
+	
+    }
+
+
+
+}
+
+export {addReviewHandler ,updateReviewHandler , deleteReviewHandler , getReveiwHandler} 
