@@ -140,7 +140,7 @@ const updateReviewHandler = async ( req : Request , res : Response)=>{
 	if(!reviewId || !reviewId.trim()) return res.status(400).json({
 	    success: false,
 	    errDetails : {
-		errMsg : `missing bookId field in the request header`	
+		errMsg : `missing reviewId field in the request header`	
 	    }
 	})
 
@@ -221,6 +221,81 @@ const updateReviewHandler = async ( req : Request , res : Response)=>{
     }
 }
 
+const deleteReviewHandler = async(req : Request , res:Response)=>{
+    try{
+
+	const {reviewId} = req.body as queryTypeForUpdate
+	
+	if(!reviewId || !reviewId.trim()) return res.status(400).json({
+	    success: false,
+	    errDetails : {
+		errMsg : `missing reviewId field in the request header`	
+	    }
+	})
+
+	const {email} = req.user as reqUser
+	
+	const foundUser = await prisma.user.findUnique({
+	    where : {
+		email : email
+	    }
+	})
+
+	if(!foundUser)  return res.status(404).json({
+	    success : false,
+	    errDetails : {
+		errMsg : 'the user account is deleted or either  has never registered'
+	    }
+
+	})	
+
+	const foundReview  = await prisma.review.findUnique({
+	    where : {
+		id : reviewId
+	    }
+	})
+
+	if(!foundReview) return res.status(404).json({
+	    success : false,
+	    errDetails : {
+		errMsg : `the review doesn't exist`
+	    }
+	})
 
 
-export {addReviewHandler ,updateReviewHandler} 
+	if(foundReview.user_id !== foundUser.id) return res.status(401).json({
+	    success : false,
+	    errDetails : {
+		errMsg : `can't delete others review`	
+	    }
+	})
+
+	const deleteReview = await prisma.review.delete({
+	where : {
+	    id : reviewId
+	}
+    })
+
+	console.log(deleteReview)
+
+	return res.status(201).json({
+	    success : true,
+	    data : deleteReview
+	})
+    }
+    catch(err : unknown){
+	if(err instanceof Error){
+	    console.log(err.stack)
+	    return res.status(500).json({
+		success : true,
+		errMsg : err.message,
+		errName : err.name
+	    })
+	}
+	
+    }
+
+} 
+
+
+export {addReviewHandler ,updateReviewHandler , deleteReviewHandler} 
