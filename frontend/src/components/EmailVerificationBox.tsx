@@ -2,7 +2,8 @@ import { useState, useRef} from 'react';
 import type {KeyboardEvent, ChangeEvent } from 'react'
 import { Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'
+import axios, { type AxiosResponse } from 'axios'
+
 export default function EmailVerificationBox() {
   const navigate = useNavigate()
   const [showMessageBox , setShowMessageBox] = useState<boolean>(false)
@@ -79,16 +80,22 @@ export default function EmailVerificationBox() {
     try{
     const response = await axios.post("http://localhost:5000/verifyotp" , {
 	otp:otpEntered
-    } )
+    }  , {
+	withCredentials : true
+    })
     console.log(response.data)
     navigateToLogin() 
     }
     catch(err){
-	if(err instanceof Error)
+	if(axios.isAxiosError(err))
 	    {
-		console.log(err.message)
+		console.log(err.response?.data)
+		console.log(err.response?.status)
 		setFailedVerification(true)
 	    }
+	else{
+	    console.error("unexpected error" , err)
+	}
     } 
     finally{
 	setEnableButton(true)
@@ -97,8 +104,8 @@ export default function EmailVerificationBox() {
 
   return (
     <>
-    {(showMessageBox) ? <div className="flex flex-col justify-center items-center w-48 h-8 fixed right-0 top-0">
-	<span className="text-sm text-green-900 " >Success ! You will be re-directed to login page in .... {countDown}</span>
+    {(showMessageBox) ? <div className="flex flex-col justify-center items-center w-96 h-16 fixed right-0 top-0">
+	<span className="text-xl text-green-900 " >Success ! You will be re-directed to login page in .... {countDown}</span>
 	</div> : <></>}
     <div className="grow bg-gray-50 flex items-center justify-center p-4 w-full">
       <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">

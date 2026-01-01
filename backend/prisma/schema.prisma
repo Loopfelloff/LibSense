@@ -47,7 +47,8 @@ model User {
   middle_name               String?
   last_name                 String
   email                     String                    @unique
-  password                  String
+  password                  String?
+  provider_id               String?                   @unique
   profile_pic_link          String?
   user_role_id              String
   user_role                 UserRole                  @relation(fields: [user_role_id], references: [id])

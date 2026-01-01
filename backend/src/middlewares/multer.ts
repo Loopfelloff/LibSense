@@ -9,7 +9,6 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: multer.FileFilterCallback,
 ) => {
-  console.log({ file });
   const allowedTypes = [
     "image/jpeg",
     "image/png",

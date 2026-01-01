@@ -1,4 +1,3 @@
-// how are you 
 import { useState } from 'react';
 import { Eye, EyeOff, Book, Mail, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -12,12 +11,15 @@ type formData ={
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isSending , setIsSending] = useState<boolean>(false);
+  const [errMsg , setErrMsg] = useState<string | null>(null)
   const [formData, setFormData] = useState<formData>({
     email: '',
     password: '',
   });
 
   const handleChange = (e : ChangeEvent<HTMLInputElement> ) => {
+    setErrMsg(null)
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -26,12 +28,43 @@ export default function LoginForm() {
 
   const handleSubmit : ()=> Promise<void>  = async () => {
 
+      if(isSending) return;
+    
+      setIsSending(true)
+
+      try{
+	  const response = await axios.post("http://localhost:5000/login" , {
+	      email : formData.email,
+	      password : formData.password
+	  } ,  {withCredentials : true})
+
+	  console.log(response.status)
+	  console.log(response.data)
+	  
+      }
+
+      catch(err){
+
+	  if(axios.isAxiosError(err)){
+
+	      console.log(err.response?.data)
+	      console.log(err.response?.status)
+
+	      if(err.response?.status  === 401) setErrMsg('the account credential is incorrect')
+	      else if(err.response?.status  === 404) setErrMsg('the account has never been registered')
+
+
+	      
+	  }
+
+      }
+      finally{
+	  setIsSending(false)
+      }
+      
     	
   };
 
-  const handleGoogleSignup = () => {
-    console.log('Continue with Google clicked');
-  };
 
   return (
     <div className=" bg-gray-50 flex items-center gap-6 grow justify-center pt-18 w-full">
@@ -69,6 +102,7 @@ export default function LoginForm() {
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
+	      {(errMsg) ? <span className="text-red-900 text-sm"> {errMsg} </span> : <></>}
             </div>
 
             <div>
@@ -85,6 +119,7 @@ export default function LoginForm() {
                   placeholder="Enter your password"
                   className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
+		{(errMsg) ? <span className="text-red-900 text-sm"> {errMsg} </span> : <></>}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -101,6 +136,7 @@ export default function LoginForm() {
             <button
               onClick={handleSubmit}
               className="w-full bg-slate-800 text-white py-3 rounded-lg font-medium hover:bg-slate-700 transition-colors"
+	      style = { (errMsg || isSending) ? {backgroundColor: 'gray' , cursor : 'not-allowed'  } : {backgroundColor : 'rgb(51, 65, 85)', cursor : 'pointer' } }
             >
 	    Login
                           </button>
@@ -113,7 +149,6 @@ export default function LoginForm() {
           </div>
 
           <button
-            onClick={handleGoogleSignup}
             className="w-full bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -134,7 +169,10 @@ export default function LoginForm() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            Continue with Google
+	<a href="http://localhost:5000/auth/google">
+	    Login with google
+	</a>
+            
           </button>
 
           <div className="text-center mb-8">

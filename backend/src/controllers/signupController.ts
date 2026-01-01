@@ -77,17 +77,17 @@ const verifyEmailHandler = async (req: Request, res: Response) => {
       specialChars: false,
     });
 
-    await redisClient.hSet(otpVal, {
-      email: email,
+    await redisClient.hSet(email, {
       firstName: firstName,
       middleName: middleName,
       lastName: lastName,
       password: hashedPassword,
+      otp: otpVal,
     });
 
-    await redisClient.expire(otpVal, 60 * 60);
+    await redisClient.expire(email, 60 * 60);
 
-    let userSession = await redisClient.hGetAll(otpVal);
+    let userSession = await redisClient.hGetAll(email);
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -105,12 +105,14 @@ const verifyEmailHandler = async (req: Request, res: Response) => {
       html: returnHTMLEmail(firstName, otpVal),
     });
 
+    res.cookie("email", email, { maxAge: 60 * 60 * 1000, httpOnly: true });
+
     return res.status(200).json({
       success: true,
       successMsg: "verify the email",
       data: userSession,
     });
-  } catch (err) {
+  } catch (err: unknown) {
     if (err instanceof Error) {
       console.log(err.stack);
       return res.status(500).json({

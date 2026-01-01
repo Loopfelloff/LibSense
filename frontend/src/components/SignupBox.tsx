@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState , useRef} from 'react';
 import { Eye, EyeOff, Book, User, Mail, Lock } from 'lucide-react';
 import {Link , useNavigate} from 'react-router-dom'
 import type { ChangeEvent } from 'react';
@@ -30,7 +30,10 @@ type userNameError = {
 export default function SignupForm() {
     // state variables
   const navigate = useNavigate()
+  const [isWaiting , setIsWaiting] = useState<boolean>(false)
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [userNameAlreadyExists , setUserNameAlreadyExists] = useState<boolean>(false)
+  const timerId = useRef<ReturnType <typeof setTimeout> | null > (null)
   const [userNameValidity , setUserNameValidity] = useState<userNameError>(
       {
 	  firstName : false,
@@ -56,10 +59,61 @@ export default function SignupForm() {
 
   const [confirmPasswordValidity , setConfirmPasswordValidity ] = useState<boolean>(false)
   const [formValidation , setFormValidation] = useState<boolean>(true)
-
-
   // function 
 
+  const checkForEmailEntry = (email : string)=>{
+
+      if(email.trim() === '') return
+
+
+      if(timerId.current) clearTimeout(timerId.current);
+
+
+      setIsWaiting(true)
+
+	timerId.current = setTimeout(async ()=>{
+
+
+	  try{
+
+	      const response = await axios.get("http://localhost:5000/checkForEmail",  {
+		  params: {
+		      email : email 
+		  }
+	      })
+
+	      console.log(response.data)
+	      console.log(response.status)
+	      setUserNameAlreadyExists(false)
+
+	      if(checkForFormValidation(formData)){
+		    setFormValidation(true)
+	      }
+	      else{
+		  setFormValidation(false)
+	      }
+
+	  }
+	  catch(err){
+	      if(axios.isAxiosError(err)){
+		 console.log(err.response?.data) 
+		 console.log(err.response?.status) 
+		 setUserNameAlreadyExists(true)
+		 setFormValidation(true)
+
+	      }
+	      else{
+		  console.error("Unexpected Error : " , err)
+	      }
+
+	  }
+	  finally{
+	      setIsWaiting(false)
+	  }
+
+      }, 1000)
+
+  }
 
   const checkForFormValidation : (formData : formData)=>boolean = (formData : formData )=>{
     const currentUserNameValidity = checkUsernameValidity(formData.firstName , formData.middleName , formData.lastName) 
@@ -71,11 +125,12 @@ export default function SignupForm() {
     const totalLengthPassword = currentPasswordValidity.totalLength
     const email = currentEmailValidity
     const confirmPassword = checkConfirmPasswordValidity(formData.password , formData.confirmPassword)
-    if(firstName || lastName || totalLength || symbol || num || totalLengthPassword || email || confirmPassword) return true;
+    if(firstName || lastName || totalLength || symbol || num || totalLengthPassword || email || confirmPassword ) return true;
     else return false
 	
   }
   const handleChange = (e : ChangeEvent<HTMLInputElement> ) => {
+      if(e.target.name === 'email') setUserNameAlreadyExists(false)
       setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -111,7 +166,7 @@ export default function SignupForm() {
     }
 
 
-    if(checkForFormValidation(newFormData)){
+    if(checkForFormValidation(newFormData) || userNameAlreadyExists){
 	setFormValidation(true)
     }
     else {
@@ -125,21 +180,34 @@ export default function SignupForm() {
   const handleSubmit : ()=> Promise<void> = async () => {
     if(checkForFormValidation(formData)) return
     setFormValidation(true)
-    const response = await axios.post("http://localhost:5000/registerAccount", {
-	firstName : formData.firstName,
-	middleName : formData.middleName,
-	lastName : formData.lastName,
-	email : formData.email,
-	password : formData.password
-    })
-    setFormValidation(false)
-    if(response.statusText === 'OK') return navigate("/registration")
+    
+    try {
+	const response = await axios.post("http://localhost:5000/registerAccount", {
+	    firstName : formData.firstName,
+	    middleName : formData.middleName,
+	    lastName : formData.lastName,
+	    email : formData.email,
+	    password : formData.password
+	} , {
+	    withCredentials : true
+	})
+	setFormValidation(false)
+	console.log(response.data)
+	return navigate("/emailverification")
+    }
+
+    catch(err){
+	if(axios.isAxiosError(err)){
+	    console.log(err.response?.data)
+	    console.log(err.response?.status)
+	}
+	else{
+	    console.error('unexpected error :' , err)
+	}
+    }
     
   };
 
-  const handleGoogleSignup = () => {
-    console.log('Continue with Google clicked');
-  };
 
   return (
     <div className="grow  bg-gray-50 flex items-center gap-6 justify-center pt-18  w-full">
@@ -171,7 +239,9 @@ export default function SignupForm() {
                   type="text"
                   name="firstName"
                   value={formData.firstName}
-                  onChange={handleChange}
+                  onChange={(e : ChangeEvent<HTMLInputElement>) =>{
+		      handleChange(e)
+		  }}
                   placeholder="Enter your full name"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
@@ -189,7 +259,9 @@ export default function SignupForm() {
                   type="text"
                   name="middleName"
                   value={formData.middleName}
-                  onChange={handleChange}
+                  onChange={(e : ChangeEvent<HTMLInputElement>) =>{
+		      handleChange(e)
+		  }}
                   placeholder="Enter your full name"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />{ (userNameValidity.totalLength) ? <span className="text-red-900">The total username length must be greater than 8</span>: <></>}
@@ -206,7 +278,9 @@ export default function SignupForm() {
                   type="text"
                   name="lastName"
                   value={formData.lastName}
-                  onChange={handleChange}
+                  onChange={(e : ChangeEvent<HTMLInputElement>) =>{
+		      handleChange(e)
+		  }}
                   placeholder="Enter your full name"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
@@ -224,11 +298,15 @@ export default function SignupForm() {
                   type="email"
                   name="email"
                   value={formData.email}
-                  onChange={handleChange}
+                  onChange={(e:ChangeEvent<HTMLInputElement>)=>{
+		      checkForEmailEntry(e.currentTarget.value)
+		      handleChange(e)
+		  }}
                   placeholder="Enter your email"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
 		{(emailValidity) ? <span className ="text-red-900">Email isn't in the correct format</span> : <></>}
+		{(userNameAlreadyExists) ? <span className ="text-red-900">Email already in use</span> : <></>}
               </div>
             </div>
 
@@ -287,7 +365,7 @@ export default function SignupForm() {
             <button
               onClick={handleSubmit}
               className="w-full bg-slate-800 text-white py-3 rounded-lg font-medium hover:bg-slate-700 transition-colors"
-	      style = { (formValidation) ? {backgroundColor: 'gray' , cursor : 'not-allowed'  } : {backgroundColor : 'rgb(51, 65, 85)', cursor : 'pointer' } }
+	      style = { (formValidation || isWaiting) ? {backgroundColor: 'gray' , cursor : 'not-allowed'  } : {backgroundColor : 'rgb(51, 65, 85)', cursor : 'pointer' } }
             >
               Create Account
             </button>
@@ -300,7 +378,6 @@ export default function SignupForm() {
           </div>
 
           <button
-            onClick={handleGoogleSignup}
             className="w-full bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -321,7 +398,9 @@ export default function SignupForm() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            Continue with Google
+	<a href="http://localhost:5000/auth/google">
+	    Continue with google
+	</a>
           </button>
 
           <div className="text-center mb-8">

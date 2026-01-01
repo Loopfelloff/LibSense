@@ -1,5 +1,5 @@
 /*
-  Warnings:
+ Warnings:
 
   - You are about to drop the column `sentDate` on the `message` table. All the data in the column will be lost.
 

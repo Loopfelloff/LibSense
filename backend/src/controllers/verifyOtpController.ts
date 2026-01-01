@@ -15,6 +15,16 @@ const verifyOtpHandler = async (req: Request, res: Response) => {
   try {
     const { otp }: otpType = req.body;
 
+    const { email } = req.cookies;
+
+    if (!email)
+      return res.status(400).json({
+        success: false,
+        errDetails: {
+          errMsg: "missing cookies in the request header",
+        },
+      });
+
     if (otp === "" || !otp)
       return res.status(400).json({
         success: false,
@@ -23,7 +33,9 @@ const verifyOtpHandler = async (req: Request, res: Response) => {
         },
       });
 
-    const userDetails = await redisClient.hGetAll(otp);
+    console.log(email.email);
+
+    const userDetails = await redisClient.hGetAll(email);
 
     if (Object.keys(userDetails).length === 0)
       return res.status(404).json({
@@ -32,29 +44,14 @@ const verifyOtpHandler = async (req: Request, res: Response) => {
           errMsg: "either the otp expired or the invalid otp entered",
         },
       });
-    /**
- *
-model User {
-    id                        String                    @id @default(uuid())
-    first_name                String
-    middle_name               String?
-    last_name                 String
-    email                     String                    @unique
-    password                  String
-    profile_pic_link          String?
-    user_role_id              String
-    user_role                 UserRole                  @relation(fields: [user_role_id], references: [id])
-    user_preferences          UserPreferences[]
-    conversation_participants ConversationParticipant[]
-    sent_messages             Message[]
-    book_status_val           BookStatusVal[]
-    favourites                Favourite[]
-    review                    Review[]
 
-    @@map("user")
-}
-**/
-    console.log(Roles.USER);
+    if (userDetails.otp !== otp)
+      return res.status(400).json({
+        success: false,
+        errDetails: {
+          errMsg: `the session email doesn't match up the otp value`,
+        },
+      });
     const role = await prisma.userRole.findFirst({
       where: { role: Roles.USER },
     });
@@ -73,7 +70,7 @@ model User {
         first_name: userDetails.firstName,
         middle_name: userDetails.middleName,
         last_name: userDetails.lastName,
-        email: userDetails.email,
+        email: email,
         password: userDetails.password,
         user_role_id: role.id,
       },
@@ -81,21 +78,23 @@ model User {
 
     console.log(result);
 
-    await redisClient.del(otp);
+    await redisClient.del(email);
+
+    res.clearCookie("email", { maxAge: 60 * 60 * 1000, httpOnly: true });
 
     const toSend = {
       firstName: userDetails.firstName,
       middleName: userDetails.middleName,
       lastName: userDetails.lastName,
-      email: userDetails.email,
+      email: email,
       user_role_id: result.user_role_id,
     };
 
-    return res.status(200).json({
+    return res.status(201).json({
       success: true,
       data: toSend,
     });
-  } catch (err) {
+  } catch (err: unknown) {
     if (err instanceof Error) {
       console.log(err.stack);
       return res.status(500).json({
