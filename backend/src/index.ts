@@ -13,9 +13,7 @@ import { checkForEmailEntryHandler } from './controllers/checkForEmailEntryContr
 import { corsOptions } from './config/corsConfig.js'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
-import {prisma} from './config/prismaClientConfig.js'
 
-import type {Request , Response} from 'express'
 const app = express()
 
 
