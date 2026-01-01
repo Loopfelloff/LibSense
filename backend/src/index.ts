@@ -6,7 +6,7 @@ import {router as verifyOtpHandler} from './routes/verifyOtpRoute.js'
 import {router as loginHandler} from './routes/loginRoute.js'
 import {router as googleLoginHandler} from './routes/googleLoginRoute.js'
 import {router as failureHandler} from './routes/failureRoute.js'
-import {router as viewBookHandler} from './routes/viewBookRouter.js'
+import {router as authHandler} from './routes/authRouter.js'
 import {router as bookReviewHandler} from './routes/bookreviewRoutes.js'
 import { authenticationMiddleware } from './middlewares/authenticationMiddleware.js'
 import { checkForEmailEntryHandler } from './controllers/checkForEmailEntryController.js'
@@ -29,8 +29,10 @@ app.use("/login", loginHandler)
 app.use("/auth",  googleLoginHandler)
 app.use("/failure",  failureHandler)
 // we have to later on add middleware instead to verify if this is from a verified request or not.
-app.use("/review" , authenticationMiddleware) // use this middelware for every restricted request 
-app.use("/review" , bookReviewHandler) // use this middelware for every restricted request 
+app.use("/auth" , authenticationMiddleware) 
+app.use("/auth" , authHandler) 
+app.use("/review" , authenticationMiddleware) 
+app.use("/review" , bookReviewHandler) 
 
 
 

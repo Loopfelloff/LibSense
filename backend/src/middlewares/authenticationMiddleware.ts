@@ -28,10 +28,10 @@ const authenticationMiddleware = async (req : Request , res : Response,  next : 
 
 	const result =  await jwtVerify(String(accessToken)  , String(process.env.ACCESS_TOKEN_SECRET))
 
-	const {email , firstName , lastName, middleName} = result 
+	const {id ,email , firstName , lastName, middleName} = result 
     
 
-	req.user = {email : email , firstName : firstName , lastName : lastName , middleName : middleName}
+	req.user = {id : id ,email : email , firstName : firstName , lastName : lastName , middleName : middleName}
 
 
 	next()
@@ -47,9 +47,9 @@ const authenticationMiddleware = async (req : Request , res : Response,  next : 
 		    if(!refreshToken) throw newError
 		    const result = await jwtVerify(String(refreshToken) , String(process.env.REFRESH_TOKEN_SECRET))
 
-		    const {email , firstName , lastName , middleName} = result
+		    const {id , email , firstName , lastName , middleName} = result
 
-		    const payload = {email : email , firstName : firstName , lastName : lastName , middleName : middleName}
+		    const payload = {id : id ,email : email , firstName : firstName , lastName : lastName , middleName : middleName}
 
 
 		    const newAccessToken =  jwt.sign(payload , String(process.env.ACCESS_TOKEN_SECRET) , { expiresIn : '30m' })
