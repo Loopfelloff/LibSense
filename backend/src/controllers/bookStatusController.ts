@@ -125,7 +125,7 @@ const deleteBookByStatus = async (req: Request, res: Response) => {
           errorMsg: "status type or book not specified",
         },
       });
-    const deleteRecord = await prisma.bookStatusVal.deleteMany({
+    await prisma.bookStatusVal.deleteMany({
       where: {
         book_id: bookId,
         user_id: userId,

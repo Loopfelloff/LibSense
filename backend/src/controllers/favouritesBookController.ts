@@ -120,7 +120,7 @@ const removeFavouriteBook = async (req: Request, res: Response) => {
   try {
     const bookId = "d6305d28-a733-44ca-a0e7-8176655feaf2";
     const userId = "403d1a57-d529-45db-a6d6-38f4204e2b8b";
-    const deleteFavourite = await prisma.favourite.deleteMany({
+    await prisma.favourite.deleteMany({
       where: {
         book_id: bookId,
         user_id: userId,

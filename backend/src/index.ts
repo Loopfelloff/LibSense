@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
-
 import { router as verifyEmailHandler } from "./routes/signupRoute.js";
 import { router as verifyOtpHandler } from "./routes/verifyOtpRoute.js";
 import { profileRouter } from "./routes/profileRoute.js";
