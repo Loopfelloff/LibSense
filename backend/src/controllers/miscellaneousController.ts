@@ -67,28 +67,63 @@ const getMutualBooks = async (req: Request, res: Response) => {
   }
 };
 
-const mockBookData = await prisma.book.create({
-    data : {
-	   book_title : '1984',
-	   description : 'A 1949 dystopian novel exploring a totalitarian future with concepts like "Big Brother" and "thoughtcrime," examining truth and propaganda in politics.' ,
-	    book_cover_image : "something for now",
-	    isbn : '9783844908213',
+const mockBookData = async (req: Request , res : Response)=>{
+    try {
+const result = await prisma.book.create({
+  data: {
+    isbn: "9780132350884",
+    book_cover_image : 'a book for clean code',
+    book_title: "Clean Code",
+    description: "A Handbook of Agile Software Craftsmanship",
 
-	    book_written_by : {
-		create : [
-		    {
-			book_author : {
-			    create : {
-				  author_first_name: "George",
-				  author_middle_name: "",
-				  author_last_name: "Martin",
-			    }
-			}
+    book_written_by: {
+      create: [
+        {
+          book_author: {
+            create: {
+              author_first_name: "Robert",
+              author_middle_name: "C.",
+              author_last_name: "Martin",
+            },
+          },
+        },
+        {
+          book_author: {
+            create: {
+              author_first_name: "Another",
+              author_last_name: "Author",
+            },
+          },
+        },
+      ],
+    },
+  },
+   include : {
+		book_written_by : {
+		    include : {
+			book_author : true
 		    }
-		]
+		}
 	    }
-	     
-    }
 })
 
-export { getMutualBooks };
+
+	    res.status(200).json({
+		success : true,
+		data  :result 
+	})
+
+    }
+    catch(err : unknown) {
+	if(err instanceof Error)
+	    {
+	    console.log(err.stack)
+	    res.status(500).json({
+		success : false,
+		errMsg:err.message,
+		errName : err.name
+	})
+	}
+    }
+} 
+export { getMutualBooks , mockBookData};

@@ -34,6 +34,14 @@ const addReviewHandler = async (req : Request , res:Response)=>{
 
 	})	
 
+	if(rating > 5) return res.status(400).json({
+	    success  :false,
+	    errDetails : {
+		errMsg : `the rating can't be more than 5`
+	    }
+	})
+
+
 	if(!reviewBody ||  !reviewBody.trim()) return res.status(400).json({
 	    success : false,
 	    errDetails : {

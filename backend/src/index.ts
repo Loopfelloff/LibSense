@@ -8,7 +8,9 @@ import { router as googleLoginHandler } from "./routes/googleLoginRoute.js";
 import { profileRouter } from "./routes/profileRoute.js";
 import { favouriteRouter } from "./routes/favouriteRoute.js";
 import { router as failureHandler } from "./routes/failureRoute.js";
+import {router as topRatedBooksHandler} from  "./routes/topRatedBooksRouter.js"
 import { router as viewBookHandler } from "./routes/viewBookRouter.js";
+import {router as mockDataHandler} from './routes/mockDataRoute.js'
 import { authenticationMiddleware } from "./middlewares/authenticationMiddleware.js";
 import { checkForEmailEntryHandler } from "./controllers/checkForEmailEntryController.js";
 import { router as bookReviewHandler } from "./routes/bookreviewRoutes.js";
@@ -31,16 +33,16 @@ app.use("/checkForEmail", checkForEmailEntryHandler);
 app.use("/login", loginHandler);
 app.use("/auth", googleLoginHandler);
 app.use("/failure", failureHandler);
+app.use("/mock" , mockDataHandler) // remove the underlying handler and stuff after the mocking or testing phase is complete during deployment
 // we have to later on add middleware instead to verify if this is from a verified request or not.
 app.use("/book", authenticationMiddleware); // use this middelware for every restricted request
 app.use("/auth", authenticationMiddleware);
 app.use("/auth", authHandler);
 app.use("/review", authenticationMiddleware);
 app.use("/review", bookReviewHandler);
+app.use("/topRated" , authenticationMiddleware)
+app.use("/topRated" , topRatedBooksHandler)
 
-app.listen(process.env.PORT, () => {
-  console.log("Listening to port ", process.env.PORT);
-});
 
 app.use("/registerAccount", verifyEmailHandler);
 app.use("/verifyOtp", verifyOtpHandler);
@@ -51,5 +53,5 @@ app.use("/users/books/favourites", favouriteRouter);
 app.use("/users/books/status", bookStatusRouter);
 
 app.listen(process.env.PORT, () => {
-  console.log("Listening to port", process.env.PORT);
+  console.log("Listening to port ", process.env.PORT);
 });
