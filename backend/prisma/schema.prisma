@@ -134,7 +134,9 @@ model Book {
 
 model BookAuthor {
   id                String           @id @default(uuid())
-  book_author_names BookAuthorName[]
+  author_first_name String
+  author_middle_name String
+  author_last_name String
   book_written_by   BookWrittenBy[]
 
   @@map("book_author")
@@ -148,17 +150,6 @@ model BookWrittenBy {
   book_author    BookAuthor @relation(fields: [book_author_id], references: [id], onDelete: Cascade)
 
   @@unique([book_author_id, book_id])
-}
-
-model BookAuthorName {
-  id                 String     @id @default(uuid())
-  book_author_id     String
-  author_first_name  String
-  author_middle_name String?
-  author_last_name   String
-  book_author        BookAuthor @relation(fields: [book_author_id], references: [id], onDelete: Cascade)
-
-  @@map("book_author_name")
 }
 
 model BookStatusVal {
