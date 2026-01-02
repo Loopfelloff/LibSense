@@ -66,4 +66,29 @@ const getMutualBooks = async (req: Request, res: Response) => {
     }
   }
 };
+
+const mockBookData = await prisma.book.create({
+    data : {
+	   book_title : '1984',
+	   description : 'A 1949 dystopian novel exploring a totalitarian future with concepts like "Big Brother" and "thoughtcrime," examining truth and propaganda in politics.' ,
+	    book_cover_image : "something for now",
+	    isbn : '9783844908213',
+
+	    book_written_by : {
+		create : [
+		    {
+			book_author : {
+			    create : {
+				  author_first_name: "George",
+				  author_middle_name: "",
+				  author_last_name: "Martin",
+			    }
+			}
+		    }
+		]
+	    }
+	     
+    }
+})
+
 export { getMutualBooks };

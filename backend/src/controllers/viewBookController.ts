@@ -20,14 +20,11 @@ const viewBookHandler = async (req : Request , res : Response)=>{
 	    where : {
 		id : bookId
 	    },
+
 	    include : {
-		book_written_by:{
+		book_written_by : {
 		    include : {
-			book_author : {
-			    include : {
-				book_author_names : true
-			    }
-			}
+			book_author : true
 		    }
 		}
 	    }

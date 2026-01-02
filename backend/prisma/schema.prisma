@@ -135,7 +135,7 @@ model Book {
 model BookAuthor {
   id                String           @id @default(uuid())
   author_first_name String
-  author_middle_name String
+  author_middle_name String?
   author_last_name String
   book_written_by   BookWrittenBy[]
 
