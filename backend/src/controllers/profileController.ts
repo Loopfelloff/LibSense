@@ -3,7 +3,11 @@ import { redisClient } from "../config/redisConfiguration.js";
 import type { Request, Response } from "express";
 
 const getProfileController = async (req: Request, res: Response) => {
-  const userId = "0385fb63-c60e-4e7e-9767-c585f050c164";
+  const { userId } = req.query;
+  if (!userId || typeof userId !== "string") {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+  console.log({ userId });
   try {
     const cachedProfileInfo = await redisClient.get(`user:${userId}:profile`);
     if (cachedProfileInfo) {

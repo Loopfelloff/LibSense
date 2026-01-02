@@ -1,5 +1,5 @@
-import { Star, BookmarkPlus, Eye } from 'lucide-react';
-import { ImageWithFallback } from './ImageWithFallback';
+import { Star, BookmarkPlus, Eye } from "lucide-react";
+import { ImageWithFallback } from "./ImageWithFallback";
 
 interface Book {
   id: number;
@@ -22,13 +22,13 @@ export function BookCard({ book, showProgress, showMatch }: BookCardProps) {
   return (
     <div className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
       {/* Book Cover */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
+      <div className="relative aspect-3/4 overflow-hidden bg-gray-100">
         <ImageWithFallback
           src={book.cover}
           alt={book.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
-        
+
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
           <button className="p-3 bg-white rounded-full hover:bg-gray-100 transition">

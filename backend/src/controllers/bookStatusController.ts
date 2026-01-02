@@ -13,7 +13,8 @@ const statusMap: Record<string, Status> = {
 const getBooksByStatus = async (req: Request, res: Response) => {
   try {
     const { type } = req.query as { type?: BookStatus };
-
+    const userId = req.query;
+    // const userId = "403d1a57-d529-45db-a6d6-38f4204e2b8b";
     if (!type)
       return res.status(401).json({
         success: false,
@@ -23,7 +24,6 @@ const getBooksByStatus = async (req: Request, res: Response) => {
       });
 
     const prismaStatus = statusMap[String(type).toLowerCase()];
-    const userId = "403d1a57-d529-45db-a6d6-38f4204e2b8b";
     const getRecordByStatus = await prisma.book.findMany({
       where: {
         user_statuses: {
