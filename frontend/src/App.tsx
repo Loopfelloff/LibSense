@@ -2,7 +2,6 @@ import { Routes, Route } from "react-router-dom";
 import Footer from "./components/Footer";
 import LoginOrSignup from "./pages/LoginOrSignup";
 import { Dashboard } from "./pages/Dashboard";
-import RestrictedPage from "./pages/restrictedPage";
 import { Profile } from "./pages/Profile";
 
 function App() {
@@ -15,7 +14,6 @@ function App() {
           path="/pageNotFound"
           element={<h1>Hello this is the default 404 page</h1>}
         />
-        <Route path="/restrictedPage" element={<RestrictedPage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/:loginOrSignup" element={<LoginOrSignup />} />
         <Route

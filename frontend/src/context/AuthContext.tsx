@@ -2,16 +2,8 @@ import {useEffect , useState} from "react";
 import type { ReactNode } from "react";
 import { UserContext } from "./UserContext";
 import { TailSpin } from "react-loader-spinner"; 
+import type {userContext} from './UserContext.tsx'
 import axios from 'axios'
-export type userContext = {
-    loggedIn : boolean;
-    id : string;
-    email : string;
-    firstName : string;
-    middleName : string;
-    lastName : string;
-    profilePicLink : string;
-}
 
 type propType = {
     children : ReactNode
