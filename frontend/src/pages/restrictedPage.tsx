@@ -1,25 +1,18 @@
-import { useEffect } from "react";
-import axios from "axios";
-
+import {  useContext , useEffect} from "react";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../context/UserContext";
 export default function RestrictedPage(){
+    const userContext = useContext(UserContext)
+    const navigation = useNavigate() 
     useEffect(()=>{
-	axios.get("http://localhost:5000/book" , {
-		  params : { bookId : 'ef1e4b3b-2e28-41f2-a494-f0b0ff044527' },
-		  withCredentials : true
-	}	
-		 )
-	.then(response =>{
-	    console.log(response.data)
-	    console.log(response.status)
-	})
-	.catch(reject =>{
-	    if(axios.isAxiosError(reject)){
-		console.log(reject.response?.data)
-		console.log(reject.response?.status)
-	    }
-	})
-    })
+	if(!userContext?.loggedIn) navigation("/signup")
+    } , [])
     return (
-	<></>
+	<>
+	    <div>
+	    This is from a very restricted page  {String(userContext?.lastName)}
+ 	    </div>
+	</>
     )
 }
+

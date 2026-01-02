@@ -41,7 +41,7 @@ const authenticationMiddleware = async (
     const { id, email, firstName, lastName, middleName } = result;
 
     req.user = {
-      id,
+      id: id,
       email: email,
       firstName: firstName,
       lastName: lastName,
@@ -61,9 +61,10 @@ const authenticationMiddleware = async (
             String(process.env.REFRESH_TOKEN_SECRET),
           );
 
-          const { email, firstName, lastName, middleName } = result;
+          const { id, email, firstName, lastName, middleName } = result;
 
           const payload = {
+            id: id,
             email: email,
             firstName: firstName,
             lastName: lastName,
