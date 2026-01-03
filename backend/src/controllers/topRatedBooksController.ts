@@ -43,6 +43,14 @@ const topRatedBooksHandler = async (req : Request , res : Response)=>{
 	})
     
 	// just gives array like ['id1' , 'id2']
+	
+	const totalResult = await prisma.book.count({
+	    where : {
+		review : {
+		    some : {}
+		}
+	    }
+	})
 
 	const tempResult = await prisma.review.groupBy({
 	    by : ['book_id'],
@@ -55,6 +63,8 @@ const topRatedBooksHandler = async (req : Request , res : Response)=>{
 	    skip : startIndex,
 	    take : shiftIndex,
 	})
+
+
 
 	const result = await Promise.all(
 	    tempResult.map(async (item)=>{
@@ -86,7 +96,12 @@ const topRatedBooksHandler = async (req : Request , res : Response)=>{
     // paxi required data jo send garnu 
 	res.status(200).json({
 	    success : true,
-	    data : result
+	    data : result,
+	    meta : {
+		total : totalResult,
+		startIndex : startIndex,
+		shiftIndex : shiftIndex
+	    }
 	})
     }
     catch(err : unknown) {
