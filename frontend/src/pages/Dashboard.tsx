@@ -115,7 +115,7 @@ export function Dashboard() {
       <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
       <div className="pt-[53px] flex">
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <Sidebar isOpen={sidebarOpen} selectValue='dashBoard' onClose={() => setSidebarOpen(false)} />
 
         <main className="flex-1 lg:pl-56">
           <div className="bg-gray-50 border-b border-gray-300 px-4 py-4">

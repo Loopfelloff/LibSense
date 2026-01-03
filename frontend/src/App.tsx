@@ -3,6 +3,7 @@ import Footer from "./components/Footer";
 import LoginOrSignup from "./pages/LoginOrSignup";
 import { Dashboard } from "./pages/Dashboard";
 import { Profile } from "./pages/Profile";
+import { TopRated } from "./pages/TopRated";
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
       <Routes>
         {/* Of course you can add the routes up in here as of now this is just the bare one */}
         <Route path="/home" element={<Dashboard />} />
+        <Route path="/topRated" element={<TopRated />} />
         <Route
           path="/pageNotFound"
           element={<h1>Hello this is the default 404 page</h1>}

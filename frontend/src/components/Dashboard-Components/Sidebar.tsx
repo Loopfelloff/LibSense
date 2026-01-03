@@ -80,19 +80,27 @@
 
 import { Home, Library, Heart, Star, X, Users, MessageSquare } from "lucide-react";
 
+type selectValue = "dashBoard" | "myLibrary" | "favorites" | "topRated" | "community" | "chats" 
+
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  selectValue : "dashBoard" | "myLibrary" | "favorites" | "topRated" | "community" | "chats" 
 }
 
-function Sidebar({ isOpen, onClose }: SidebarProps) {
+function Sidebar({ isOpen, onClose , selectValue }: SidebarProps) {
+
+  const returnTheActiveLabel: (activeTab : selectValue) => boolean = (activeTab : selectValue)=>{
+
+      return (selectValue === activeTab)
+  }
   const menuItems = [
-    { icon: Home, label: "Dashboard", active: true },
-    { icon: Library, label: "My Library", active: false },
-    { icon: Heart, label: "Favorites", active: false },
-    { icon: Star, label: "Top Rated", active: false },
-    { icon: Users, label: "Community", active: false },
-    { icon: MessageSquare, label: "Chats", active: false },
+    { icon: Home, label: "Dashboard", active: returnTheActiveLabel("dashBoard")},
+    { icon: Library, label: "My Library", active: returnTheActiveLabel("myLibrary") },
+    { icon: Heart, label: "Favorites", active: returnTheActiveLabel("favorites") },
+    { icon: Star, label: "Top Rated", active: returnTheActiveLabel("topRated") },
+    { icon: Users, label: "Community", active : returnTheActiveLabel("community")},
+    { icon: MessageSquare, label: "Chats", active: returnTheActiveLabel("chats") },
   ];
 
   return (
