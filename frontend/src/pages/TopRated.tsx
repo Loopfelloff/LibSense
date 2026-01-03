@@ -80,7 +80,8 @@ export function TopRated() {
                                 <img
                                   src={(!book.book_cover_image || book.book_cover_image.trim() === '') ? 'default Image' : book.book_cover_image}
                                   alt={book.book_title}
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-cover cursor-pointer"
+				  onClick={()=>{navigation(`/bookReview/${book.id}`)}}
                                 />
                               </div>
                               <span className="text-gray-900">{book.book_title}</span>
@@ -94,7 +95,7 @@ export function TopRated() {
                       )) : 
 			   <tr className="w-full">
 			      <td colSpan={3} className=" flex flex-row justify-start ">
-				<TailSpin />
+				<TailSpin color="blue"/>
 			      </td>
 			  </tr>
 		      }

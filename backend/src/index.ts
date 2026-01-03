@@ -42,6 +42,7 @@ app.use("/review", authenticationMiddleware);
 app.use("/review", bookReviewHandler);
 app.use("/topRated" , authenticationMiddleware)
 app.use("/topRated" , topRatedBooksHandler)
+app.use("/viewBook" , authenticationMiddleware)
 app.use("/viewBook" , viewBookHandler)
 
 app.use("/registerAccount", verifyEmailHandler);
