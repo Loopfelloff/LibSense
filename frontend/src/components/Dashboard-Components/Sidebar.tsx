@@ -28,7 +28,6 @@ function Sidebar({ isOpen, onClose , selectValue }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/30 z-40 lg:hidden"
@@ -36,14 +35,12 @@ function Sidebar({ isOpen, onClose , selectValue }: SidebarProps) {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`fixed left-0 top-[53px] h-[calc(100vh-53px)] w-56 bg-white border-r border-gray-300 z-50 transition-transform duration-300
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
           lg:translate-x-0`}
       >
         <div className="p-3">
-          {/* Mobile header */}
           <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-300 lg:hidden">
             <div className="text-gray-900 font-semibold">libsense</div>
             <button onClick={onClose} className="p-1">

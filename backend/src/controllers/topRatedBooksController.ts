@@ -12,9 +12,6 @@ const topRatedBooksHandler = async (req : Request , res : Response)=>{
     try {
 
 	let {startIndex, shiftIndex}  = req.query as reqBodyType
-	startIndex = Number(startIndex)
-	shiftIndex = Number(shiftIndex)
-
 	if(startIndex === undefined) return res.status(400).json({
 	    success : true,
 	    errDetails : {
@@ -27,6 +24,9 @@ const topRatedBooksHandler = async (req : Request , res : Response)=>{
 		errMsg : 'missing shiftIndex in the request header'
 	    }
 	})
+	startIndex = Number(startIndex)
+	shiftIndex = Number(shiftIndex)
+
 
 	const bookResult = await prisma.book.findMany({ // so books with atelast one review pop up
 	    where : {
