@@ -10,7 +10,7 @@ function App() {
     <div className="flex min-w-screen min-h-screen  flex-col items-center bg-white relative">
       <Routes>
         {/* Of course you can add the routes up in here as of now this is just the bare one */}
-        <Route path="/home" element={<Dashboard />} />
+        <Route path="/dashBoard" element={<Dashboard />} />
         <Route path="/topRated" element={<TopRated />} />
         <Route
           path="/pageNotFound"

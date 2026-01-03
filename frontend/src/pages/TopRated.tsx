@@ -92,7 +92,11 @@ export function TopRated() {
 
                         </tr>
                       )) : 
-			  <TailSpin/>
+			   <tr className="w-full">
+			      <td colSpan={3} className=" flex flex-row justify-start ">
+				<TailSpin />
+			      </td>
+			  </tr>
 		      }
                     </tbody>
                   </table>
@@ -100,7 +104,7 @@ export function TopRated() {
 		    Page no: 
 		   {new Array(Math.ceil(totalBooks/10)).fill(0).map((item , index)=>{
 			return (
-			    <div className={(isLoading) ? "text-blue-950 cursor-not-allowed p-4 flex flex-row justify-center items-center" : "text-blue-950 cursor-pointer p-4 flex flex-row justify-center items-center"}
+			    <div key={index} className={(isLoading) ? "text-blue-950 cursor-not-allowed p-4 flex flex-row justify-center items-center" : "text-blue-950 cursor-pointer p-4 flex flex-row justify-center items-center"}
 			    style={((startIndex / 10) === index)?{backgroundColor : 'blue' , color : 'white'} : {}}
 			    onClick={()=>{changeStartIndex(index)}}
 			    >
