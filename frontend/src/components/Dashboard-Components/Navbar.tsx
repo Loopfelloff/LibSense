@@ -2,6 +2,8 @@ import { Search, Settings, Menu } from "lucide-react";
 import { useContext, useState } from "react";
 import { UserContext } from "../../context/UserContext";
 import { Link } from "react-router-dom";
+import ChangePasswordModal from "../PasswordChangeModal";
+import ChangeProfilePicModal from "../ProfilePicChangeModal";
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -10,6 +12,8 @@ interface NavbarProps {
 function Navbar({ onMenuClick }: NavbarProps) {
   const [showProfileMenu, setShowProfileMenu] = useState<boolean>(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState<boolean>(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showProfilePicModal, setShowProfilePicModal] = useState(false);
   const user = useContext(UserContext);
 
   return (
@@ -56,8 +60,7 @@ function Navbar({ onMenuClick }: NavbarProps) {
                       className="w-full text-left px-3 py-2 hover:bg-gray-100 text-gray-900"
                       onClick={() => {
                         setShowSettingsMenu(false);
-                        // Add your change profile pic logic here
-                        console.log("Change profile picture");
+                        setShowProfilePicModal(true);
                       }}
                     >
                       Change Profile Picture
@@ -66,7 +69,7 @@ function Navbar({ onMenuClick }: NavbarProps) {
                       className="w-full text-left px-3 py-2 border-t border-gray-300 hover:bg-gray-100 text-gray-900"
                       onClick={() => {
                         setShowSettingsMenu(false);
-                        console.log("Change password");
+                        setShowPasswordModal(true);
                       }}
                     >
                       Change Password
@@ -126,6 +129,17 @@ function Navbar({ onMenuClick }: NavbarProps) {
           </div>
         </div>
       </div>
+
+      <ChangePasswordModal
+        isOpen={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+      />
+
+      <ChangeProfilePicModal
+        isOpen={showProfilePicModal}
+        onClose={() => setShowProfilePicModal(false)}
+        currentPic={user?.profilePicLink}
+      />
     </nav>
   );
 }

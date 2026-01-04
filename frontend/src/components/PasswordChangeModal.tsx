@@ -33,13 +33,6 @@ function ChangePasswordModal({ isOpen, onClose }: ModelValue) {
       return;
     }
 
-    // Add your API call here
-    console.log("Password change submitted:", {
-      currentPassword,
-      newPassword,
-    });
-
-    // Reset form and close
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
@@ -48,11 +41,8 @@ function ChangePasswordModal({ isOpen, onClose }: ModelValue) {
 
   return (
     <>
-      <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-50"
-        onClick={onClose}
-      />
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white border border-gray-300 z-50">
+      <div className="fixed inset-0 backdrop-blur-sm z-60" onClick={onClose} />
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white border border-gray-300 z-[70]">
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-300">
           <h2 className="text-gray-900 font-semibold">Change Password</h2>
           <button
