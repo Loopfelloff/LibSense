@@ -11,6 +11,7 @@ import { getBookReview } from '../apis/getReview';
 import type { ReviewType } from '../types/bookReviewType';
 import type { updateReviewPayload } from '../types/updateReviewPayload';
 import type { addReviewPayload } from '../types/addReviewPayload';
+import AuthContext from '../context/AuthContext';
 
 // Mock reviews data
 
@@ -35,6 +36,7 @@ export function BookReview() {
 
   useEffect(() => {
     if (!authContext?.loggedIn) navigation('/login');
+    console.log('from authContext' , authContext)
     getFullBookInfo(bookId, setIsBookDetailLoading)
     .then(resolve =>{
       console.log(resolve)
@@ -114,7 +116,6 @@ export function BookReview() {
 
   const handleAddReview = async () => {
     if(isReviewAdding) return
-    console.log('oops')
     if (!newRating || !newReviewBody.trim()) {
       alert('Please provide both rating and review text');
       return;
