@@ -174,6 +174,7 @@ import { useContext, useState } from "react";
 import Navbar from "../components/Dashboard-Components/Navbar";
 import Sidebar from "../components/Dashboard-Components/Sidebar";
 import { UserContext } from "../context/UserContext";
+import { ToastContainer } from "react-toastify";
 
 // Mock data for books
 const interestedBooks = [
@@ -277,99 +278,111 @@ export function Dashboard() {
   const user = useContext(UserContext);
 
   return (
-    <div className="min-h-screen bg-white">
-      <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+    <>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        pauseOnHover
+        closeOnClick
+      />
 
-      <div className="pt-13.25 flex">
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="min-h-screen bg-white">
+        <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
-        <main className="flex-1 lg:pl-56">
-          <div className="bg-gray-50 border-b border-gray-300 px-4 py-4">
-            <h1 className="text-gray-900 mt-2 text-lg font-semibold">
-              Dashboard
-            </h1>
-            <div className="text-gray-600">
-              Welcome, {user?.firstName} {user?.lastName}
-            </div>
-          </div>
+        <div className="pt-13.25 flex">
+          <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-          <div className="p-4 max-w-7xl">
-            <section>
-              <div className="border border-gray-300 rounded">
-                <div className="px-4 py-3 bg-gray-50 border-b border-gray-300 flex items-center justify-between">
-                  <div className="text-gray-900 font-medium">
-                    Recommended Books
-                  </div>
-                  <a href="#" className="text-blue-600 hover:underline">
-                    View All
-                  </a>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-100 border-b border-gray-300">
-                      <tr>
-                        <th className="px-4 py-2 text-left text-gray-900">
-                          Book
-                        </th>
-                        <th className="px-4 py-2 text-left text-gray-900">
-                          Author
-                        </th>
-                        <th className="px-4 py-2 text-left text-gray-900">
-                          Genre
-                        </th>
-                        <th className="px-4 py-2 text-left text-gray-900">
-                          Rating
-                        </th>
-                        <th className="px-4 py-2 text-left text-gray-900">
-                          Action
-                        </th>
-                      </tr>
-                    </thead>
-
-                    <tbody className="divide-y divide-gray-300">
-                      {recommendedBooks.map((book) => (
-                        <tr key={book.id} className="bg-white hover:bg-gray-50">
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-2">
-                              <div className="w-10 h-14 bg-gray-200 flex-shrink-0 overflow-hidden rounded">
-                                <img
-                                  src={book.cover}
-                                  alt={book.title}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                              <span className="text-gray-900">
-                                {book.title}
-                              </span>
-                            </div>
-                          </td>
-
-                          <td className="px-4 py-3 text-gray-700">
-                            {book.author}
-                          </td>
-                          <td className="px-4 py-3 text-gray-700">
-                            {book.genre}
-                          </td>
-                          <td className="px-4 py-3 text-gray-700">
-                            {book.rating}
-                          </td>
-
-                          <td className="px-4 py-3">
-                            <button className="px-3 py-1 border border-gray-700 text-gray-700 hover:bg-gray-100">
-                              Add
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+          <main className="flex-1 lg:pl-56">
+            <div className="bg-gray-50 border-b border-gray-300 px-4 py-4">
+              <h1 className="text-gray-900 mt-2 text-lg font-semibold">
+                Dashboard
+              </h1>
+              <div className="text-gray-600">
+                Welcome, {user?.firstName} {user?.lastName}
               </div>
-            </section>
-          </div>
-        </main>
+            </div>
+
+            <div className="p-4 max-w-7xl">
+              <section>
+                <div className="border border-gray-300 rounded">
+                  <div className="px-4 py-3 bg-gray-50 border-b border-gray-300 flex items-center justify-between">
+                    <div className="text-gray-900 font-medium">
+                      Recommended Books
+                    </div>
+                    <a href="#" className="text-blue-600 hover:underline">
+                      View All
+                    </a>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-100 border-b border-gray-300">
+                        <tr>
+                          <th className="px-4 py-2 text-left text-gray-900">
+                            Book
+                          </th>
+                          <th className="px-4 py-2 text-left text-gray-900">
+                            Author
+                          </th>
+                          <th className="px-4 py-2 text-left text-gray-900">
+                            Genre
+                          </th>
+                          <th className="px-4 py-2 text-left text-gray-900">
+                            Rating
+                          </th>
+                          <th className="px-4 py-2 text-left text-gray-900">
+                            Action
+                          </th>
+                        </tr>
+                      </thead>
+
+                      <tbody className="divide-y divide-gray-300">
+                        {recommendedBooks.map((book) => (
+                          <tr
+                            key={book.id}
+                            className="bg-white hover:bg-gray-50"
+                          >
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2">
+                                <div className="w-10 h-14 bg-gray-200 shrink-0 overflow-hidden rounded">
+                                  <img
+                                    src={book.cover}
+                                    alt={book.title}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <span className="text-gray-900">
+                                  {book.title}
+                                </span>
+                              </div>
+                            </td>
+
+                            <td className="px-4 py-3 text-gray-700">
+                              {book.author}
+                            </td>
+                            <td className="px-4 py-3 text-gray-700">
+                              {book.genre}
+                            </td>
+                            <td className="px-4 py-3 text-gray-700">
+                              {book.rating}
+                            </td>
+
+                            <td className="px-4 py-3">
+                              <button className="px-3 py-1 border border-gray-700 text-gray-700 hover:bg-gray-100">
+                                Add
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -9,4 +9,17 @@ const getUserProfile = async (userId: string): Promise<User> => {
   return response.data.data;
 };
 
-export { getUserProfile };
+const changePassword = async (newPassword: string): Promise<string> => {
+  const response = await axios.post(
+    "http://localhost:5000/users/profile/changepassword",
+    {
+      newPassword,
+    },
+    {
+      withCredentials: true,
+    },
+  );
+
+  return response.data.success;
+};
+export { getUserProfile, changePassword };

@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { X } from "lucide-react";
+import { changePassword } from "../apis/profile";
+import { ToastContainer, toast } from "react-toastify";
+import { checkPasswordValidity } from "../utils/formValidation";
 
 interface ModelValue {
   isOpen: boolean;
@@ -7,36 +10,47 @@ interface ModelValue {
 }
 
 function ChangePasswordModal({ isOpen, onClose }: ModelValue) {
-  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      setError("All fields are required");
-      return;
-    }
 
     if (newPassword !== confirmPassword) {
       setError("New passwords do not match");
       return;
     }
 
-    if (newPassword.length < 8) {
-      setError("Password must be at least 8 characters");
+    const validity = checkPasswordValidity(confirmPassword);
+
+    if (validity.totalLength) {
+      setError("Password must be at least 8 characters long");
       return;
     }
 
-    setCurrentPassword("");
+    if (validity.num) {
+      setError("Password must contain at least one number");
+      return;
+    }
+
+    if (validity.symbol) {
+      setError("Password must contain at least one symbol");
+      return;
+    }
+    const passwordChangeSucess = await changePassword(confirmPassword);
+    console.log(passwordChangeSucess);
+
+    if (passwordChangeSucess) {
+      toast.success("Password changed successfully!");
+      onClose();
+    }
+
     setNewPassword("");
     setConfirmPassword("");
-    onClose();
   };
 
   return (
@@ -61,21 +75,11 @@ function ChangePasswordModal({ isOpen, onClose }: ModelValue) {
           <div className="space-y-4">
             <div>
               <label className="block text-gray-900 text-sm mb-1">
-                Current Password
-              </label>
-              <input
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full px-3 py-1.5 border border-gray-300 text-gray-900 focus:outline-none focus:border-gray-400"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-900 text-sm mb-1">
                 New Password
               </label>
               <input
                 type="password"
+                autoComplete="new-password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 className="w-full px-3 py-1.5 border border-gray-300 text-gray-900 focus:outline-none focus:border-gray-400"
@@ -104,6 +108,7 @@ function ChangePasswordModal({ isOpen, onClose }: ModelValue) {
             <button
               type="submit"
               className="flex-1 px-4 py-2 bg-gray-900 text-white hover:bg-gray-800"
+              disabled={confirmPassword !== newPassword}
             >
               Change Password
             </button>
