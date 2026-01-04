@@ -1,39 +1,63 @@
-import type {Request , Response } from 'express'
+import type { Request, Response } from 'express'
 import { prisma } from '../../config/prismaClientConfig.js'
 
-export const addBook = async (req: Request, res: Response) => {
+interface AddBookAuthor {
+  author_id?: string
+  first_name?: string
+  middle_name?: string | null
+  last_name?: string
+}
+
+interface AddBookBody {
+  isbn: string
+  book_title: string
+  book_cover_image: string
+  description: string
+  authors: AddBookAuthor[]
+}
+
+export const addBook = async (
+  req: Request<{}, {}, AddBookBody>,
+  res: Response
+) => {
   try {
-    const { isbn, book_title, book_cover_image, description, authors } = req.body;
+    const { isbn, book_title, book_cover_image, description, authors } = req.body
 
     if (!isbn || !book_title || !authors || !Array.isArray(authors) || authors.length === 0) {
-      return res.status(400).json({ error: "Missing required fields" });
+      return res.status(400).json({ error: "Missing required fields" })
     }
 
     const book = await prisma.book.create({
       data: {
         isbn,
         book_title,
-        book_cover_image,
-        description,
+        book_cover_image: book_cover_image?.trim() ?? null,
+        description: description?.trim() ?? null,
       },
-    });
+    })
 
     for (const author of authors) {
-      let authorId: string;
+      let authorId: string
 
       if (author.author_id) {
-        // Use existing author
-        authorId = author.author_id;
+
+        authorId = author.author_id
       } else {
-        // Create new author
+
+        if (!author.first_name || !author.last_name) {
+          return res
+            .status(400)
+            .json({ error: "First and last name required for new author" })
+        }
+
         const newAuthor = await prisma.bookAuthor.create({
           data: {
-            author_first_name: author.first_name,
-            author_middle_name: author.middle_name || null,
-            author_last_name: author.last_name,
+            author_first_name: author.first_name.trim(),
+            author_middle_name: author.middle_name?.trim() ?? null,
+            author_last_name: author.last_name.trim(),
           },
-        });
-        authorId = newAuthor.id;
+        })
+        authorId = newAuthor.id
       }
 
       await prisma.bookWrittenBy.create({
@@ -41,7 +65,7 @@ export const addBook = async (req: Request, res: Response) => {
           book_id: book.id,
           book_author_id: authorId,
         },
-      });
+      })
     }
 
     const createdBook = await prisma.book.findUnique({
@@ -53,11 +77,20 @@ export const addBook = async (req: Request, res: Response) => {
           },
         },
       },
-    });
+    })
 
-    return res.status(201).json(createdBook);
-  } catch (error) {
-    console.error("Error adding book:", error);
-    return res.status(500).json({ error: "Something went wrong" });
+    return res.status(201).json({ success: true, book: createdBook })
+  } catch (error: unknown) {
+    console.error("Error adding book:", error)
+
+    if (error instanceof Error) {
+      return res.status(500).json({
+        success: false,
+        errName: error.name,
+        errMsg: error.message,
+      })
+    }
+
+    return res.status(500).json({ success: false, errName: "UnknownError" })
   }
-};
+}
