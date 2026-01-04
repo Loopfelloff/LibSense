@@ -72,23 +72,16 @@ const changePassword = async (req: Request, res: Response) => {
   try {
     const { id } = req.user as { id: string };
     const { newPassword } = req.body;
-    if (!id)
-      return res.status(401).json({
-        success: false,
-        error: {
-          errorMsg: "No userid specified",
-        },
-      });
 
     const salt = await genSalt(10);
     const hashedPassword = await hash(newPassword, salt);
 
-    const userRecord = await prisma.user.update({
+    await prisma.user.update({
       where: {
         id,
       },
       data: {
-        password: newPassword,
+        password: hashedPassword,
       },
     });
 
@@ -112,4 +105,4 @@ const changePassword = async (req: Request, res: Response) => {
   }
 };
 
-export { getMutualBooks };
+export { getMutualBooks, changePassword };
