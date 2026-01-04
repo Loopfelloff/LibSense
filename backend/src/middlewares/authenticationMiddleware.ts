@@ -38,6 +38,9 @@ const authenticationMiddleware = async (
       String(process.env.ACCESS_TOKEN_SECRET),
     );
 
+    console.log("from second in the middle ware ")
+    console.log(result)
+
     const { id, email, firstName, lastName, middleName } = result;
 
     req.user = {
@@ -47,6 +50,9 @@ const authenticationMiddleware = async (
       lastName: lastName,
       middleName: middleName,
     };
+
+    console.log("from the first in teh middleware ")
+    console.log(req.user)
 
     next();
   } catch (err: unknown) {
