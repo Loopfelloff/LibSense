@@ -30,19 +30,19 @@ function Sidebar({ isOpen, onClose , selectValue }: SidebarProps) {
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/30 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/30 z-10 lg:hidden"
           onClick={onClose}
         />
       )}
 
       <aside
-        className={`fixed left-0 top-[53px] h-[calc(100vh-53px)] w-56 bg-white border-r border-gray-300 z-50 transition-transform duration-300
+        className={`fixed left-0 top-13.25 h-[calc(100vh-53px)] w-56 m-2 bg-white border-r border-gray-300 z-10 transition-transform duration-300
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
           lg:translate-x-0`}
       >
         <div className="p-3">
           <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-300 lg:hidden">
-            <div className="text-gray-900 font-semibold">libsense</div>
+            <div className="text-gray-900 font-semibold">Libsense</div>
             <button onClick={onClose} className="p-1">
               <X className="w-4 h-4 text-gray-600" />
             </button>
@@ -52,7 +52,7 @@ function Sidebar({ isOpen, onClose , selectValue }: SidebarProps) {
             {menuItems.map((item, index) => (
               <button
                 key={index}
-                className={`w-full flex items-center gap-2 px-3 py-2 mb-1 text-left rounded
+                className={`w-full flex items-center gap-2 px-3 py-2 m-1 text-left rounded
                   ${item.active ? "bg-gray-200" : "hover:bg-gray-100"}`}
 		onClick={()=>{navigation(`/${sideBarElement[index]}`)}}
               >
@@ -77,4 +77,3 @@ function Sidebar({ isOpen, onClose , selectValue }: SidebarProps) {
 }
 
 export default Sidebar;
-

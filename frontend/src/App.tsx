@@ -19,6 +19,7 @@ function App() {
           element={<h1>Hello this is the default 404 page</h1>}
         />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/profile/:userId" element={<Profile />} />
         <Route path="/:loginOrSignup" element={<LoginOrSignup />} />
         <Route path="*" element={<h1>Hello this is the default 404 page</h1>} />
       </Routes>
