@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Upload } from "lucide-react";
+import { changeProfilePic } from "../apis/profile";
+import { toast } from "react-toastify";
 
 interface ModelValue {
   isOpen: boolean;
@@ -12,7 +14,16 @@ function ChangeProfilePicModal({ isOpen, onClose, currentPic }: ModelValue) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    return () => {
+      if (preview && preview !== currentPic) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview, currentPic]);
+
   if (!isOpen) return null;
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -32,23 +43,28 @@ function ChangeProfilePicModal({ isOpen, onClose, currentPic }: ModelValue) {
     setError("");
     setSelectedFile(file);
 
+    if (preview && preview !== currentPic) {
+      URL.revokeObjectURL(preview);
+    }
     const objectUrl = URL.createObjectURL(file);
     setPreview(objectUrl);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedFile) {
       setError("Please select an image");
       return;
     }
+    const formData = new FormData();
+    formData.append("profilePic", selectedFile);
 
-    // Add your API call here to upload the image
-    console.log("Uploading profile picture:", selectedFile);
-
-    // Reset and close
+    const uploadResult = await changeProfilePic(formData);
+    if (uploadResult) {
+      toast.success("Profile Picture changed successfully!");
+      onClose();
+    }
     setPreview(null);
     setSelectedFile(null);
-    onClose();
   };
 
   const handleClose = () => {

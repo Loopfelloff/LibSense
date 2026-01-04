@@ -22,4 +22,19 @@ const changePassword = async (newPassword: string): Promise<string> => {
 
   return response.data.success;
 };
-export { getUserProfile, changePassword };
+
+const changeProfilePic = async (formdata: FormData) => {
+  const response = await axios.post(
+    "http://localhost:5000/users/profile/profilepicture/upload",
+    formdata,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      withCredentials: true,
+    },
+  );
+
+  return response.data.success;
+};
+export { changeProfilePic, getUserProfile, changePassword };

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { changePassword } from "../apis/profile";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import { checkPasswordValidity } from "../utils/formValidation";
 
 interface ModelValue {
