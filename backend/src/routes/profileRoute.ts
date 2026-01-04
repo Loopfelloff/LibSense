@@ -7,7 +7,7 @@ const profileRouter = express.Router();
 
 profileRouter.get("/", getProfileController);
 profileRouter.post(
-  "/profilepicture/uploads",
+  "/profilepicture/upload",
   upload.fields([{ name: "profilePic", maxCount: 1 }]),
   postProfilePicController,
 );

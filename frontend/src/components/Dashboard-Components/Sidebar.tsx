@@ -3,10 +3,11 @@ import {
   Library,
   Heart,
   Star,
-  X,
   Users,
   MessageSquare,
+  X,
 } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -14,13 +15,15 @@ interface SidebarProps {
 }
 
 function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const location = useLocation();
+
   const menuItems = [
-    { icon: Home, label: "Dashboard", active: true },
-    { icon: Library, label: "My Library", active: false },
-    { icon: Heart, label: "Favorites", active: false },
-    { icon: Star, label: "Top Rated", active: false },
-    { icon: Users, label: "Community", active: false },
-    { icon: MessageSquare, label: "Chats", active: false },
+    { icon: Home, label: "Dashboard", path: "/" },
+    { icon: Library, label: "My Library", path: "/library" },
+    { icon: Heart, label: "Favorites", path: "/favorites" },
+    { icon: Star, label: "Top Rated", path: "/top-rated" },
+    { icon: Users, label: "Community", path: "/community" },
+    { icon: MessageSquare, label: "Chats", path: "/chats" },
   ];
 
   return (
@@ -32,7 +35,6 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
           onClick={onClose}
         />
       )}
-
       {/* Sidebar */}
       <aside
         className={`fixed left-0 top-13.25 h-[calc(100vh-53px)] w-56 m-2 bg-white border-r border-gray-300 z-10 transition-transform duration-300
@@ -47,20 +49,23 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
               <X className="w-4 h-4 text-gray-600" />
             </button>
           </div>
-
           <nav>
-            {menuItems.map((item, index) => (
-              <button
-                key={index}
-                className={`w-full flex items-center gap-2 px-3 py-2 m-1 text-left rounded
-                  ${item.active ? "bg-gray-200" : "hover:bg-gray-100"}`}
-              >
-                <item.icon className="w-4 h-4" />
-                <span>{item.label}</span>
-              </button>
-            ))}
+            {menuItems.map((item, index) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={index}
+                  to={item.path}
+                  onClick={onClose}
+                  className={`w-full flex items-center gap-2 px-3 py-2 m-1 text-left rounded
+                    ${isActive ? "bg-gray-200" : "hover:bg-gray-100"}`}
+                >
+                  <item.icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
           </nav>
-
           <div className="mt-4 pt-4 border-t border-gray-300">
             <div className="px-3 space-y-3">
               <div>
