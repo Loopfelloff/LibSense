@@ -9,6 +9,7 @@ const getBooksByStatus = async (
       userId,
       type: status,
     },
+    withCredentials: true,
   });
   return response.data.data;
 };

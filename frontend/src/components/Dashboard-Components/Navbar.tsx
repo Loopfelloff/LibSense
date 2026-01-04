@@ -1,14 +1,16 @@
-
-
-import { Search, Bell, Settings, User, Menu } from "lucide-react";
-import { useState } from "react";
+import { Search, Settings, Menu } from "lucide-react";
+import { useContext, useState } from "react";
+import { UserContext } from "../../context/UserContext";
+import { Link } from "react-router-dom";
 
 interface NavbarProps {
   onMenuClick: () => void;
 }
 
 function Navbar({ onMenuClick }: NavbarProps) {
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState<boolean>(false);
+  const [showSettingsMenu, setShowSettingsMenu] = useState<boolean>(false);
+  const user = useContext(UserContext);
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white border-b border-gray-300 z-50">
@@ -19,8 +21,7 @@ function Navbar({ onMenuClick }: NavbarProps) {
             <button onClick={onMenuClick} className="lg:hidden p-1">
               <Menu className="w-5 h-5 text-gray-700" />
             </button>
-
-            <div className="text-gray-900 font-semibold">libsense</div>
+            <div className="text-gray-900 font-semibold">Libsense</div>
           </div>
 
           {/* Search */}
@@ -37,20 +38,62 @@ function Navbar({ onMenuClick }: NavbarProps) {
 
           {/* Right */}
           <div className="flex items-center gap-4">
-            <button className="text-gray-700">
-              <Settings className="w-5 h-5" />
-            </button>
-
-            <button className="relative text-gray-700">
-              <Bell className="w-5 h-5" />
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+                className="text-gray-700"
+              >
+                <Settings className="w-5 h-5" />
+              </button>
+              {showSettingsMenu && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowSettingsMenu(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-300 z-50">
+                    <button
+                      className="w-full text-left px-3 py-2 hover:bg-gray-100 text-gray-900"
+                      onClick={() => {
+                        setShowSettingsMenu(false);
+                        // Add your change profile pic logic here
+                        console.log("Change profile picture");
+                      }}
+                    >
+                      Change Profile Picture
+                    </button>
+                    <button
+                      className="w-full text-left px-3 py-2 border-t border-gray-300 hover:bg-gray-100 text-gray-900"
+                      onClick={() => {
+                        setShowSettingsMenu(false);
+                        console.log("Change password");
+                      }}
+                    >
+                      Change Password
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
 
             <div className="relative">
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
                 className="flex items-center gap-2 text-gray-700"
               >
-                <User className="w-5 h-5" />
+                <div className="w-12 h-12 shrink-0">
+                  {user?.profilePicLink ? (
+                    <img
+                      src={user.profilePicLink}
+                      alt={`${user.firstName} ${user.lastName}`}
+                      className="w-full h-full rounded-full object-cover border border-gray-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                      {user?.firstName[0]}
+                    </div>
+                  )}
+                </div>
                 <span className="hidden md:inline">Profile</span>
               </button>
 
@@ -62,15 +105,17 @@ function Navbar({ onMenuClick }: NavbarProps) {
                   />
                   <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 z-50">
                     <div className="px-3 py-2 border-b border-gray-300">
-                      <div className="text-gray-900 font-medium">John Doe</div>
+                      <div className="text-gray-900 font-medium">
+                        {user?.firstName} {user?.lastName}
+                      </div>
                       <div className="text-gray-600 text-sm">Student</div>
                     </div>
-                    <button className="w-full text-left px-3 py-2 hover:bg-gray-100">
+                    <Link
+                      className="w-full block px-3 py-2 text-left hover:bg-gray"
+                      to={`/profile/${user?.id}`}
+                    >
                       My Profile
-                    </button>
-                    <button className="w-full text-left px-3 py-2 hover:bg-gray-100">
-                      Settings
-                    </button>
+                    </Link>
                     <button className="w-full text-left px-3 py-2 border-t border-gray-300 hover:bg-gray-100">
                       Logout
                     </button>
@@ -86,4 +131,3 @@ function Navbar({ onMenuClick }: NavbarProps) {
 }
 
 export default Navbar;
-
