@@ -1,13 +1,13 @@
-import type { Request, Response } from "express";
-import { prisma } from "../config/prismaClientConfig.js";
-import { Status } from "../../generated/prisma/index.js";
+import type { Request, Response } from "express"
+import { prisma } from "../config/prismaClientConfig.js"
+import { Status } from "../../generated/prisma/index.js"
 
 const getMutualBooks = async (req: Request, res: Response) => {
   try {
-    console.log(req.params);
-    const { userId } = req.params;
-    // const { id } = req.body;
-    const id = "403d1a57-d529-45db-a6d6-38f4204e2b8b";
+    console.log(req.params)
+    const { userId } = req.params
+    // const { id } = req.body
+    const id = "403d1a57-d529-45db-a6d6-38f4204e2b8b"
 
     if (!userId)
       return res.status(401).json({
@@ -15,7 +15,7 @@ const getMutualBooks = async (req: Request, res: Response) => {
         error: {
           errorMsg: "No userid specified",
         },
-      });
+      })
 
     const getMutualRecord = await prisma.book.findMany({
       where: {
@@ -47,23 +47,23 @@ const getMutualBooks = async (req: Request, res: Response) => {
       //     },
       //   },
       // },
-    });
+    })
 
     return res.status(200).json({
       success: true,
       data: getMutualRecord,
-    });
+    })
   } catch (err: unknown) {
     if (err instanceof Error) {
-      console.error(err.message);
+      console.error(err.message)
       return res.status(500).json({
         success: false,
         error: {
           errName: err.name,
           errMsg: err.message,
         },
-      });
+      })
     }
   }
-};
-export { getMutualBooks };
+}
+export { getMutualBooks }
