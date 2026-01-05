@@ -9,6 +9,7 @@ export const Layout = () => {
   return (
     <div className="min-h-screen bg-white">
       <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -17,11 +18,7 @@ export const Layout = () => {
       />
 
       <div className="pt-13.25 flex">
-        <Sidebar
-          isOpen={sidebarOpen}
-          selectValue="dashBoard"
-          onClose={() => setSidebarOpen(false)}
-        />
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         <main className="flex-1 lg:pl-56">
           <Outlet />
