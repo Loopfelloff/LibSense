@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-type selectValue =
+type SelectValue =
   | "dashBoard"
   | "myLibrary"
   | "favorites"
@@ -20,18 +20,12 @@ type selectValue =
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  selectValue:
-    | "dashBoard"
-    | "myLibrary"
-    | "favorites"
-    | "topRated"
-    | "community"
-    | "chats";
+  selectValue: SelectValue;
 }
 
 function Sidebar({ isOpen, onClose, selectValue }: SidebarProps) {
-  const returnTheActiveLabel: (activeTab: selectValue) => boolean = (
-    activeTab: selectValue,
+  const returnTheActiveLabel: (activeTab: SelectValue) => boolean = (
+    activeTab: SelectValue,
   ) => {
     return selectValue === activeTab;
   };
