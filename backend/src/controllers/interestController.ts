@@ -66,6 +66,7 @@ const addInterestHandler = async (req : Request , res:Response)=>{
     }
     catch(err : unknown){
 	if(err instanceof Error){
+	    console.log(err.stack)
 	    return res.status(500).json({
 		success : false,
 		errMsg : err.message,
@@ -76,5 +77,34 @@ const addInterestHandler = async (req : Request , res:Response)=>{
 
 }
 
+const getUserPreferences = async (req : Request , res : Response)=>{
+    try {
 
-export {addInterestHandler}
+	const user = req.user as reqUser
+
+	const userPreferences = await prisma.userPreferences.findMany({
+	    where : {
+		user_id : user.id
+	    }
+	})
+
+	return res.status(200).json({
+	    success : true,
+	    data : userPreferences
+	})
+
+    }
+    catch(err : unknown) {
+	if(err instanceof Error){
+	    console.log(err.stack)
+	    return res.status(500).json({
+		success : false,
+		errMsg : err.message,
+		errName : err.name
+	    })
+	}
+    }
+}
+
+
+export {addInterestHandler , getUserPreferences}
