@@ -1,12 +1,6 @@
 import type {Request , Response} from 'express'
 import { prisma } from '../config/prismaClientConfig.js'
-type reqUser = {
-    id : string,
-    email : string;
-    firstName : string;
-    lastName : string;
-    middleName : string
-}
+import { reqUser } from '../types/reqUserType.js'
 const authHandler = async (req : Request , res : Response)=>{
 
     try{
@@ -15,7 +9,7 @@ const authHandler = async (req : Request , res : Response)=>{
 
 	const result = await prisma.user.findUnique({
 	    where : {
-		id : user?.id
+		id : user.id
 	    }
 	    ,
 	    select : {
