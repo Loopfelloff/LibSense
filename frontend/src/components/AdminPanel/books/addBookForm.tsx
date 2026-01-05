@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 import { Upload, X } from 'lucide-react';
 import type { AuthorWithBooks } from '../../../types/adminPanel';
+import { api } from '../../../apis/adminApi';
 
 interface AddBookFormProps {
   authors: AuthorWithBooks[];
-  onSubmit: (data: any) => void;
+  onSuccess: () => void;
   onCancel: () => void;
 }
 
-export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onCancel }) => {
+export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSuccess, onCancel }) => {
   const [formData, setFormData] = useState({
     isbn: '',
     book_title: '',
     description: '',
-    authors: [] as any[],
   });
 
   const [coverImage, setCoverImage] = useState<File | null>(null);
@@ -27,6 +27,8 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onC
 
   const [selectedAuthorIds, setSelectedAuthorIds] = useState<string[]>([]);
   const [showNewAuthorForm, setShowNewAuthorForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -45,33 +47,70 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onC
     setImagePreview(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
+    // Build authors array matching backend structure
     const authorsArray = [
       ...selectedAuthorIds.map((id) => ({ author_id: id })),
       ...(showNewAuthorForm && newAuthor.first_name && newAuthor.last_name
-        ? [{ first_name: newAuthor.first_name, middle_name: newAuthor.middle_name || null, last_name: newAuthor.last_name }]
+        ? [{ 
+            first_name: newAuthor.first_name, 
+            middle_name: newAuthor.middle_name || null, 
+            last_name: newAuthor.last_name 
+          }]
         : []),
     ];
 
     if (authorsArray.length === 0) {
-      alert('Please select at least one author or add a new author');
+      setError('Please select at least one author or add a new author');
       return;
     }
 
-    onSubmit({ 
-      ...formData, 
-      authors: authorsArray,
-      book_cover_image: coverImage 
-    });
+    setIsSubmitting(true);
+
+    try {
+      await api.addBook({
+        isbn: formData.isbn,
+        book_title: formData.book_title,
+        description: formData.description || undefined,
+        authors: authorsArray,
+        book_cover_image: coverImage || undefined,
+      });
+
+      // Reset form on success
+      setFormData({ isbn: '', book_title: '', description: '' });
+      setCoverImage(null);
+      setImagePreview(null);
+      setNewAuthor({ first_name: '', middle_name: '', last_name: '' });
+      setSelectedAuthorIds([]);
+      setShowNewAuthorForm(false);
+
+      onSuccess();
+    } catch (err: any) {
+      setError(err.message || 'Failed to add book');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const toggleAuthor = (authorId: string) => {
-    setSelectedAuthorIds((prev) => (prev.includes(authorId) ? prev.filter((id) => id !== authorId) : [...prev, authorId]));
+    setSelectedAuthorIds((prev) => 
+      prev.includes(authorId) 
+        ? prev.filter((id) => id !== authorId) 
+        : [...prev, authorId]
+    );
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      )}
+
       <div>
         <label className="block text-sm font-medium mb-1">ISBN*</label>
         <input
@@ -79,8 +118,9 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onC
           required
           value={formData.isbn}
           onChange={(e) => setFormData({ ...formData, isbn: e.target.value })}
-          className="w-full px-3 py-2 border border-gray-300 rounded"
+          className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="Enter ISBN"
+          disabled={isSubmitting}
         />
       </div>
       
@@ -91,8 +131,9 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onC
           required
           value={formData.book_title}
           onChange={(e) => setFormData({ ...formData, book_title: e.target.value })}
-          className="w-full px-3 py-2 border border-gray-300 rounded"
+          className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="Enter book title"
+          disabled={isSubmitting}
         />
       </div>
       
@@ -105,6 +146,7 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onC
               type="button"
               onClick={removeImage}
               className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+              disabled={isSubmitting}
             >
               <X size={16} />
             </button>
@@ -119,6 +161,7 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onC
                 accept="image/*"
                 onChange={handleFileChange}
                 className="hidden"
+                disabled={isSubmitting}
               />
             </label>
             <span className="text-sm text-gray-500">Optional</span>
@@ -131,33 +174,40 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onC
         <textarea
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          className="w-full px-3 py-2 border border-gray-300 rounded"
+          className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           rows={3}
           placeholder="Enter book description"
+          disabled={isSubmitting}
         />
       </div>
       
       <div>
         <label className="block text-sm font-medium mb-2">Select Authors*</label>
         <div className="max-h-40 overflow-y-auto border border-gray-300 rounded p-2 mb-2">
-          {authors.map((author) => (
-            <label key={author.id} className="flex items-center gap-2 py-1 hover:bg-gray-50 px-2 rounded cursor-pointer">
-              <input
-                type="checkbox"
-                checked={selectedAuthorIds.includes(author.id)}
-                onChange={() => toggleAuthor(author.id)}
-                className="w-4 h-4"
-              />
-              <span className="text-sm">
-                {author.author_first_name} {author.author_middle_name} {author.author_last_name}
-              </span>
-            </label>
-          ))}
+          {authors.length === 0 ? (
+            <p className="text-sm text-gray-500 text-center py-2">No authors available</p>
+          ) : (
+            authors.map((author) => (
+              <label key={author.id} className="flex items-center gap-2 py-1 hover:bg-gray-50 px-2 rounded cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectedAuthorIds.includes(author.id)}
+                  onChange={() => toggleAuthor(author.id)}
+                  className="w-4 h-4"
+                  disabled={isSubmitting}
+                />
+                <span className="text-sm">
+                  {author.first_name} {author.middle_name && `${author.middle_name} `}{author.last_name}
+                </span>
+              </label>
+            ))
+          )}
         </div>
         <button
           type="button"
           onClick={() => setShowNewAuthorForm(!showNewAuthorForm)}
           className="text-sm text-blue-600 hover:underline"
+          disabled={isSubmitting}
         >
           {showNewAuthorForm ? 'Hide new author form' : '+ Add new author'}
         </button>
@@ -172,8 +222,9 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onC
               type="text"
               value={newAuthor.first_name}
               onChange={(e) => setNewAuthor({ ...newAuthor, first_name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded"
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="First name"
+              disabled={isSubmitting}
             />
           </div>
           <div>
@@ -182,8 +233,9 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onC
               type="text"
               value={newAuthor.middle_name}
               onChange={(e) => setNewAuthor({ ...newAuthor, middle_name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded"
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Middle name (optional)"
+              disabled={isSubmitting}
             />
           </div>
           <div>
@@ -192,18 +244,28 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onC
               type="text"
               value={newAuthor.last_name}
               onChange={(e) => setNewAuthor({ ...newAuthor, last_name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded"
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Last name"
+              disabled={isSubmitting}
             />
           </div>
         </div>
       )}
       
       <div className="flex gap-2 pt-4">
-        <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-          Add Book
+        <button 
+          type="submit" 
+          className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Adding...' : 'Add Book'}
         </button>
-        <button type="button" onClick={onCancel} className="flex-1 bg-gray-200 text-gray-700 py-2 rounded hover:bg-gray-300">
+        <button 
+          type="button" 
+          onClick={onCancel} 
+          className="flex-1 bg-gray-200 text-gray-700 py-2 rounded hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
+          disabled={isSubmitting}
+        >
           Cancel
         </button>
       </div>
