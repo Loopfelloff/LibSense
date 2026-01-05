@@ -16,16 +16,15 @@ import { updateBook } from '../controllers/AdminControllers/updateBookInformatio
 import { upload } from '../middlewares/multer.js'
 
 router.post('/addAuthor', addAuthor)
-router.delete('/deleteAuthor', deleteAuthor)
+router.delete('/deleteAuthor/:author_id', deleteAuthor) 
 router.get('/listAuthors', getAllAuthors)
 router.get('/authorDetail/:author_id', getAuthorDetail)
 router.put('/updateAuthor', updateAuthor)
 router.post('/addBook', upload.fields([{ name: "book_cover_image", maxCount: 1 }]), addBook)
-router.delete('/deleteBook', deleteBook)
+router.delete('/deleteBook/:book_id', deleteBook)
 router.get('/listBooks', getAllBooks)
 router.get('/bookDetail/:book_id', getBookDetail)
 router.put('/updateBook', upload.fields([{ name: "book_cover_image", maxCount: 1 }]), updateBook)
 router.put('/updateBookAuthors', updateBookAuthors)
-
 
 export { router }

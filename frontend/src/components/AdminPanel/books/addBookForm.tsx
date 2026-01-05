@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Upload, X } from 'lucide-react';
 import type { AuthorWithBooks } from '../../../types/adminPanel';
 
 interface AddBookFormProps {
@@ -11,10 +12,12 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onC
   const [formData, setFormData] = useState({
     isbn: '',
     book_title: '',
-    book_cover_image: '',
     description: '',
     authors: [] as any[],
   });
+
+  const [coverImage, setCoverImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const [newAuthor, setNewAuthor] = useState({
     first_name: '',
@@ -24,6 +27,23 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onC
 
   const [selectedAuthorIds, setSelectedAuthorIds] = useState<string[]>([]);
   const [showNewAuthorForm, setShowNewAuthorForm] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCoverImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setCoverImage(null);
+    setImagePreview(null);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +59,11 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onC
       return;
     }
 
-    onSubmit({ ...formData, authors: authorsArray });
+    onSubmit({ 
+      ...formData, 
+      authors: authorsArray,
+      book_cover_image: coverImage 
+    });
   };
 
   const toggleAuthor = (authorId: string) => {
@@ -59,6 +83,7 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onC
           placeholder="Enter ISBN"
         />
       </div>
+      
       <div>
         <label className="block text-sm font-medium mb-1">Book Title*</label>
         <input
@@ -70,16 +95,37 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onC
           placeholder="Enter book title"
         />
       </div>
+      
       <div>
-        <label className="block text-sm font-medium mb-1">Cover Image URL</label>
-        <input
-          type="text"
-          value={formData.book_cover_image}
-          onChange={(e) => setFormData({ ...formData, book_cover_image: e.target.value })}
-          className="w-full px-3 py-2 border border-gray-300 rounded"
-          placeholder="https://example.com/image.jpg"
-        />
+        <label className="block text-sm font-medium mb-1">Cover Image</label>
+        {imagePreview ? (
+          <div className="relative inline-block">
+            <img src={imagePreview} alt="Preview" className="w-32 h-48 object-cover rounded border" />
+            <button
+              type="button"
+              onClick={removeImage}
+              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <label className="flex items-center gap-2 px-4 py-2 bg-gray-100 border border-gray-300 rounded cursor-pointer hover:bg-gray-200">
+              <Upload size={18} />
+              <span>Choose Image</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </label>
+            <span className="text-sm text-gray-500">Optional</span>
+          </div>
+        )}
       </div>
+      
       <div>
         <label className="block text-sm font-medium mb-1">Description</label>
         <textarea
@@ -90,6 +136,7 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onC
           placeholder="Enter book description"
         />
       </div>
+      
       <div>
         <label className="block text-sm font-medium mb-2">Select Authors*</label>
         <div className="max-h-40 overflow-y-auto border border-gray-300 rounded p-2 mb-2">
@@ -115,6 +162,7 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onC
           {showNewAuthorForm ? 'Hide new author form' : '+ Add new author'}
         </button>
       </div>
+      
       {showNewAuthorForm && (
         <div className="border border-gray-300 rounded p-3 space-y-3 bg-gray-50">
           <h4 className="font-medium text-sm">New Author</h4>
@@ -150,6 +198,7 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSubmit, onC
           </div>
         </div>
       )}
+      
       <div className="flex gap-2 pt-4">
         <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
           Add Book

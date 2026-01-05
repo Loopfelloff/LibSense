@@ -21,6 +21,11 @@ export const addBook = async (
   res: Response
 ) => {
   try {
+
+    if (typeof req.body.authors === 'string') {
+      req.body.authors = JSON.parse(req.body.authors)
+    }
+
     const { isbn, book_title, description, authors } = req.body
 
     if (!isbn || !book_title || !Array.isArray(authors) || authors.length === 0) {
