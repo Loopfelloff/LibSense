@@ -13,6 +13,7 @@ const updateBookReview = async (requestPayload : updateReviewPayload , setIsLoad
     }
     catch(err:unknown){
 	if(axios.isAxiosError(err)){
+	    alert(`can't update your review due to ${ err.name}` ,)
 	    console.log(err.response?.data)
 	    console.log(err.response?.status)
 	}

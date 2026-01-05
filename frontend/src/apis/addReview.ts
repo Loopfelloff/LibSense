@@ -14,6 +14,7 @@ const addBookReview = async (requestPayload : addReviewPayload , setIsLoading : 
     }
     catch(err:unknown){
 	if(axios.isAxiosError(err)){
+	    alert(`can't add the review due to ${err.name}`)
 	    console.log(err.response?.data)
 	    console.log(err.response?.status)
 	}
