@@ -115,18 +115,16 @@ export function Favorite() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto p-6">
+    <div className="min-h-screen w-full bg-white">
+      <div className="mx-auto p-6">
         {/* Books Count */}
-        <div className="bg-white border border-gray-300 p-4 mb-6">
-          <div className="text-gray-600">Total Books</div>
-          <div className="text-gray-900">{favoriteBooks.length}</div>
-        </div>
 
         {/* Favorite Books List */}
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-gray-900">Favorite Books</h2>
+          <div className="flex items-center justify-between m-4">
+            <h2 className="text-gray-900">
+              Favorite Books ({favoriteBooks.length})
+            </h2>
             <button
               onClick={() => setIsEditing(!isEditing)}
               className="px-4 py-2 border border-gray-700 text-gray-700 hover:bg-gray-100"

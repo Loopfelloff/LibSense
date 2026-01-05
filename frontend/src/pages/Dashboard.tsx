@@ -65,7 +65,7 @@ export function Dashboard() {
 
   return (
     <>
-      <div className="bg-gray-50 border-b border-gray-300 px-4 py-4">
+      <div className="bg-gray-50 border-b mt-2 border-gray-300 px-4 py-4">
         <h1 className="text-gray-900 text-lg font-semibold">Dashboard</h1>
         <div className="text-gray-600">Welcome,{authContext?.firstName}</div>
       </div>
