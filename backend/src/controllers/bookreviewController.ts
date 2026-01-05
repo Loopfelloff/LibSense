@@ -232,7 +232,7 @@ const updateReviewHandler = async ( req : Request , res : Response)=>{
 const deleteReviewHandler = async(req : Request , res:Response)=>{
     try{
 
-	const {reviewId} = req.body as queryTypeForUpdate
+	const {reviewId} = req.query as queryTypeForUpdate
 	
 	if(!reviewId || !reviewId.trim()) return res.status(400).json({
 	    success: false,
