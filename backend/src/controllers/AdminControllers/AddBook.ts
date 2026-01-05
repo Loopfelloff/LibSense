@@ -1,5 +1,6 @@
-import type { Request, Response } from 'express'
-import { prisma } from '../../config/prismaClientConfig.js'
+import type { Request, Response } from "express"
+import { prisma } from "../../config/prismaClientConfig.js"
+import { uploadToCloudinary } from "../../config/cloudinaryConfig.js"
 
 interface AddBookAuthor {
   author_id?: string
@@ -11,8 +12,7 @@ interface AddBookAuthor {
 interface AddBookBody {
   isbn: string
   book_title: string
-  book_cover_image: string
-  description: string
+  description?: string
   authors: AddBookAuthor[]
 }
 
@@ -21,18 +21,37 @@ export const addBook = async (
   res: Response
 ) => {
   try {
-    const { isbn, book_title, book_cover_image, description, authors } = req.body
+    const { isbn, book_title, description, authors } = req.body
 
-    if (!isbn || !book_title || !authors || !Array.isArray(authors) || authors.length === 0) {
-      return res.status(400).json({ error: "Missing required fields" })
+    if (!isbn || !book_title || !Array.isArray(authors) || authors.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "ISBN, title and authors are required",
+      })
+    }
+
+    let coverUrl: string = 'backend/src/resources/coverImageForBook.png'
+
+    if (req.files) {
+      const files = req.files as { [field: string]: Express.Multer.File[] }
+      const file = files.book_cover_image?.[0]
+
+      if (file) {
+        const uploaded = await uploadToCloudinary(file.buffer, {
+          folder: "Libsense/books",
+          resource_type: "auto",
+        })
+
+        coverUrl = uploaded.secure_url
+      }
     }
 
     const book = await prisma.book.create({
       data: {
-        isbn,
-        book_title,
-        book_cover_image: book_cover_image?.trim() ?? null,
-        description: description?.trim() ?? null,
+        isbn: isbn.trim(),
+        book_title: book_title.trim(),
+        description: description?.trim() ?? "",
+        book_cover_image: coverUrl,
       },
     })
 
@@ -40,14 +59,13 @@ export const addBook = async (
       let authorId: string
 
       if (author.author_id) {
-
         authorId = author.author_id
       } else {
-
         if (!author.first_name || !author.last_name) {
-          return res
-            .status(400)
-            .json({ error: "First and last name required for new author" })
+          return res.status(400).json({
+            success: false,
+            error: "First & last name required for new author",
+          })
         }
 
         const newAuthor = await prisma.bookAuthor.create({
@@ -57,6 +75,7 @@ export const addBook = async (
             author_last_name: author.last_name.trim(),
           },
         })
+
         authorId = newAuthor.id
       }
 
@@ -72,14 +91,15 @@ export const addBook = async (
       where: { id: book.id },
       include: {
         book_written_by: {
-          include: {
-            book_author: true,
-          },
+          include: { book_author: true },
         },
       },
     })
 
-    return res.status(201).json({ success: true, book: createdBook })
+    return res.status(201).json({
+      success: true,
+      book: createdBook,
+    })
   } catch (error: unknown) {
     console.error("Error adding book:", error)
 
@@ -91,6 +111,9 @@ export const addBook = async (
       })
     }
 
-    return res.status(500).json({ success: false, errName: "UnknownError" })
+    return res.status(500).json({
+      success: false,
+      errName: "UnknownError",
+    })
   }
 }
