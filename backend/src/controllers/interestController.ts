@@ -106,5 +106,34 @@ const getUserPreferences = async (req : Request , res : Response)=>{
     }
 }
 
+const deleteUserPreferences = async (req: Request , res : Response)=>{
 
-export {addInterestHandler , getUserPreferences}
+    try {
+	const {userPreferenceId} = req.query as {userPreferenceId : string}
+
+	const deleteResult = await prisma.userPreferences.delete({
+	    where : {
+		id : userPreferenceId 
+	    }
+	})
+
+	return res.status(200).json({
+	    success : true,
+	    data : deleteResult
+	})
+
+    }
+    catch(err : unknown) {
+	if(err instanceof Error){
+	    console.log(err.stack)
+	    return res.status(500).json({
+		success : false,
+		errMsg : err.message,
+		errName : err.name
+	    })
+	}
+    }
+}
+
+
+export {addInterestHandler , getUserPreferences , deleteUserPreferences}
