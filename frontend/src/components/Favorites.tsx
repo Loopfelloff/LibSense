@@ -8,7 +8,7 @@ interface BookItem {
   cover: string;
 }
 
-export function MyLibrary() {
+export function Favorite() {
   const [favoriteBooks, setFavoriteBooks] = useState<BookItem[]>([
     {
       id: 1,
