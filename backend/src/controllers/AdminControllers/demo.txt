@@ -66,6 +66,11 @@ export const addBook = async (
   res: Response
 ) => {
   try {
+
+    if (typeof req.body.authors === 'string') {
+      req.body.authors = JSON.parse(req.body.authors)
+    }
+
     const { isbn, book_title, description, authors } = req.body
 
     if (!isbn || !book_title || !Array.isArray(authors) || authors.length === 0) {
@@ -163,6 +168,7 @@ export const addBook = async (
   }
 }
 
+
 import type { Request, Response } from 'express'
 import { prisma } from '../../config/prismaClientConfig.js'
 
@@ -247,6 +253,7 @@ export const deleteBook = async (req: Request<{ book_id: string }>, res: Respons
     })
   }
 }
+
 
 import type {Request , Response } from 'express'
 import { prisma } from '../../config/prismaClientConfig.js'
@@ -492,7 +499,6 @@ export const getAllBooks = async (req: Request, res: Response) => {
     }
 }
 
-
 import type { Request, Response } from 'express'
 import { prisma } from '../../config/prismaClientConfig.js'
 
@@ -545,7 +551,6 @@ export const updateAuthor = async (
         return res.status(500).json({ success: false, errName: "UnknownError" })
     }
 }
-
 
 import type { Request, Response } from 'express'
 import { prisma } from '../../config/prismaClientConfig.js'
@@ -642,7 +647,6 @@ export const updateBookAuthors = async (
         return res.status(500).json({ success: false, errName: "UnknownError" })
     }
 }
-
 
 import type { Request, Response } from "express"
 import { prisma } from "../../config/prismaClientConfig.js"
