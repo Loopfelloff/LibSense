@@ -5,9 +5,7 @@ const viewBookHandler = async (req : Request , res : Response)=>{
     try{
 
 	const bookId = req.query?.bookId  as string
-
-	console.log('from the book handler')
-	console.log(req.user)
+	console.log(bookId)
 
 	if(!bookId) return res.status(400).json({
 	    success : false,
@@ -20,14 +18,11 @@ const viewBookHandler = async (req : Request , res : Response)=>{
 	    where : {
 		id : bookId
 	    },
+
 	    include : {
-		book_written_by:{
+		book_written_by : {
 		    include : {
-			book_author : {
-			    include : {
-				book_author_names : true
-			    }
-			}
+			book_author : true
 		    }
 		}
 	    }

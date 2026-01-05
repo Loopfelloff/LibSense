@@ -17,7 +17,8 @@ type userType = {
 
 const googleLoginHandler = async (req : Request , res : Response)=>{
 
-    
+    let accessToken : string = ""
+    let refreshToken : string = ""
 
     try{
     
@@ -35,6 +36,7 @@ const googleLoginHandler = async (req : Request , res : Response)=>{
 	    },
 
 	    select : {
+		id : true,
 		email : true,
 		provider_id : true,
 		first_name : true,
@@ -72,6 +74,24 @@ const googleLoginHandler = async (req : Request , res : Response)=>{
 		    profile_pic_link : profilePicLink
 		}
 	    }) 
+	 accessToken =  jwt.sign({
+	    id : result.id,
+	    email : user.email,
+	    firstName : user.firstName,
+	    middleName : user.middleName,
+	    lastName: user.lastName
+	} , String(process.env.ACCESS_TOKEN_SECRET) , {
+	    expiresIn : '30m'
+	    })
+	 refreshToken =  jwt.sign({
+	    id : result.id,
+	    email : user.email,
+	    firstName : user.firstName,
+	    middleName : user.middleName,
+	    lastName : user.lastName
+	} , String(process.env.REFRESH_TOKEN_SECRET) , {
+	    expiresIn : '30d'
+	    })
 
 	    console.log('new user created' , result)
 	}
@@ -94,10 +114,8 @@ const googleLoginHandler = async (req : Request , res : Response)=>{
 
 		console.log('changed' , result)
 	    }
-
-	}
-
-	const accessToken =  jwt.sign({
+	 accessToken =  jwt.sign({
+	    id : foundUser.id,
 	    email : user.email,
 	    firstName : user.firstName,
 	    middleName : user.middleName,
@@ -105,7 +123,8 @@ const googleLoginHandler = async (req : Request , res : Response)=>{
 	} , String(process.env.ACCESS_TOKEN_SECRET) , {
 	    expiresIn : '30m'
 	    })
-	const refreshToken =  jwt.sign({
+	 refreshToken =  jwt.sign({
+	    id : foundUser.id,
 	    email : user.email,
 	    firstName : user.firstName,
 	    middleName : user.middleName,
@@ -113,6 +132,9 @@ const googleLoginHandler = async (req : Request , res : Response)=>{
 	} , String(process.env.REFRESH_TOKEN_SECRET) , {
 	    expiresIn : '30d'
 	    })
+
+	}
+
 
 	res.cookie('accessToken' , accessToken)
 	res.cookie('refreshToken' , refreshToken)
