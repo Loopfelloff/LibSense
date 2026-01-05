@@ -88,7 +88,7 @@ function Navbar({ onMenuClick }: NavbarProps) {
                   {user?.profilePicLink ? (
                     <img
                       src={user.profilePicLink}
-                      alt={`${user.firstName} ${user.lastName}`}
+                      alt={`${user.firstName[0]}`}
                       className="w-full h-full rounded-full object-cover border border-gray-300"
                     />
                   ) : (
