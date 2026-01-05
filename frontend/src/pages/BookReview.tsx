@@ -8,6 +8,7 @@ import type { bookEntireDataType , bookWrittenBy} from '../types/bookEntireData'
 import { getFullBookInfo } from '../apis/fullBookInfo';
 import { addBookReview } from '../apis/addReview';
 import { getBookReview } from '../apis/getReview';
+import { deleteBookReview } from '../apis/deleteReview';
 import type { ReviewType } from '../types/bookReviewType';
 import type { updateReviewPayload } from '../types/updateReviewPayload';
 import type { addReviewPayload } from '../types/addReviewPayload';
@@ -21,6 +22,7 @@ export function BookReview() {
   console.log(bookId);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [isBookDetailLoading , setIsBookDetailLoading] = useState<boolean>(false)
+  const [isReviewDeleting , setIsReviewDeleting] = useState<boolean>(false)
   const [isReviewAdding , setIsReviewAdding] = useState<boolean>(false)
   const [isReviewUpdating , setIsReviewUpdating] = useState<boolean>(false)
   const [isReviewLoading , setIsReviewLoading] = useState<boolean>(false)
@@ -76,9 +78,8 @@ export function BookReview() {
     if (!window.confirm('Are you sure you want to delete this review?')) return;
     
     try {
-      // TODO: Call your delete API here
-      // await deleteReview(reviewId);
-      console.log('Deleting review:', reviewId);
+
+      await deleteBookReview(reviewId , setIsReviewDeleting) 
       
       setReviews(reviews.filter((r: ReviewType) => r.id !== reviewId));
     } catch (error) {
@@ -423,7 +424,7 @@ export function BookReview() {
                                           </button>
                                           <button
                                             onClick={() => handleDeleteReview(review.id)}
-                                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150"
+                                            className={(!isReviewDeleting) ? "p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-150" : "p-2 text-gray-300 rounded-lg transition-colors duration-150"}
                                             title="Delete review"
                                           >
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
