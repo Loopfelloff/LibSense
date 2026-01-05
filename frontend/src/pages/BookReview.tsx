@@ -11,7 +11,7 @@ import { getBookReview } from '../apis/getReview';
 import type { ReviewType } from '../types/bookReviewType';
 import type { updateReviewPayload } from '../types/updateReviewPayload';
 import type { addReviewPayload } from '../types/addReviewPayload';
-import AuthContext from '../context/AuthContext';
+import { updateBookReview } from '../apis/updateReview';
 
 // Mock reviews data
 
@@ -22,6 +22,7 @@ export function BookReview() {
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [isBookDetailLoading , setIsBookDetailLoading] = useState<boolean>(false)
   const [isReviewAdding , setIsReviewAdding] = useState<boolean>(false)
+  const [isReviewUpdating , setIsReviewUpdating] = useState<boolean>(false)
   const [isReviewLoading , setIsReviewLoading] = useState<boolean>(false)
   const [bookData, setBookData] = useState<bookEntireDataType | null>(null);
   const [reviews, setReviews] = useState<ReviewType[]>([]);
@@ -86,6 +87,8 @@ export function BookReview() {
   };
 
   const handleUpdateReview = async (reviewId: string) => {
+    console.log("while sending the data we have got this one ", editReviewBody)
+    if(isReviewUpdating) return
     if (!editRating && !editReviewBody.trim()) {
       alert('Please provide either a rating or review text');
       return;
@@ -95,14 +98,20 @@ export function BookReview() {
       const updateData: updateReviewPayload = {
 	  reviewId : reviewId,
 	  rating : (editRating) ? editRating : null, 
-	  reviewBody : (editReviewBody.trim()) ? editReviewBody : null, 
+	  reviewBody : (editReviewBody.trim() !== "") ? editReviewBody : null, 
       };
+      console.log('this is from udpateData' , updateData)
 
-      console.log('Updating review:', reviewId, updateData);
+      const response = await updateBookReview(updateData , setIsReviewUpdating)
+
+      console.log("success from updating", response)
 
       setReviews(reviews.map((r: ReviewType) => 
         r.id === reviewId 
-          ? { ...r, ...updateData }
+          ? { ...r, ...{
+	      rating : response.rating,
+	      review_body : response.review_body,
+	  } }
           : r
       ));
 
@@ -134,7 +143,6 @@ export function BookReview() {
       };
 
       console.log('Creating review:', reviewData);
-      // TODO: Call your create review API here
 
       const response = await addBookReview(reviewData , setIsReviewAdding)
 
@@ -375,7 +383,7 @@ export function BookReview() {
                                     <div className="flex gap-3">
                                       <button
                                         onClick={() => handleUpdateReview(review.id)}
-                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-150 text-sm font-medium"
+                                        className={(!isReviewUpdating) ? "px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-150 text-sm font-medium" : "px-4 py-2 bg-gray-300 text-white rounded-lg  transition-colors duration-150 text-sm font-medium"}
                                       >
                                         Save Changes
                                       </button>

@@ -4,7 +4,7 @@ import type { updateReviewPayload } from "../types/updateReviewPayload";
 const updateBookReview = async (requestPayload : updateReviewPayload , setIsLoading :  Dispatch<SetStateAction<boolean>>)=>{
     try{
 	setIsLoading(true)
-	const response = await axios.post("http://localhost:5000/review/add", requestPayload , {
+	const response = await axios.put("http://localhost:5000/review/update", requestPayload , {
 	    withCredentials : true,
 	})
 
