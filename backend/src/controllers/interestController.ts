@@ -85,6 +85,9 @@ const getUserPreferences = async (req : Request , res : Response)=>{
 	const userPreferences = await prisma.userPreferences.findMany({
 	    where : {
 		user_id : user.id
+	    },
+	    include : {
+		genre : true
 	    }
 	})
 
