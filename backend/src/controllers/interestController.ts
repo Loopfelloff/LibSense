@@ -138,5 +138,67 @@ const deleteUserPreferences = async (req: Request , res : Response)=>{
     }
 }
 
+const findGenreByName = async (req : Request ,  res : Response)=>{
+    try {
 
-export {addInterestHandler , getUserPreferences , deleteUserPreferences}
+	let {genreName} = req.query as {genreName : string}
+
+	const user = req.user as reqUser	
+
+	if(!genreName || genreName.trim() === "") return res.status(400).json({
+	    success : false,
+	    errDetails : {
+		errMsg : `genreName missing in the request header` 
+	    }
+	})
+
+	genreName = genreName.toLowerCase().trim()
+
+	const foundUserPrefferedGenre = await prisma.userPreferences.findMany({
+	    where : {
+		user_id : user.id
+	    },
+	    select :{
+		genre_id : true 
+	    }
+	})
+
+
+	const foundUserPrefferedGenreId  = foundUserPrefferedGenre.map(item=>{
+	    return item.genre_id
+	})
+
+	const foundGenre = await prisma.genre.findMany({
+	    where : {
+		id : {
+		    notIn : foundUserPrefferedGenreId
+		},
+		genre_name : {
+		    contains : genreName,
+		}
+	    },
+
+	    skip : 0,
+	    take : 10
+	})
+
+	return res.status(200).json({
+	    success : true,
+	    data : foundGenre 
+	})
+
+    }
+    catch(err : unknown){
+	if(err instanceof Error){
+	    console.log(err.stack)
+	    return res.status(500).json({
+		success : false,
+		errMsg : err.message,
+		errName : err.name
+	    })
+	}
+    }
+}
+
+
+export {addInterestHandler , getUserPreferences , deleteUserPreferences , findGenreByName}

@@ -17,6 +17,7 @@ import { checkForEmailEntryHandler } from "./controllers/checkForEmailEntryContr
 import { router as bookReviewHandler } from "./routes/bookreviewRoutes.js";
 import { corsOptions } from "./config/corsConfig.js";
 import cors from "cors";
+import type {Request , Response} from 'express'
 import cookieParser from "cookie-parser";
 import { prisma } from "./config/prismaClientConfig.js";
 
@@ -55,6 +56,7 @@ app.use("/users", authenticationMiddleware);
 app.use("/users/profile", profileRouter);
 app.use("/users/books/favourites", favouriteRouter);
 app.use("/users/books/status", bookStatusRouter);
+
 
 app.listen(process.env.PORT, () => {
   console.log("Listening to port ", process.env.PORT);
