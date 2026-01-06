@@ -65,110 +65,45 @@ const AdminPanel: React.FC = () => {
     loadAuthors();
   }, []);
 
+  // Success handlers that refresh data and close modal
+  const handleBookSuccess = async () => {
+    await loadBooks();
+    await loadAuthors();
+    setModalOpen(false);
+  };
+
+  const handleAuthorSuccess = async () => {
+    await loadAuthors();
+    await loadBooks(); // Refresh books too as they may reference authors
+    setModalOpen(false);
+  };
+
   // Book handlers
-  const handleAddBook = async (bookData: any) => {
-    try {
-      setLoading(true);
-      await api.addBook(bookData);
-      await loadBooks();
-      await loadAuthors();
-      setModalOpen(false);
-      alert('Book added successfully');
-    } catch (error) {
-      console.error('Error adding book:', error);
-      alert('Failed to add book');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEditBook = async (bookData: any) => {
-    try {
-      setLoading(true);
-      await api.updateBook(selectedItem.id, bookData);
-      await loadBooks();
-      setModalOpen(false);
-      alert('Book updated successfully');
-    } catch (error) {
-      console.error('Error updating book:', error);
-      alert('Failed to update book');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleDeleteBook = async (bookId: string) => {
-    if (!confirm('Are you sure you want to delete this book?')) return;
+    if (!window.confirm('Are you sure you want to delete this book?')) return;
     try {
       setLoading(true);
       await api.deleteBook(bookId);
       await loadBooks();
-      alert('Book deleted successfully');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting book:', error);
-      alert('Failed to delete book');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleManageBookAuthors = async (authors: any[]) => {
-    try {
-      setLoading(true);
-      await api.updateBookAuthors(selectedItem.id, authors);
-      await loadBooks();
-      await loadAuthors();
-      setModalOpen(false);
-      alert('Book authors updated successfully');
-    } catch (error) {
-      console.error('Error updating book authors:', error);
-      alert('Failed to update book authors');
+      alert(error.message || 'Failed to delete book');
     } finally {
       setLoading(false);
     }
   };
 
   // Author handlers
-  const handleAddAuthor = async (authorData: any) => {
-    try {
-      setLoading(true);
-      await api.addAuthor(authorData);
-      await loadAuthors();
-      setModalOpen(false);
-      alert('Author added successfully');
-    } catch (error) {
-      console.error('Error adding author:', error);
-      alert('Failed to add author');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEditAuthor = async (authorData: any) => {
-    try {
-      setLoading(true);
-      await api.updateAuthor(selectedItem.id, authorData);
-      await loadAuthors();
-      setModalOpen(false);
-      alert('Author updated successfully');
-    } catch (error) {
-      console.error('Error updating author:', error);
-      alert('Failed to update author');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleDeleteAuthor = async (authorId: string) => {
-    if (!confirm('Are you sure you want to delete this author?')) return;
+    if (!window.confirm('Are you sure you want to delete this author?')) return;
     try {
       setLoading(true);
       await api.deleteAuthor(authorId);
       await loadAuthors();
-      alert('Author deleted successfully');
-    } catch (error) {
+      await loadBooks(); // Refresh books as they may reference this author
+    } catch (error: any) {
       console.error('Error deleting author:', error);
-      alert('Failed to delete author');
+      alert(error.message || 'Failed to delete author');
     } finally {
       setLoading(false);
     }
@@ -188,12 +123,18 @@ const AdminPanel: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-gray-50">
       <Sidebar activeView={activeView} setActiveView={setActiveView} />
+      
       <div className="flex-1 overflow-y-auto">
         {loading && (
-          <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-40">
-            <div className="bg-white p-4 rounded-lg">Loading...</div>
+          <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-40">
+            <div className="bg-white px-8 py-6 rounded-lg shadow-xl">
+              <div className="flex items-center gap-3">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span className="text-gray-700 font-medium">Loading...</span>
+              </div>
+            </div>
           </div>
         )}
         
@@ -249,34 +190,55 @@ const AdminPanel: React.FC = () => {
       
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={getModalTitle()}>
         {modalType === 'addBook' && (
-          <AddBookForm authors={authors} onSubmit={handleAddBook} onCancel={() => setModalOpen(false)} />
+          <AddBookForm 
+            authors={authors} 
+            onSuccess={handleBookSuccess} 
+            onCancel={() => setModalOpen(false)} 
+          />
         )}
         {modalType === 'editBook' && selectedItem && (
-          <EditBookForm book={selectedItem} onSubmit={handleEditBook} onCancel={() => setModalOpen(false)} />
+          <EditBookForm 
+            book={selectedItem} 
+            onSuccess={handleBookSuccess} 
+            onCancel={() => setModalOpen(false)} 
+          />
         )}
         {modalType === 'viewBook' && selectedItem && (
-          <BookDetail book={selectedItem} onClose={() => setModalOpen(false)} />
+          <BookDetail 
+            book={selectedItem} 
+            onClose={() => setModalOpen(false)} 
+          />
         )}
         {modalType === 'manageAuthors' && selectedItem && (
           <ManageBookAuthorsForm
             book={selectedItem}
             allAuthors={authors}
-            onSubmit={handleManageBookAuthors}
+            onSuccess={handleBookSuccess}
             onCancel={() => setModalOpen(false)}
           />
         )}
         {modalType === 'addAuthor' && (
-          <AddAuthorForm onSubmit={handleAddAuthor} onCancel={() => setModalOpen(false)} />
+          <AddAuthorForm 
+            onSuccess={handleAuthorSuccess} 
+            onCancel={() => setModalOpen(false)} 
+          />
         )}
         {modalType === 'editAuthor' && selectedItem && (
-          <EditAuthorForm author={selectedItem} onSubmit={handleEditAuthor} onCancel={() => setModalOpen(false)} />
+          <EditAuthorForm 
+            author={selectedItem} 
+            onSuccess={handleAuthorSuccess} 
+            onCancel={() => setModalOpen(false)} 
+          />
         )}
         {modalType === 'viewAuthor' && selectedItem && (
-          <AuthorDetail author={selectedItem} onClose={() => setModalOpen(false)} />
+          <AuthorDetail 
+            author={selectedItem} 
+            onClose={() => setModalOpen(false)} 
+          />
         )}
       </Modal>
     </div>
   );
 };
 
-export {AdminPanel}
+export { AdminPanel };
