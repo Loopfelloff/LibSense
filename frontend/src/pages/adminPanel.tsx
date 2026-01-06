@@ -1,126 +1,126 @@
-import React, { useState, useEffect } from 'react';
-import type { Book, AuthorWithBooks } from '../types/adminPanel';
-import { api } from '../apis/adminApi';
+import React, { useState, useEffect } from 'react'
+import type { Book, AuthorWithBooks } from '../types/adminPanel'
+import { api } from '../apis/adminApi'
 
 // Layout Components
-import { Sidebar } from '../components/AdminPanel/layout/sidebar';
-import { Modal } from '../components/AdminPanel/layout/modal';
+import { Sidebar } from '../components/AdminPanel/layout/sidebar'
+import { Modal } from '../components/AdminPanel/layout/modal'
 
 // Dashboard
-import { Overview } from '../components/AdminPanel/dashboard/overview';
+import { Overview } from '../components/AdminPanel/dashboard/overview'
 
 // Book Components
-import { BookList } from '../components/AdminPanel/books/booklist';
-import { AddBookForm } from '../components/AdminPanel/books/addBookForm';
-import { EditBookForm } from '../components/AdminPanel/books/editBookForm';
-import { BookDetail } from '../components/AdminPanel/books/bookdetail';
-import { ManageBookAuthorsForm } from '../components/AdminPanel/books/manageBookAuthor';
+import { BookList } from '../components/AdminPanel/books/booklist'
+import { AddBookForm } from '../components/AdminPanel/books/addBookForm'
+import { EditBookForm } from '../components/AdminPanel/books/editBookForm'
+import { BookDetail } from '../components/AdminPanel/books/bookdetail'
+import { ManageBookAuthorsForm } from '../components/AdminPanel/books/manageBookAuthor'
 
 // Author Components
-import { AuthorList } from '../components/AdminPanel/authors/authorlist';
-import { AddAuthorForm } from '../components/AdminPanel/authors/addauthorForm';
-import { EditAuthorForm } from '../components/AdminPanel/authors/editAuthorform';
-import { AuthorDetail } from '../components/AdminPanel/authors/authordetail';
+import { AuthorList } from '../components/AdminPanel/authors/authorlist'
+import { AddAuthorForm } from '../components/AdminPanel/authors/addauthorForm'
+import { EditAuthorForm } from '../components/AdminPanel/authors/editAuthorform'
+import { AuthorDetail } from '../components/AdminPanel/authors/authordetail'
 
-type ModalType = 'addBook' | 'editBook' | 'addAuthor' | 'editAuthor' | 'viewBook' | 'viewAuthor' | 'manageAuthors';
+type ModalType = 'addBook' | 'editBook' | 'addAuthor' | 'editAuthor' | 'viewBook' | 'viewAuthor' | 'manageAuthors'
 
 const AdminPanel: React.FC = () => {
-  const [activeView, setActiveView] = useState('overview');
-  const [books, setBooks] = useState<Book[]>([]);
-  const [authors, setAuthors] = useState<AuthorWithBooks[]>([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalType, setModalType] = useState<ModalType>('addBook');
-  const [selectedItem, setSelectedItem] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const [activeView, setActiveView] = useState('overview')
+  const [books, setBooks] = useState<Book[]>([])
+  const [authors, setAuthors] = useState<AuthorWithBooks[]>([])
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalType, setModalType] = useState<ModalType>('addBook')
+  const [selectedItem, setSelectedItem] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
 
   // Load data
   const loadBooks = async () => {
     try {
-      setLoading(true);
-      const data = await api.getAllBooks();
-      setBooks(data);
+      setLoading(true)
+      const data = await api.getAllBooks()
+      setBooks(data)
     } catch (error) {
-      console.error('Error loading books:', error);
-      alert('Failed to load books');
+      console.error('Error loading books:', error)
+      alert('Failed to load books')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const loadAuthors = async () => {
     try {
-      setLoading(true);
-      const data = await api.getAllAuthors();
-      setAuthors(data);
+      setLoading(true)
+      const data = await api.getAllAuthors()
+      setAuthors(data)
     } catch (error) {
-      console.error('Error loading authors:', error);
-      alert('Failed to load authors');
+      console.error('Error loading authors:', error)
+      alert('Failed to load authors')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    loadBooks();
-    loadAuthors();
-  }, []);
+    loadBooks()
+    loadAuthors()
+  }, [])
 
   // Success handlers that refresh data and close modal
   const handleBookSuccess = async () => {
-    await loadBooks();
-    await loadAuthors();
-    setModalOpen(false);
-  };
+    await loadBooks()
+    await loadAuthors()
+    setModalOpen(false)
+  }
 
   const handleAuthorSuccess = async () => {
-    await loadAuthors();
-    await loadBooks(); // Refresh books too as they may reference authors
-    setModalOpen(false);
-  };
+    await loadAuthors()
+    await loadBooks() // Refresh books too as they may reference authors
+    setModalOpen(false)
+  }
 
   // Book handlers
   const handleDeleteBook = async (bookId: string) => {
-    if (!window.confirm('Are you sure you want to delete this book?')) return;
+    if (!window.confirm('Are you sure you want to delete this book?')) return
     try {
-      setLoading(true);
-      await api.deleteBook(bookId);
-      await loadBooks();
+      setLoading(true)
+      await api.deleteBook(bookId)
+      await loadBooks()
     } catch (error: any) {
-      console.error('Error deleting book:', error);
-      alert(error.message || 'Failed to delete book');
+      console.error('Error deleting book:', error)
+      alert(error.message || 'Failed to delete book')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   // Author handlers
   const handleDeleteAuthor = async (authorId: string) => {
-    if (!window.confirm('Are you sure you want to delete this author?')) return;
+    if (!window.confirm('Are you sure you want to delete this author?')) return
     try {
-      setLoading(true);
-      await api.deleteAuthor(authorId);
-      await loadAuthors();
-      await loadBooks(); // Refresh books as they may reference this author
+      setLoading(true)
+      await api.deleteAuthor(authorId)
+      await loadAuthors()
+      await loadBooks() // Refresh books as they may reference this author
     } catch (error: any) {
-      console.error('Error deleting author:', error);
-      alert(error.message || 'Failed to delete author');
+      console.error('Error deleting author:', error)
+      alert(error.message || 'Failed to delete author')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const getModalTitle = () => {
     switch (modalType) {
-      case 'addBook': return 'Add Book';
-      case 'editBook': return 'Edit Book';
-      case 'viewBook': return 'Book Details';
-      case 'addAuthor': return 'Add Author';
-      case 'editAuthor': return 'Edit Author';
-      case 'manageAuthors': return 'Manage Book Authors';
-      case 'viewAuthor': return 'Author Details';
-      default: return '';
+      case 'addBook': return 'Add Book'
+      case 'editBook': return 'Edit Book'
+      case 'viewBook': return 'Book Details'
+      case 'addAuthor': return 'Add Author'
+      case 'editAuthor': return 'Edit Author'
+      case 'manageAuthors': return 'Manage Book Authors'
+      case 'viewAuthor': return 'Author Details'
+      default: return ''
     }
-  };
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -144,24 +144,24 @@ const AdminPanel: React.FC = () => {
           <BookList
             books={books}
             onAdd={() => {
-              setModalType('addBook');
-              setModalOpen(true);
+              setModalType('addBook')
+              setModalOpen(true)
             }}
             onEdit={(book) => {
-              setSelectedItem(book);
-              setModalType('editBook');
-              setModalOpen(true);
+              setSelectedItem(book)
+              setModalType('editBook')
+              setModalOpen(true)
             }}
             onDelete={handleDeleteBook}
             onView={(book) => {
-              setSelectedItem(book);
-              setModalType('viewBook');
-              setModalOpen(true);
+              setSelectedItem(book)
+              setModalType('viewBook')
+              setModalOpen(true)
             }}
             onManageAuthors={(book) => {
-              setSelectedItem(book);
-              setModalType('manageAuthors');
-              setModalOpen(true);
+              setSelectedItem(book)
+              setModalType('manageAuthors')
+              setModalOpen(true)
             }}
           />
         )}
@@ -170,19 +170,19 @@ const AdminPanel: React.FC = () => {
           <AuthorList
             authors={authors}
             onAdd={() => {
-              setModalType('addAuthor');
-              setModalOpen(true);
+              setModalType('addAuthor')
+              setModalOpen(true)
             }}
             onEdit={(author) => {
-              setSelectedItem(author);
-              setModalType('editAuthor');
-              setModalOpen(true);
+              setSelectedItem(author)
+              setModalType('editAuthor')
+              setModalOpen(true)
             }}
             onDelete={handleDeleteAuthor}
             onView={(author) => {
-              setSelectedItem(author);
-              setModalType('viewAuthor');
-              setModalOpen(true);
+              setSelectedItem(author)
+              setModalType('viewAuthor')
+              setModalOpen(true)
             }}
           />
         )}
@@ -238,7 +238,7 @@ const AdminPanel: React.FC = () => {
         )}
       </Modal>
     </div>
-  );
-};
+  )
+}
 
-export { AdminPanel };
+export { AdminPanel }

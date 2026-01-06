@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { api } from '../../../apis/adminApi';
+import React, { useState } from 'react'
+import { api } from '../../../apis/adminApi'
 
 interface AddAuthorFormProps {
-  onSuccess: () => void;
-  onCancel: () => void;
+  onSuccess: () => void
+  onCancel: () => void
 }
 
 export const AddAuthorForm: React.FC<AddAuthorFormProps> = ({ onSuccess, onCancel }) => {
@@ -11,36 +11,36 @@ export const AddAuthorForm: React.FC<AddAuthorFormProps> = ({ onSuccess, onCance
     author_first_name: '',
     author_middle_name: '',
     author_last_name: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
+    e.preventDefault()
+    setError(null)
+    setIsSubmitting(true)
 
     try {
       await api.addAuthor({
         author_first_name: formData.author_first_name.trim(),
         author_middle_name: formData.author_middle_name.trim() || null,
         author_last_name: formData.author_last_name.trim(),
-      });
+      })
 
       // Reset form on success
       setFormData({
         author_first_name: '',
         author_middle_name: '',
         author_last_name: '',
-      });
+      })
 
-      onSuccess();
+      onSuccess()
     } catch (err: any) {
-      setError(err.message || 'Failed to add author');
+      setError(err.message || 'Failed to add author')
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   return (
     <div className="space-y-4 max-w-2xl mx-auto p-6 bg-white rounded-lg shadow">
@@ -107,5 +107,5 @@ export const AddAuthorForm: React.FC<AddAuthorFormProps> = ({ onSuccess, onCance
         </button>
       </div>
     </div>
-  );
-};
+  )
+}

@@ -1,10 +1,10 @@
-import React from 'react';
-import { X, BookOpen } from 'lucide-react';
-import type { AuthorWithBooks } from '../../../types/adminPanel';
+import React from 'react'
+import { X, BookOpen } from 'lucide-react'
+import type { AuthorWithBooks } from '../../../types/adminPanel'
 
 interface AuthorDetailProps {
-  author: AuthorWithBooks;
-  onClose: () => void;
+  author: AuthorWithBooks
+  onClose: () => void
 }
 
 export const AuthorDetail: React.FC<AuthorDetailProps> = ({ author, onClose }) => {
@@ -84,5 +84,5 @@ export const AuthorDetail: React.FC<AuthorDetailProps> = ({ author, onClose }) =
         </button>
       </div>
     </div>
-  );
-};
+  )
+}

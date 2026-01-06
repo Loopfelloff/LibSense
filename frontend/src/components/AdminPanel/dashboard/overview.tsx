@@ -1,20 +1,20 @@
-import React from 'react';
-import { BookOpen, Users, TrendingUp } from 'lucide-react';
-import type { Book, AuthorWithBooks } from '../../../types/adminPanel';
+import React from 'react'
+import { BookOpen, Users, TrendingUp } from 'lucide-react'
+import type { Book, AuthorWithBooks } from '../../../types/adminPanel'
 
 interface OverviewProps {
-  books: Book[];
-  authors: AuthorWithBooks[];
+  books: Book[]
+  authors: AuthorWithBooks[]
 }
 
 export const Overview: React.FC<OverviewProps> = ({ books, authors }) => {
   // Calculate total books written by all authors
-  const totalBooksFromAuthors = authors.reduce((sum, author) => sum + (author.books?.length || 0), 0);
+  const totalBooksFromAuthors = authors.reduce((sum, author) => sum + (author.books?.length || 0), 0)
   
   // Calculate average books per author
   const avgBooksPerAuthor = authors.length > 0 
     ? (totalBooksFromAuthors / authors.length).toFixed(1) 
-    : '0';
+    : '0'
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -102,5 +102,5 @@ export const Overview: React.FC<OverviewProps> = ({ books, authors }) => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}

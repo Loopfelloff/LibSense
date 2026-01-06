@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { Plus, Eye, Edit, Users, Trash2, Search } from 'lucide-react';
-import type { Book } from '../../../types/adminPanel';
+import React, { useState } from 'react'
+import { Plus, Eye, Edit, Users, Trash2, Search } from 'lucide-react'
+import type { Book } from '../../../types/adminPanel'
 
 interface BookListProps {
-  books: Book[];
-  onAdd: () => void;
-  onEdit: (book: Book) => void;
-  onDelete: (id: string) => void;
-  onView: (book: Book) => void;
-  onManageAuthors: (book: Book) => void;
+  books: Book[]
+  onAdd: () => void
+  onEdit: (book: Book) => void
+  onDelete: (id: string) => void
+  onView: (book: Book) => void
+  onManageAuthors: (book: Book) => void
 }
 
 export const BookList: React.FC<BookListProps> = ({ 
@@ -19,38 +19,38 @@ export const BookList: React.FC<BookListProps> = ({
   onView, 
   onManageAuthors 
 }) => {
-  const [search, setSearch] = useState('');
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [search, setSearch] = useState('')
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   
   const filteredBooks = books.filter((book) => {
-    const searchLower = search.toLowerCase();
+    const searchLower = search.toLowerCase()
     
     // Search in title
-    if (book.book_title.toLowerCase().includes(searchLower)) return true;
+    if (book.book_title.toLowerCase().includes(searchLower)) return true
     
     // Search in ISBN
-    if (book.isbn.toLowerCase().includes(searchLower)) return true;
+    if (book.isbn.toLowerCase().includes(searchLower)) return true
     
     // Search in authors
     if (book.authors && book.authors.length > 0) {
       return book.authors.some((author) => {
-        const fullName = `${author.author_first_name} ${author.author_middle_name || ''} ${author.author_last_name}`.toLowerCase();
-        return fullName.includes(searchLower);
-      });
+        const fullName = `${author.author_first_name} ${author.author_middle_name || ''} ${author.author_last_name}`.toLowerCase()
+        return fullName.includes(searchLower)
+      })
     }
     
-    return false;
-  });
+    return false
+  })
 
   const handleDelete = (id: string) => {
     if (deleteConfirm === id) {
-      onDelete(id);
-      setDeleteConfirm(null);
+      onDelete(id)
+      setDeleteConfirm(null)
     } else {
-      setDeleteConfirm(id);
-      setTimeout(() => setDeleteConfirm(null), 3000);
+      setDeleteConfirm(id)
+      setTimeout(() => setDeleteConfirm(null), 3000)
     }
-  };
+  }
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -180,5 +180,5 @@ export const BookList: React.FC<BookListProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}

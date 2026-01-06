@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { Plus, Eye, Edit, Trash2, Search, User } from 'lucide-react';
-import type { AuthorWithBooks } from '../../../types/adminPanel';
+import React, { useState } from 'react'
+import { Plus, Eye, Edit, Trash2, Search, User } from 'lucide-react'
+import type { AuthorWithBooks } from '../../../types/adminPanel'
 
 interface AuthorListProps {
-  authors: AuthorWithBooks[];
-  onAdd: () => void;
-  onEdit: (author: AuthorWithBooks) => void;
-  onDelete: (id: string) => void;
-  onView: (author: AuthorWithBooks) => void;
+  authors: AuthorWithBooks[]
+  onAdd: () => void
+  onEdit: (author: AuthorWithBooks) => void
+  onDelete: (id: string) => void
+  onView: (author: AuthorWithBooks) => void
 }
 
 export const AuthorList: React.FC<AuthorListProps> = ({ 
@@ -17,24 +17,24 @@ export const AuthorList: React.FC<AuthorListProps> = ({
   onDelete, 
   onView 
 }) => {
-  const [search, setSearch] = useState('');
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [search, setSearch] = useState('')
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   
   const filteredAuthors = authors.filter((author) => {
-    const searchLower = search.toLowerCase();
-    const fullName = `${author.first_name} ${author.middle_name || ''} ${author.last_name}`.toLowerCase();
-    return fullName.includes(searchLower);
-  });
+    const searchLower = search.toLowerCase()
+    const fullName = `${author.first_name} ${author.middle_name || ''} ${author.last_name}`.toLowerCase()
+    return fullName.includes(searchLower)
+  })
 
   const handleDelete = (id: string) => {
     if (deleteConfirm === id) {
-      onDelete(id);
-      setDeleteConfirm(null);
+      onDelete(id)
+      setDeleteConfirm(null)
     } else {
-      setDeleteConfirm(id);
-      setTimeout(() => setDeleteConfirm(null), 3000);
+      setDeleteConfirm(id)
+      setTimeout(() => setDeleteConfirm(null), 3000)
     }
-  };
+  }
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -151,5 +151,5 @@ export const AuthorList: React.FC<AuthorListProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}

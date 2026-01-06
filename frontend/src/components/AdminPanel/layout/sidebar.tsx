@@ -1,9 +1,9 @@
-import React from 'react';
-import { Book, Users, LayoutDashboard, Library } from 'lucide-react';
+import React from 'react'
+import { Book, Users, LayoutDashboard, Library } from 'lucide-react'
 
 interface SidebarProps {
-  activeView: string;
-  setActiveView: (view: string) => void;
+  activeView: string
+  setActiveView: (view: string) => void
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView }) => {
@@ -11,7 +11,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView }) =
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'books', label: 'Manage Books', icon: Book },
     { id: 'authors', label: 'Manage Authors', icon: Users },
-  ];
+  ]
 
   return (
     <div className="w-64 bg-gradient-to-b from-gray-50 to-gray-100 border-r border-gray-200 min-h-screen p-4 flex flex-col">
@@ -25,8 +25,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView }) =
 
       <nav className="flex-1">
         {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeView === item.id;
+          const Icon = item.icon
+          const isActive = activeView === item.id
           
           return (
             <button
@@ -41,7 +41,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView }) =
               <Icon size={20} />
               <span className="font-medium">{item.label}</span>
             </button>
-          );
+          )
         })}
       </nav>
 
@@ -50,5 +50,5 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeView, setActiveView }) =
         <p className="mt-1">Library Management System</p>
       </div>
     </div>
-  );
-};
+  )
+}

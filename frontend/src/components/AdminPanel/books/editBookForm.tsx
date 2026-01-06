@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Upload, X } from 'lucide-react';
-import type { Book } from '../../../types/adminPanel';
-import { api } from '../../../apis/adminApi';
+import React, { useState } from 'react'
+import { Upload, X } from 'lucide-react'
+import type { Book } from '../../../types/adminPanel'
+import { api } from '../../../apis/adminApi'
 
 interface EditBookFormProps {
-  book: Book;
-  onSuccess: () => void;
-  onCancel: () => void;
+  book: Book
+  onSuccess: () => void
+  onCancel: () => void
 }
 
 export const EditBookForm: React.FC<EditBookFormProps> = ({ book, onSuccess, onCancel }) => {
@@ -14,34 +14,34 @@ export const EditBookForm: React.FC<EditBookFormProps> = ({ book, onSuccess, onC
     isbn: book.isbn,
     book_title: book.book_title,
     description: book.description || '',
-  });
+  })
 
-  const [coverImage, setCoverImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(book.book_cover_image || null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [coverImage, setCoverImage] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(book.book_cover_image || null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files?.[0]
     if (file) {
-      setCoverImage(file);
-      const reader = new FileReader();
+      setCoverImage(file)
+      const reader = new FileReader()
       reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
     }
-  };
+  }
 
   const removeImage = () => {
-    setCoverImage(null);
-    setImagePreview(null);
-  };
+    setCoverImage(null)
+    setImagePreview(null)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
+    e.preventDefault()
+    setError(null)
+    setIsSubmitting(true)
 
     try {
       await api.updateBook(book.id, {
@@ -49,15 +49,15 @@ export const EditBookForm: React.FC<EditBookFormProps> = ({ book, onSuccess, onC
         book_title: formData.book_title.trim(),
         description: formData.description.trim() || undefined,
         book_cover_image: coverImage || undefined,
-      });
+      })
 
-      onSuccess();
+      onSuccess()
     } catch (err: any) {
-      setError(err.message || 'Failed to update book');
+      setError(err.message || 'Failed to update book')
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   return (
     <div className="space-y-4 max-w-2xl mx-auto p-6 bg-white rounded-lg shadow">
@@ -167,5 +167,5 @@ export const EditBookForm: React.FC<EditBookFormProps> = ({ book, onSuccess, onC
         </button>
       </div>
     </div>
-  );
-};
+  )
+}

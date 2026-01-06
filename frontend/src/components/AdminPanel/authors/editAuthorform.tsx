@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import type { AuthorWithBooks } from '../../../types/adminPanel';
-import { api } from '../../../apis/adminApi';
+import React, { useState } from 'react'
+import type { AuthorWithBooks } from '../../../types/adminPanel'
+import { api } from '../../../apis/adminApi'
 
 interface EditAuthorFormProps {
-  author: AuthorWithBooks;
-  onSuccess: () => void;
-  onCancel: () => void;
+  author: AuthorWithBooks
+  onSuccess: () => void
+  onCancel: () => void
 }
 
 export const EditAuthorForm: React.FC<EditAuthorFormProps> = ({ author, onSuccess, onCancel }) => {
@@ -13,29 +13,29 @@ export const EditAuthorForm: React.FC<EditAuthorFormProps> = ({ author, onSucces
     author_first_name: author.first_name,
     author_middle_name: author.middle_name || '',
     author_last_name: author.last_name,
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
+    e.preventDefault()
+    setError(null)
+    setIsSubmitting(true)
 
     try {
       await api.updateAuthor(author.id, {
         author_first_name: formData.author_first_name.trim(),
         author_middle_name: formData.author_middle_name.trim() || null,
         author_last_name: formData.author_last_name.trim(),
-      });
+      })
 
-      onSuccess();
+      onSuccess()
     } catch (err: any) {
-      setError(err.message || 'Failed to update author');
+      setError(err.message || 'Failed to update author')
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   return (
     <div className="space-y-4 max-w-2xl mx-auto p-6 bg-white rounded-lg shadow">
@@ -102,5 +102,5 @@ export const EditAuthorForm: React.FC<EditAuthorFormProps> = ({ author, onSucces
         </button>
       </div>
     </div>
-  );
-};
+  )
+}

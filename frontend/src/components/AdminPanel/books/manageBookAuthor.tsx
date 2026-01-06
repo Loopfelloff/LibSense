@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import type { Book, AuthorWithBooks } from '../../../types/adminPanel';
-import { api } from '../../../apis/adminApi';
+import React, { useState } from 'react'
+import type { Book, AuthorWithBooks } from '../../../types/adminPanel'
+import { api } from '../../../apis/adminApi'
 
 interface ManageBookAuthorsFormProps {
-  book: Book;
-  allAuthors: AuthorWithBooks[];
-  onSuccess: () => void;
-  onCancel: () => void;
+  book: Book
+  allAuthors: AuthorWithBooks[]
+  onSuccess: () => void
+  onCancel: () => void
 }
 
 export const ManageBookAuthorsForm: React.FC<ManageBookAuthorsFormProps> = ({ 
@@ -17,19 +17,19 @@ export const ManageBookAuthorsForm: React.FC<ManageBookAuthorsFormProps> = ({
 }) => {
   const [selectedAuthorIds, setSelectedAuthorIds] = useState<string[]>(
     book.authors?.map((a) => a.id) || []
-  );
+  )
   const [newAuthor, setNewAuthor] = useState({
     first_name: '',
     middle_name: '',
     last_name: '',
-  });
-  const [showNewAuthorForm, setShowNewAuthorForm] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  })
+  const [showNewAuthorForm, setShowNewAuthorForm] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+    e.preventDefault()
+    setError(null)
 
     // Build authors array matching backend structure
     const authorsArray = [
@@ -41,32 +41,32 @@ export const ManageBookAuthorsForm: React.FC<ManageBookAuthorsFormProps> = ({
             last_name: newAuthor.last_name.trim() 
           }]
         : []),
-    ];
+    ]
 
     if (authorsArray.length === 0) {
-      setError('Please select at least one author or add a new author');
-      return;
+      setError('Please select at least one author or add a new author')
+      return
     }
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
 
     try {
-      await api.updateBookAuthors(book.id, authorsArray);
-      onSuccess();
+      await api.updateBookAuthors(book.id, authorsArray)
+      onSuccess()
     } catch (err: any) {
-      setError(err.message || 'Failed to update book authors');
+      setError(err.message || 'Failed to update book authors')
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   const toggleAuthor = (authorId: string) => {
     setSelectedAuthorIds((prev) => 
       prev.includes(authorId) 
         ? prev.filter((id) => id !== authorId) 
         : [...prev, authorId]
-    );
-  };
+    )
+  }
 
   return (
     <div className="space-y-4 max-w-2xl mx-auto p-6 bg-white rounded-lg shadow">
@@ -187,5 +187,5 @@ export const ManageBookAuthorsForm: React.FC<ManageBookAuthorsFormProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}

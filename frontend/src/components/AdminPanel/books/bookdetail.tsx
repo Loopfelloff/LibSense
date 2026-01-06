@@ -1,10 +1,10 @@
-import React from 'react';
-import { X } from 'lucide-react';
-import type { Book } from '../../../types/adminPanel';
+import React from 'react'
+import { X } from 'lucide-react'
+import type { Book } from '../../../types/adminPanel'
 
 interface BookDetailProps {
-  book: Book;
-  onClose: () => void;
+  book: Book
+  onClose: () => void
 }
 
 export const BookDetail: React.FC<BookDetailProps> = ({ book, onClose }) => {
@@ -78,5 +78,5 @@ export const BookDetail: React.FC<BookDetailProps> = ({ book, onClose }) => {
         </button>
       </div>
     </div>
-  );
-};
+  )
+}

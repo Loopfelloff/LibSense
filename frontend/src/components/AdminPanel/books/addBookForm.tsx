@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Upload, X } from 'lucide-react';
-import type { AuthorWithBooks } from '../../../types/adminPanel';
-import { api } from '../../../apis/adminApi';
+import React, { useState } from 'react'
+import { Upload, X } from 'lucide-react'
+import type { AuthorWithBooks } from '../../../types/adminPanel'
+import { api } from '../../../apis/adminApi'
 
 interface AddBookFormProps {
-  authors: AuthorWithBooks[];
-  onSuccess: () => void;
-  onCancel: () => void;
+  authors: AuthorWithBooks[]
+  onSuccess: () => void
+  onCancel: () => void
 }
 
 export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSuccess, onCancel }) => {
@@ -14,42 +14,42 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSuccess, on
     isbn: '',
     book_title: '',
     description: '',
-  });
+  })
 
-  const [coverImage, setCoverImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [coverImage, setCoverImage] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   const [newAuthor, setNewAuthor] = useState({
     first_name: '',
     middle_name: '',
     last_name: '',
-  });
+  })
 
-  const [selectedAuthorIds, setSelectedAuthorIds] = useState<string[]>([]);
-  const [showNewAuthorForm, setShowNewAuthorForm] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [selectedAuthorIds, setSelectedAuthorIds] = useState<string[]>([])
+  const [showNewAuthorForm, setShowNewAuthorForm] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files?.[0]
     if (file) {
-      setCoverImage(file);
-      const reader = new FileReader();
+      setCoverImage(file)
+      const reader = new FileReader()
       reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
     }
-  };
+  }
 
   const removeImage = () => {
-    setCoverImage(null);
-    setImagePreview(null);
-  };
+    setCoverImage(null)
+    setImagePreview(null)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+    e.preventDefault()
+    setError(null)
 
     // Build authors array matching backend structure exactly
     const authorsArray = [
@@ -61,14 +61,14 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSuccess, on
             last_name: newAuthor.last_name.trim() 
           }]
         : []),
-    ];
+    ]
 
     if (authorsArray.length === 0) {
-      setError('Please select at least one author or add a new author');
-      return;
+      setError('Please select at least one author or add a new author')
+      return
     }
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
 
     try {
       await api.addBook({
@@ -77,31 +77,31 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSuccess, on
         description: formData.description.trim() || undefined,
         authors: authorsArray,
         book_cover_image: coverImage || undefined,
-      });
+      })
 
       // Reset form on success
-      setFormData({ isbn: '', book_title: '', description: '' });
-      setCoverImage(null);
-      setImagePreview(null);
-      setNewAuthor({ first_name: '', middle_name: '', last_name: '' });
-      setSelectedAuthorIds([]);
-      setShowNewAuthorForm(false);
+      setFormData({ isbn: '', book_title: '', description: '' })
+      setCoverImage(null)
+      setImagePreview(null)
+      setNewAuthor({ first_name: '', middle_name: '', last_name: '' })
+      setSelectedAuthorIds([])
+      setShowNewAuthorForm(false)
 
-      onSuccess();
+      onSuccess()
     } catch (err: any) {
-      setError(err.message || 'Failed to add book');
+      setError(err.message || 'Failed to add book')
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   const toggleAuthor = (authorId: string) => {
     setSelectedAuthorIds((prev) => 
       prev.includes(authorId) 
         ? prev.filter((id) => id !== authorId) 
         : [...prev, authorId]
-    );
-  };
+    )
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl mx-auto p-6 bg-white rounded-lg shadow">
@@ -270,5 +270,5 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ authors, onSuccess, on
         </button>
       </div>
     </form>
-  );
-};
+  )
+}
