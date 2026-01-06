@@ -17,9 +17,7 @@ import { updateBookReview } from '../apis/updateReview';
 // Mock reviews data
 
 export function BookReview() {
-  let { bookId } = useParams();
-  bookId = String(bookId)
-  console.log(bookId);
+  const { bookId } = useParams();
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [isBookDetailLoading , setIsBookDetailLoading] = useState<boolean>(false)
   const [isReviewDeleting , setIsReviewDeleting] = useState<boolean>(false)
@@ -40,7 +38,7 @@ export function BookReview() {
   useEffect(() => {
     if (!authContext?.loggedIn) navigation('/login');
     console.log('from authContext' , authContext)
-    getFullBookInfo(bookId, setIsBookDetailLoading)
+    getFullBookInfo(String(bookId), setIsBookDetailLoading)
     .then(resolve =>{
       console.log(resolve)
       setBookData(resolve)
@@ -48,7 +46,7 @@ export function BookReview() {
     .catch(err =>{
       console.log(err)
     })
-    getBookReview(bookId, setIsReviewLoading)
+    getBookReview(String(bookId), setIsReviewLoading)
     .then(resolve =>{
 	console.log(resolve)
 	setReviews(resolve)

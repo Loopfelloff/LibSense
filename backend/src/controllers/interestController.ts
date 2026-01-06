@@ -1,0 +1,80 @@
+import type {Request , Response } from 'express'
+import {prisma} from '../config/prismaClientConfig.js'
+import type { reqUser } from '../types/reqUserType.js'
+const addInterestHandler = async (req : Request , res:Response)=>{
+
+    try{
+
+	let {genre} = req.body as {genre : string} 
+
+	const user = req.user as reqUser 
+	
+	if(!genre || genre.trim() === "") return res.status(400).json({
+	    success : false,
+	    errDetails : {
+		errMsg : `missing genre in the request header`
+	    }
+	})
+
+	genre = genre.toLowerCase().trim()
+
+
+	const foundGenre = await prisma.genre.findFirst({
+	    where : {
+		genre_name : genre
+	    }
+	})
+
+	if(!foundGenre) return res.status(404).json({
+	    success : false,
+	    errDetails : {
+		errMsg : `such genre doesn't even exists`
+	    }
+	})
+
+	const foundUserGenre = await prisma.userPreferences.findUnique({
+	    where : {
+		user_genre_preference :{
+		    user_id : user.id,
+		    genre_id : foundGenre.id
+		}
+	    }
+	})
+
+	if(foundUserGenre) return res.status(409).json({
+	    success : false,
+	    errDetails : {
+		errMsg : `the particular genre already exists for the given user`
+	    }
+	})
+
+	const result = await prisma.userPreferences.create({
+	    data :{
+		user_id : user.id,
+		genre_id : foundGenre.id,
+
+	    }
+	}) 
+
+	return res.status(200).json({
+	    success : true,
+	    data : result
+	})
+
+
+
+    }
+    catch(err : unknown){
+	if(err instanceof Error){
+	    return res.status(500).json({
+		success : false,
+		errMsg : err.message,
+		errName : err.name
+	    })
+	}
+    }
+
+}
+
+
+export {addInterestHandler}

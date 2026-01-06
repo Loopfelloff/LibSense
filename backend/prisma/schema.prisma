@@ -74,7 +74,7 @@ model UserPreferences {
   user          User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
   genre    	Genre @relation(fields: [genre_id], references: [id], onDelete: Cascade)
 
-  @@unique([user_id, genre_id])
+  @@unique([user_id, genre_id] , name:"user_genre_preference")
 }
 
 model Conversation {

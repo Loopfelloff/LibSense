@@ -1,6 +1,6 @@
 import type {Request , Response } from 'express'
 import {prisma} from '../config/prismaClientConfig.js'
-
+import type { reqUser } from '../types/reqUserType.js'
 type queryTypeForPost= {
     bookId? : string;
     rating? : number;
@@ -10,12 +10,6 @@ type queryTypeForUpdate = {
     reviewId? : string;
     rating? : number;
     reviewBody? : string;
-}
-type reqUser = {
-    email : string;
-    firstName : string;
-    lastName : string;
-    middleName : string
 }
 
 const addReviewHandler = async (req : Request , res:Response)=>{
