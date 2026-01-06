@@ -6,6 +6,9 @@ import { UserContext } from '../context/UserContext';
 import { Search, X, Plus } from 'lucide-react';
 import type { ChangeEvent } from 'react';
 import { getGenreByName } from '../apis/getInterestByName.js';
+import { addInterest } from '../apis/addInterest.js';
+import { getUserPreference } from '../apis/getUserPreference.js';
+import { deleteInterest } from '../apis/removeInterest.js';
 import type {searchGenre , addGenre , userPreferredGenre} from '../types/userInterest.js'
 export function YourInterest() {
   const timerId = useRef<number | null>(null) 
@@ -14,32 +17,27 @@ export function YourInterest() {
   const [searchResults, setSearchResults] = useState<searchGenre[]>([]);
   const [userGenres, setUserGenres] = useState<userPreferredGenre[]>([]);
   const [isAddingGenre , setIsAddingGenre]= useState<boolean>(false)
+  const [isDeletingGenre , setIsDeletingGenre] = useState<boolean>(false)
   const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
   const authContext = useContext(UserContext);
   const navigation = useNavigate();
 
-  const MOCK_USER_GENRES = [
-    {
-      id: "cd698612-969c-4c23-8ac8-965fbdc520f4",
-      user_id: "361136b7-dfa9-4a1f-8e20-a5372f49931d",
-      genre_id: "e5fe3a36-4c40-4f53-a3e2-4515755162aa",
-      genre: {
-        id: "e5fe3a36-4c40-4f53-a3e2-4515755162aa",
-        genre_name: "helium"
-      }
-    }
-  ];
 
   useEffect(() => {
     if (!authContext?.loggedIn) navigation('/login');
     
-    // Simulate fetching user genres
-    setTimeout(() => {
-      setUserGenres(MOCK_USER_GENRES);
-      setIsLoading(false);
-    }, 500);
+    getUserPreference(setIsLoading)
+    .then((response : userPreferredGenre[] )=> {
+	setUserGenres([...userGenres , ...response])	
+	console.log(response)
+    })
+    .catch(err =>{
+	console.log(err.stack)
+	alert(err.name)
+    })
+
   }, []);
 
   const handleInputChange =(e : ChangeEvent<HTMLInputElement>) => {
@@ -63,7 +61,7 @@ export function YourInterest() {
     }
 
     try{ 
-    const genreData = await getGenreByName(searchQuery , setIsLoading)  
+    const genreData = await getGenreByName(searchQuery , setIsSearching)  
     setSearchResults(genreData);
     }
     catch(err : unknown){
@@ -73,31 +71,48 @@ export function YourInterest() {
     }
   };
 
-  const handleAddGenre = (genre  : searchGenre) => { // don't worry about the type error here.
-    // Simulate API call to add genre
-    const newUserGenre = {
-      id: `new-${Date.now()}`, // Mock ID for user-genre relationship
-      user_id: "361136b7-dfa9-4a1f-8e20-a5372f49931d",
-      genre_id: genre.id,
-      genre: {
-        id: genre.id,
-        genre_name: genre.genre_name
-      }
-    };
+  const handleAddGenre = async (genre  : searchGenre) => { 
+    if(isAddingGenre) return
+    try {
+	const response = await addInterest(genre.id , setIsAddingGenre) as addGenre
+	const newUserGenre = {
+	    id : response.id,
+	    user_id : response.user_id,
+	    genre_id : response.genre_id,
+	    genre : {
+		id : response.genre_id,
+		genre_name : genre.genre_name
+	    }
+	}
+	setUserGenres([...userGenres, newUserGenre]);
+	setSearchResults(searchResults.filter(g => g.id !== genre.id));
+	setSearchQuery('');
+    }
+    catch(err : unknown){
+	if(err instanceof Error){
+	    console.log(err.stack)
+	    alert(err.name)
+	}
+    }
 
-    setUserGenres([...userGenres, newUserGenre]);
-    setSearchResults(searchResults.filter(g => g.id !== genre.id));
-    setSearchQuery('');
   };
 
-  const handleDeleteGenre = (userGenreId : string) => {
-    // Simulate API call to delete genre
-    setUserGenres(userGenres.filter(ug => ug.id !== userGenreId));
+  const handleDeleteGenre = async (userGenreId : string) => {
+    try {
+	const response = await deleteInterest(userGenreId,  setIsDeletingGenre)
+	console.log(response)	
+	setUserGenres(userGenres.filter(ug => ug.id !== userGenreId));
+    }
+    catch(err : unknown){
+	if(err instanceof Error){
+	    alert(err.name)
+	}
+    }
   };
 
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen w-full bg-gray-50">
       <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
       
       <div className="flex">
@@ -147,7 +162,7 @@ export function YourInterest() {
                           </span>
                           <button
                             onClick={() => handleAddGenre(genre)}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm"
+                            className={(!isAddingGenre) ? "flex items-center gap-1 px-3 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm":"flex items-center gap-1 px-3 py-1.5 bg-gray-300 text-white rounded-md cursor-not-allowed transition-colors text-sm"}
                           >
                             <Plus className="w-4 h-4" />
                             Add
@@ -188,23 +203,23 @@ export function YourInterest() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {userGenres.map((userGenre) => (
+                    {userGenres.map((userGenre) =>(
                       <div
                         key={userGenre.id}
                         className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg hover:shadow-md transition-shadow"
                       >
-                        <span className="text-gray-800 font-medium capitalize">
+                        <span className="text-gray-800 font-medium capitalize w-full flex flex-row justify-center">
                           {userGenre.genre.genre_name}
                         </span>
                         <button
                           onClick={() => handleDeleteGenre(userGenre.id)}
-                          className="p-1.5 hover:bg-red-100 rounded-full transition-colors group"
+                          className={(!isDeletingGenre) ? "p-1.5 hover:bg-red-100 rounded-full transition-colors group" : "p-1.5 bg-gray-300 cursor-not-allowed rounded-full transition-colors group" }
                           title="Remove genre"
                         >
-                          <X className="w-5 h-5 text-gray-500 group-hover:text-red-600" />
+                          <X className="w-5 h-5 text-gray-500 group-hover:text-red-600 " />
                         </button>
                       </div>
-                    ))}
+		    ))}
                   </div>
                 )}
               </div>

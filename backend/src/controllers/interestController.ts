@@ -87,6 +87,8 @@ const getUserPreferences = async (req : Request , res : Response)=>{
 	    }
 	})
 
+	console.log('from the backend ' , userPreferences)
+
 	return res.status(200).json({
 	    success : true,
 	    data : userPreferences
