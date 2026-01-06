@@ -6,7 +6,8 @@ async function handleResponse(res: Response) {
   const data = await res.json()
 
   if (!res.ok) {
-    throw new Error(data?.error || data?.msg || "Request failed")
+    console.log(data)
+    throw new Error(data?.errMsg || data?.errName || "Request failed")
   }
 
   return data
@@ -112,7 +113,7 @@ export const api = {
 
   ///////////////////////////////////////////////////
 
-  
+
   getAllAuthors: async (): Promise<AuthorWithBooks[]> => {
     const res = await fetch(`${API_BASE_URL}/listAuthors`)
     const data = await handleResponse(res)

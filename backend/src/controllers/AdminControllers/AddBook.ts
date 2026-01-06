@@ -105,8 +105,22 @@ export const addBook = async (
       success: true,
       book: createdBook,
     })
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error("Error adding book:", error)
+
+    if (error?.code === 'P2002') {
+      let field = 'field';
+
+      if (typeof error?.message === 'string') {
+
+        const match = error.message.match(/\((`?)([^)`]+)\1\)/);
+        if (match?.[2]) field = match[2];
+      }
+      return res.status(400).json({
+        success: false,
+        errMsg: `A record with this ${field} already exists.`
+      })
+    }
 
     if (error instanceof Error) {
       return res.status(500).json({
