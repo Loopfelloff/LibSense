@@ -28,19 +28,19 @@ const topRatedBooksHandler = async (req : Request , res : Response)=>{
 	shiftIndex = Number(shiftIndex)
 
 
-	const bookResult = await prisma.book.findMany({ // so books with atelast one review pop up
-	    where : {
-		review : {
-		    some : {}
-		}
-	    }
-	    ,
-	    select : {
-		id : true
-	    },
-	    skip : startIndex,
-	    take : shiftIndex
-	})
+//	const bookResult = await prisma.book.findMany({ // so books with atelast one review pop up
+//	    where : {
+//		review : {
+//		    some : {}
+//		}
+//	    }
+//	    ,
+//	    select : {
+//		id : true
+//	    },
+//	    skip : startIndex,
+//	    take : shiftIndex
+//	})
     
 	// just gives array like ['id1' , 'id2']
 	

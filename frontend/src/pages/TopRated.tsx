@@ -28,6 +28,7 @@ export function TopRated() {
     getTopRated(startIndex , 10, setIsLoading )
     .then(resolve => {
       setTopRatedBooks(resolve?.data?.data)
+      console.log(resolve?.data.data)
       console.log(resolve?.data?.meta)
       console.log(resolve?.data?.data)
       setTotalBooks(resolve?.data?.meta.total)

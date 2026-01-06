@@ -13,14 +13,17 @@ import type { ReviewType } from '../types/bookReviewType';
 import type { updateReviewPayload } from '../types/updateReviewPayload';
 import type { addReviewPayload } from '../types/addReviewPayload';
 import { updateBookReview } from '../apis/updateReview';
-
+import { checkIfStatusExist } from '../apis/checkIfStatusExist';
+import { addToWillRead } from '../apis/addToWillRead';
 // Mock reviews data
 
 export function BookReview() {
   const { bookId } = useParams();
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false)
+  const [statusExist , setStatusExist] = useState<boolean>(false)
   const [isBookDetailLoading , setIsBookDetailLoading] = useState<boolean>(false)
   const [isReviewDeleting , setIsReviewDeleting] = useState<boolean>(false)
+  const [isStatusAdding , setIsStatusAdding] = useState<boolean>(false)
   const [isReviewAdding , setIsReviewAdding] = useState<boolean>(false)
   const [isReviewUpdating , setIsReviewUpdating] = useState<boolean>(false)
   const [isReviewLoading , setIsReviewLoading] = useState<boolean>(false)
@@ -46,11 +49,17 @@ export function BookReview() {
     .catch(err =>{
       console.log(err)
     })
+    checkIfStatusExist(String(bookId))
+    .then(resolve =>{
+	if(resolve) setStatusExist(true)
+	else setStatusExist(false)
+    })
     getBookReview(String(bookId), setIsReviewLoading)
     .then(resolve =>{
 	console.log(resolve)
 	setReviews(resolve)
     })
+
   }, []);
 
   const getAuthorNames = () => {
@@ -62,6 +71,20 @@ export function BookReview() {
         .join(' ');
     }).join(', ');
   };
+
+  const handleClick = async ()=>{
+      if(statusExist) return
+      try{
+
+	  const response = await addToWillRead(String(bookId) , setIsStatusAdding , setStatusExist )
+	  console.log(response)
+      }  
+      catch(err : unknown){
+	  if(err instanceof Error){
+	    alert(err.name)
+	  }
+      }
+  }
 
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName[0]}${lastName[0]}`.toUpperCase();
@@ -279,6 +302,13 @@ export function BookReview() {
                         </div>
                       </div>
                     </div>
+
+		    <button
+			className={(!statusExist && !isStatusAdding) ? "p-4 border bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-150 font-medium" : "p-4 border bg-gray-300 cursor-not-allowed text-white rounded-lg  transition-colors duration-150 font-medium"}
+			onClick={handleClick}
+		    > 
+		    {(statusExist) ? "Already added" : "Add to List"}
+		    </button>
                   </div>
 
                   {/* Reviews Section */}

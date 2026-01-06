@@ -10,8 +10,10 @@ import { favouriteRouter } from "./routes/favouriteRoute.js";
 import { router as failureHandler } from "./routes/failureRoute.js";
 import {router as topRatedBooksHandler} from  "./routes/topRatedBooksRouter.js"
 import { router as viewBookHandler } from "./routes/viewBookRouter.js";
+import { router as checkIfStatusExistHandler } from "./routes/checkIfStatusExistRoute.js";
 import {router as mockDataHandler} from './routes/mockDataRoute.js'
 import {router as interestHandler} from './routes/interestRoute.js'
+import {router as addToWillReadHandler} from './routes/addToWillReadRoute.js'
 import { authenticationMiddleware } from "./middlewares/authenticationMiddleware.js";
 import { checkForEmailEntryHandler } from "./controllers/checkForEmailEntryController.js";
 import { router as bookReviewHandler } from "./routes/bookreviewRoutes.js";
@@ -48,6 +50,10 @@ app.use("/viewBook" , authenticationMiddleware)
 app.use("/viewBook" , viewBookHandler)
 app.use("/interest" , authenticationMiddleware)
 app.use("/interest" , interestHandler)
+app.use("/addToWillRead" , authenticationMiddleware)
+app.use("/addToWillRead" , addToWillReadHandler)
+app.use("/checkIfStatusExist" , authenticationMiddleware)
+app.use("/checkIfStatusExist" , checkIfStatusExistHandler)
 
 app.use("/registerAccount", verifyEmailHandler);
 app.use("/verifyOtp", verifyOtpHandler);

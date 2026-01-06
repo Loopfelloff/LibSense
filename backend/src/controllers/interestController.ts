@@ -3,7 +3,7 @@ import {prisma} from '../config/prismaClientConfig.js'
 import type { reqUser } from '../types/reqUserType.js'
 const addInterestHandler = async (req : Request , res:Response)=>{
 
-    try{
+        try{
 
 	let {genreId} = req.body as {genreId : string} 
 
