@@ -21,20 +21,17 @@ export const AddAuthorForm: React.FC<AddAuthorFormProps> = ({ onSuccess, onCance
   
   const debounceTimer = useRef<number | null>(null)
 
-  // Debounced search for existing authors
   useEffect(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current)
 
     const firstName = formData.author_first_name.trim()
     const lastName = formData.author_last_name.trim()
 
-    // Only search if both first and last name have at least 2 characters
     if (firstName.length < 2 && lastName.length < 2) {
       setExistingAuthors([])
       return
     }
 
-    // Build search query
     const searchQuery = [firstName, lastName].filter(Boolean).join(' ')
 
     if (!searchQuery) {
@@ -55,7 +52,6 @@ export const AddAuthorForm: React.FC<AddAuthorFormProps> = ({ onSuccess, onCance
           recentBooks: a.recentBooks || [],
         }))
         
-        // Filter for close matches (case-insensitive)
         const closeMatches = authors.filter((author: SuggestedAuthor) => {
           const firstNameMatch = firstName && 
             author.first_name.toLowerCase().includes(firstName.toLowerCase())
@@ -72,7 +68,7 @@ export const AddAuthorForm: React.FC<AddAuthorFormProps> = ({ onSuccess, onCance
       } finally {
         setIsSearching(false)
       }
-    }, 800) // 800ms debounce
+    }, 800)
 
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current)
@@ -83,7 +79,6 @@ export const AddAuthorForm: React.FC<AddAuthorFormProps> = ({ onSuccess, onCance
     e.preventDefault()
     setError(null)
 
-    // Check for exact duplicates
     const exactMatch = existingAuthors.find(
       (author) =>
         author.first_name.toLowerCase() === formData.author_first_name.trim().toLowerCase() &&
@@ -106,7 +101,6 @@ export const AddAuthorForm: React.FC<AddAuthorFormProps> = ({ onSuccess, onCance
         author_last_name: formData.author_last_name.trim(),
       })
 
-      // Reset form on success
       setFormData({
         author_first_name: '',
         author_middle_name: '',
