@@ -153,4 +153,12 @@ export const api = {
 
     return handleResponse(res)
   },
+
+  fetchSuggestedAuthors: async (query: string) => {
+    if (!query) return []
+    const res = await fetch(`${API_BASE_URL}/getSuggestedAuthor?query=${encodeURIComponent(query)}`)
+
+    return handleResponse(res)
+
+  },
 }

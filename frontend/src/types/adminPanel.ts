@@ -60,3 +60,15 @@ export interface UpdateBookResponse extends ApiResponse<any> {
 export interface UpdateAuthorResponse extends ApiResponse<any> {
   updatedAuthor?: Author;
 }
+
+// Suggested authors returned by your API
+export interface SuggestedAuthor {
+  id: string
+  first_name: string
+  middle_name: string | null
+  last_name: string
+  recentBooks: {
+    title: string
+    coverImage: string
+  }[]
+}
