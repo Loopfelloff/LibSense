@@ -191,7 +191,6 @@ const AdminPanel: React.FC = () => {
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={getModalTitle()}>
         {modalType === 'addBook' && (
           <AddBookForm 
-            authors={authors} 
             onSuccess={handleBookSuccess} 
             onCancel={() => setModalOpen(false)} 
           />

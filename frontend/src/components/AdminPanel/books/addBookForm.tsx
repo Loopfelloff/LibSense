@@ -33,7 +33,6 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ onSuccess, onCancel })
 
   const debounceTimer = useRef<number | null>(null)
 
-  // Handle file change
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -51,7 +50,7 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ onSuccess, onCancel })
     setImagePreview(null)
   }
 
-  // Debounced fetch for authors
+
   useEffect(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current)
 
@@ -63,9 +62,9 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ onSuccess, onCancel })
     debounceTimer.current = window.setTimeout(async () => {
       try {
         const data = await api.fetchSuggestedAuthors(authorQuery)
-        // ✅ NOW USING THE ACTUAL DATABASE ID FROM BACKEND
+
         const authors = data.authors.map((a: any) => ({
-          id: a.id, // Real database ID
+          id: a.id,
           first_name: a.firstName,
           middle_name: null,
           last_name: a.lastName,
@@ -90,9 +89,8 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ onSuccess, onCancel })
     e.preventDefault()
     setError(null)
 
-    // ✅ BUILD AUTHORS ARRAY WITH REAL DATABASE IDs
     const authorsArray = [
-      ...selectedAuthorIds.map((id) => ({ author_id: id })), // These are now real database IDs
+      ...selectedAuthorIds.map((id) => ({ author_id: id })),
       ...(showNewAuthorForm && newAuthor.first_name.trim() && newAuthor.last_name.trim()
         ? [
           {
@@ -120,7 +118,6 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ onSuccess, onCancel })
         book_cover_image: coverImage || undefined,
       })
 
-      // Reset form
       setFormData({ isbn: '', book_title: '', description: '' })
       setCoverImage(null)
       setImagePreview(null)
@@ -231,7 +228,7 @@ export const AddBookForm: React.FC<AddBookFormProps> = ({ onSuccess, onCancel })
           className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none mb-2"
           disabled={isSubmitting}
         />
-        
+
         {/* Display selected authors count */}
         {selectedAuthorIds.length > 0 && (
           <div className="mb-2 text-sm text-blue-600 font-medium">
