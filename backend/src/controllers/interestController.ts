@@ -5,23 +5,19 @@ const addInterestHandler = async (req : Request , res:Response)=>{
 
     try{
 
-	let {genre} = req.body as {genre : string} 
+	let {genreId} = req.body as {genreId : string} 
 
 	const user = req.user as reqUser 
 	
-	if(!genre || genre.trim() === "") return res.status(400).json({
+	if(!genreId || genreId.trim() === "") return res.status(400).json({
 	    success : false,
 	    errDetails : {
 		errMsg : `missing genre in the request header`
 	    }
 	})
-
-	genre = genre.toLowerCase().trim()
-
-
-	const foundGenre = await prisma.genre.findFirst({
+	const foundGenre = await prisma.genre.findUnique({
 	    where : {
-		genre_name : genre
+		id : genreId
 	    }
 	})
 

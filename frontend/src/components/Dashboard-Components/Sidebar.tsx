@@ -1,12 +1,12 @@
-import { Home, Library, Heart, Star, X, Users, MessageSquare } from "lucide-react";
+import { Home, Library, Heart, Star, X, Users, MessageSquare , UserStar} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-type selectValue = "dashBoard" | "myLibrary" | "favorites" | "topRated" | "community" | "chats" 
+type selectValue = "dashBoard" | "myLibrary" | "favorites" | "topRated" | "community" | "chats" | "interests"
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  selectValue : "dashBoard" | "myLibrary" | "favorites" | "topRated" | "community" | "chats" 
+  selectValue : selectValue 
 }
 
 function Sidebar({ isOpen, onClose , selectValue }: SidebarProps) {
@@ -16,7 +16,7 @@ function Sidebar({ isOpen, onClose , selectValue }: SidebarProps) {
       return (selectValue === activeTab)
   }
   const navigation = useNavigate()
-  const sideBarElement : string[] = ["dashBoard", "myLibrary", "favorites" , "topRated" , "community", "chats"]
+  const sideBarElement : string[] = ["dashBoard", "myLibrary", "favorites" , "topRated" , "community", "chats" , "interests"]
   const menuItems = [
     { icon: Home, label: "Dashboard", active: returnTheActiveLabel("dashBoard")},
     { icon: Library, label: "My Library", active: returnTheActiveLabel("myLibrary") },
@@ -24,6 +24,7 @@ function Sidebar({ isOpen, onClose , selectValue }: SidebarProps) {
     { icon: Star, label: "Top Rated", active: returnTheActiveLabel("topRated") },
     { icon: Users, label: "Community", active : returnTheActiveLabel("community")},
     { icon: MessageSquare, label: "Chats", active: returnTheActiveLabel("chats") },
+    { icon: UserStar, label: "Your Interests", active: returnTheActiveLabel("interests") },
   ];
 
   return (

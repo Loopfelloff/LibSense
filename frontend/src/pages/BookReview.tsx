@@ -138,7 +138,7 @@ export function BookReview() {
       const reviewData : addReviewPayload = {
         rating: newRating,
         reviewBody: newReviewBody,
-        bookId: bookId,
+        bookId: String(bookId),
       };
 
       console.log('Creating review:', reviewData);

@@ -5,6 +5,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { Profile } from "./pages/Profile";
 import { TopRated } from "./pages/TopRated";
 import { BookReview } from "./pages/BookReview";
+import { YourInterest } from "./pages/YourInterest";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         {/* Of course you can add the routes up in here as of now this is just the bare one */}
         <Route path="/dashBoard" element={<Dashboard />} />
         <Route path="/topRated" element={<TopRated />} />
+        <Route path="/interests" element={<YourInterest />} />
         <Route path="/bookReview/:bookId" element={<BookReview />} />
         <Route
           path="/pageNotFound"
