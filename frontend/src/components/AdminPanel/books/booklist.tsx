@@ -23,7 +23,8 @@ export const BookList: React.FC<BookListProps> = ({
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   
   const filteredBooks = books.filter((book) => {
-    const searchLower = search.toLowerCase()
+    const searchLower = search.toLowerCase().trim()
+    if (!searchLower) return true
     
     // Search in title
     if (book.book_title.toLowerCase().includes(searchLower)) return true
@@ -34,7 +35,10 @@ export const BookList: React.FC<BookListProps> = ({
     // Search in authors
     if (book.authors && book.authors.length > 0) {
       return book.authors.some((author) => {
-        const fullName = `${author.author_first_name} ${author.author_middle_name || ''} ${author.author_last_name}`.toLowerCase()
+        const firstName = author.author_first_name.toLowerCase()
+        const middleName = (author.author_middle_name || '').toLowerCase()
+        const lastName = author.author_last_name.toLowerCase()
+        const fullName = `${firstName} ${middleName} ${lastName}`.replace(/\s+/g, ' ').trim()
         return fullName.includes(searchLower)
       })
     }

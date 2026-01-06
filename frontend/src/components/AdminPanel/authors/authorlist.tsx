@@ -21,8 +21,15 @@ export const AuthorList: React.FC<AuthorListProps> = ({
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   
   const filteredAuthors = authors.filter((author) => {
-    const searchLower = search.toLowerCase()
-    const fullName = `${author.first_name} ${author.middle_name || ''} ${author.last_name}`.toLowerCase()
+    const searchLower = search.toLowerCase().trim()
+    if (!searchLower) return true
+    
+    const firstName = author.first_name.toLowerCase()
+    const middleName = (author.middle_name || '').toLowerCase()
+    const lastName = author.last_name.toLowerCase()
+    const fullName = `${firstName} ${middleName} ${lastName}`.replace(/\s+/g, ' ').trim()
+    
+    // If full name includes the search, it's a match
     return fullName.includes(searchLower)
   })
 
