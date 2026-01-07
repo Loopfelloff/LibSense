@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { prisma } from "../config/prismaClientConfig.js";
 import { Status } from "../../generated/prisma/index.js";
 import { genSalt, hash } from "bcrypt-ts";
+import type { reqUser } from "../types/reqUserType.js";
 
 const getMutualBooks = async (req: Request, res: Response) => {
   try {
@@ -68,65 +69,61 @@ const getMutualBooks = async (req: Request, res: Response) => {
   }
 };
 
-const mockBookData = async (req: Request , res : Response)=>{
-    try {
-const result = await prisma.book.create({
-  data: {
-    isbn: "9780132350884",
-    book_cover_image : 'a book for clean code',
-    book_title: "Clean Code",
-    description: "A Handbook of Agile Software Craftsmanship",
+const mockBookData = async (req: Request, res: Response) => {
+  try {
+    const result = await prisma.book.create({
+      data: {
+        isbn: "9780132350884",
+        book_cover_image: "a book for clean code",
+        book_title: "Clean Code",
+        description: "A Handbook of Agile Software Craftsmanship",
 
-    book_written_by: {
-      create: [
-        {
-          book_author: {
-            create: {
-              author_first_name: "Robert",
-              author_middle_name: "C.",
-              author_last_name: "Martin",
+        book_written_by: {
+          create: [
+            {
+              book_author: {
+                create: {
+                  author_first_name: "Robert",
+                  author_middle_name: "C.",
+                  author_last_name: "Martin",
+                },
+              },
             },
+            {
+              book_author: {
+                create: {
+                  author_first_name: "Another",
+                  author_last_name: "Author",
+                },
+              },
+            },
+          ],
+        },
+      },
+      include: {
+        book_written_by: {
+          include: {
+            book_author: true,
           },
         },
-        {
-          book_author: {
-            create: {
-              author_first_name: "Another",
-              author_last_name: "Author",
-            },
-          },
-        },
-      ],
-    },
-  },
-   include : {
-		book_written_by : {
-		    include : {
-			book_author : true
-		    }
-		}
-	    }
-})
+      },
+    });
 
-
-	    res.status(200).json({
-		success : true,
-		data  :result 
-	})
-
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.log(err.stack);
+      res.status(500).json({
+        success: false,
+        errMsg: err.message,
+        errName: err.name,
+      });
     }
-    catch(err : unknown) {
-	if(err instanceof Error)
-	    {
-	    console.log(err.stack)
-	    res.status(500).json({
-		success : false,
-		errMsg:err.message,
-		errName : err.name
-	})
-	}
-    }
-} 
+  }
+};
 const changePassword = async (req: Request, res: Response) => {
   try {
     const { id } = req.user as { id: string };
@@ -164,4 +161,182 @@ const changePassword = async (req: Request, res: Response) => {
   }
 };
 
-export { getMutualBooks, changePassword , mockBookData};
+const addToWillRead = async (req: Request, res: Response) => {
+  try {
+    const { bookId } = req.body as { bookId: string };
+
+    const user = req.user as reqUser;
+
+    if (!bookId)
+      return res.status(400).json({
+        success: false,
+        errDetails: {
+          errMsg: `missing bodyId in the request header`,
+        },
+      });
+
+    const foundUser = await prisma.user.findUnique({
+      where: {
+        id: user.id,
+      },
+    });
+
+    if (!foundUser)
+      return res.status(404).json({
+        success: false,
+        errDetails: {
+          errMsg: `the user doesn't exist`,
+        },
+      });
+
+    const foundBook = await prisma.book.findUnique({
+      where: {
+        id: bookId,
+      },
+    });
+
+    if (!foundBook)
+      return res.status(404).json({
+        success: false,
+        errDetails: {
+          errMsg: `the book you are requesting for doesn't exists`,
+        },
+      });
+
+    const foundInFavorites = await prisma.favourite.findUnique({
+      where: {
+        user_book_favourite: {
+          user_id: user.id,
+          book_id: bookId,
+        },
+      },
+    });
+
+    const foundInBookStatus = await prisma.bookStatusVal.findUnique({
+      where: {
+        user_book_status: {
+          user_id: user.id,
+          book_id: bookId,
+        },
+      },
+    });
+
+    if (foundInFavorites || foundInBookStatus)
+      return res.status(409).json({
+        success: false,
+        errDetails: {
+          errMsg: `the book already has some status in it`,
+        },
+      });
+
+    const result = await prisma.bookStatusVal.create({
+      data: {
+        book_id: bookId,
+        user_id: user.id,
+        status: Status.WILLREAD,
+      },
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: result,
+    });
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.log(err.stack);
+      return res.status(500).json({
+        success: false,
+        errMsg: err.message,
+        errName: err.name,
+      });
+    }
+  }
+};
+
+const checkIfStatusExists = async (req: Request, res: Response) => {
+  try {
+    const { bookId } = req.query as { bookId: string };
+
+    const user = req.user as reqUser;
+
+    if (!bookId)
+      return res.status(400).json({
+        success: false,
+        errDetails: {
+          errMsg: `missing bodyId in the request header`,
+        },
+      });
+    const foundUser = await prisma.user.findUnique({
+      where: {
+        id: user.id,
+      },
+    });
+
+    if (!foundUser)
+      return res.status(404).json({
+        success: false,
+        errDetails: {
+          errMsg: `the user doesn't exist`,
+        },
+      });
+
+    const foundBook = await prisma.book.findUnique({
+      where: {
+        id: bookId,
+      },
+    });
+
+    if (!foundBook)
+      return res.status(404).json({
+        success: false,
+        errDetails: {
+          errMsg: `the book you are requesting for doesn't exists`,
+        },
+      });
+    const foundInFavorites = await prisma.favourite.findUnique({
+      where: {
+        user_book_favourite: {
+          user_id: user.id,
+          book_id: bookId,
+        },
+      },
+    });
+
+    const foundInBookStatus = await prisma.bookStatusVal.findUnique({
+      where: {
+        user_book_status: {
+          user_id: user.id,
+          book_id: bookId,
+        },
+      },
+    });
+
+    if (!foundInFavorites && !foundInBookStatus)
+      return res.status(200).json({
+        success: true,
+        data: false,
+      });
+    else
+      return res.status(200).json({
+        success: true,
+        data: true,
+      });
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.log(err.stack);
+      return res.status(500).json({
+        success: false,
+        errMsg: err.message,
+        errName: err.name,
+      });
+    }
+  }
+};
+
+export {
+  getMutualBooks,
+  changePassword,
+  mockBookData,
+  addToWillRead,
+  checkIfStatusExists,
+};

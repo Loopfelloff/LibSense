@@ -16,7 +16,6 @@ type SelectValue =
   | "topRated"
   | "community"
   | "chats";
-
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
