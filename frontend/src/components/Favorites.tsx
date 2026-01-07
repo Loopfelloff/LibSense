@@ -1,112 +1,37 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Heart, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { deleteFavorite, getFavorites } from "../apis/favorite";
 
 interface BookItem {
-  id: number;
+  id: string;
   title: string;
   author: string;
   cover: string;
+  rating: number;
+  genre: string;
 }
 
 export function Favorite() {
-  const [favoriteBooks, setFavoriteBooks] = useState<BookItem[]>([
-    {
-      id: 1,
-      title: "The Great Gatsby",
-      author: "F. Scott Fitzgerald",
-      cover: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400",
-    },
-    {
-      id: 2,
-      title: "1984",
-      author: "George Orwell",
-      cover:
-        "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400",
-    },
-    {
-      id: 3,
-      title: "To Kill a Mockingbird",
-      author: "Harper Lee",
-      cover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400",
-    },
-    {
-      id: 4,
-      title: "Pride and Prejudice",
-      author: "Jane Austen",
-      cover:
-        "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400",
-    },
-    {
-      id: 5,
-      title: "The Catcher in the Rye",
-      author: "J.D. Salinger",
-      cover:
-        "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400",
-    },
-    {
-      id: 6,
-      title: "Brave New World",
-      author: "Aldous Huxley",
-      cover: "https://images.unsplash.com/photo-1551029506-0807df4e2031?w=400",
-    },
-    {
-      id: 7,
-      title: "The Hobbit",
-      author: "J.R.R. Tolkien",
-      cover:
-        "https://images.unsplash.com/photo-1621351183012-e2f9972dd9bf?w=400",
-    },
-    {
-      id: 8,
-      title: "Animal Farm",
-      author: "George Orwell",
-      cover:
-        "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400",
-    },
-    {
-      id: 9,
-      title: "Fahrenheit 451",
-      author: "Ray Bradbury",
-      cover:
-        "https://images.unsplash.com/photo-1519682337058-a94d519337bc?w=400",
-    },
-    {
-      id: 10,
-      title: "Lord of the Flies",
-      author: "William Golding",
-      cover:
-        "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400",
-    },
-    {
-      id: 11,
-      title: "The Alchemist",
-      author: "Paulo Coelho",
-      cover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400",
-    },
-  ]);
-
+  const [favoriteBooks, setFavoriteBooks] = useState<BookItem[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const booksPerPage = 10;
+  const [totalPages, setTotalPages] = useState(0);
 
-  // Calculate pagination
-  const totalPages = Math.ceil(favoriteBooks.length / booksPerPage);
-  const startIndex = (currentPage - 1) * booksPerPage;
-  const endIndex = startIndex + booksPerPage;
-  const currentBooks = favoriteBooks.slice(startIndex, endIndex);
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      const favoriteList = await getFavorites(currentPage);
+      setFavoriteBooks(favoriteList.data);
+      setTotalPages(favoriteList.pagination.totalPages);
+    };
+    fetchFavorites();
+  }, [currentPage]);
 
-  const handleRemoveBook = (id: number) => {
+  const handleRemoveBook = async (id: string) => {
     if (
       confirm("Are you sure you want to remove this book from your favorites?")
     ) {
       setFavoriteBooks(favoriteBooks.filter((book) => book.id !== id));
-      // Adjust current page if needed
-      const newTotalPages = Math.ceil(
-        (favoriteBooks.length - 1) / booksPerPage,
-      );
-      if (currentPage > newTotalPages && newTotalPages > 0) {
-        setCurrentPage(newTotalPages);
-      }
+      await deleteFavorite(id);
     }
   };
 
@@ -115,24 +40,25 @@ export function Favorite() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto p-6">
+    <div className="min-h-screen w-full bg-white">
+      <div className="mx-auto p-6">
         {/* Books Count */}
-        <div className="bg-white border border-gray-300 p-4 mb-6">
-          <div className="text-gray-600">Total Books</div>
-          <div className="text-gray-900">{favoriteBooks.length}</div>
-        </div>
 
         {/* Favorite Books List */}
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-gray-900">Favorite Books</h2>
-            <button
-              onClick={() => setIsEditing(!isEditing)}
-              className="px-4 py-2 border border-gray-700 text-gray-700 hover:bg-gray-100"
-            >
-              {isEditing ? "Done" : "Edit"}
-            </button>
+          <div className="flex items-center justify-between m-4">
+            <h2 className="text-gray-900">
+              Favorite Books (
+              {favoriteBooks.length > 0 ? favoriteBooks.length : 0})
+            </h2>
+            {favoriteBooks.length > 0 && (
+              <button
+                onClick={() => setIsEditing(!isEditing)}
+                className="px-4 py-2 border border-gray-700 text-gray-700 hover:bg-gray-100 rounded"
+              >
+                {isEditing ? "Done" : "Edit"}
+              </button>
+            )}
           </div>
 
           {favoriteBooks.length > 0 ? (
@@ -147,6 +73,12 @@ export function Favorite() {
                       <th className="px-4 py-3 text-left text-gray-700">
                         Author
                       </th>
+                      <th className="px-4 py-3 text-left text-gray-700">
+                        Genre
+                      </th>
+                      <th className="px-4 py-3 text-left text-gray-700">
+                        Rating
+                      </th>
                       {isEditing && (
                         <th className="px-4 py-3 text-left text-gray-700">
                           Actions
@@ -154,9 +86,14 @@ export function Favorite() {
                       )}
                     </tr>
                   </thead>
+
                   <tbody className="divide-y divide-gray-300">
-                    {currentBooks.map((book) => (
-                      <tr key={book.id} className="bg-white hover:bg-gray-50">
+                    {favoriteBooks.map((book) => (
+                      <tr
+                        key={book.id}
+                        className="bg-white cursor-pointer hover:bg-gray-50"
+                      >
+                        {/* Book */}
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             <img
@@ -167,9 +104,23 @@ export function Favorite() {
                             <span className="text-gray-900">{book.title}</span>
                           </div>
                         </td>
+
+                        {/* Author */}
                         <td className="px-4 py-3 text-gray-700">
                           {book.author}
                         </td>
+
+                        {/* Genre */}
+                        <td className="px-4 py-3 text-gray-700">
+                          {book.genre}
+                        </td>
+
+                        {/* Rating */}
+                        <td className="px-4 py-3 text-gray-700">
+                          ⭐ {book.rating}
+                        </td>
+
+                        {/* Actions */}
                         {isEditing && (
                           <td className="px-4 py-3">
                             <button
