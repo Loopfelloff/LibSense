@@ -21,7 +21,6 @@ import cookieParser from "cookie-parser";
 
 import { bookStatusRouter } from "./routes/bookStatusRoute.js";
 import { authHandler } from "./controllers/authController.js";
-import { main } from "../prisma/seed/authorsSeed.js";
 const app = express();
 app.use(cors(corsOptions));
 app.use(cookieParser());
