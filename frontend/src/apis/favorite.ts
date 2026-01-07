@@ -16,12 +16,13 @@ const getFavorites = async (page: number) => {
       console.error("Error response data:", err.response?.data);
       console.error("Error status:", err.response?.status);
     }
+    return { data: [], pagination: { totalPages: 0 } };
   }
 };
 
 const deleteFavorite = async (bookId: string) => {
   try {
-    const response = await axios.get(
+    const response = await axios.delete(
       "http://localhost:5000/users/books/favorites",
       {
         params: { bookId },

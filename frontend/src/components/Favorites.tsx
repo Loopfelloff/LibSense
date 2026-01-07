@@ -20,7 +20,7 @@ export function Favorite() {
   useEffect(() => {
     const fetchFavorites = async () => {
       const favoriteList = await getFavorites(currentPage);
-      setFavoriteBooks(favoriteList);
+      setFavoriteBooks(favoriteList.data);
       setTotalPages(favoriteList.pagination.totalPages);
     };
     fetchFavorites();
