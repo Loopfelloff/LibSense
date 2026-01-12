@@ -7,7 +7,7 @@ import { Outlet } from "react-router-dom";
 export const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
-    <div className="min-h-screen w-full bg-white">
+      <>
       <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
       <ToastContainer
@@ -17,13 +17,13 @@ export const Layout = () => {
         closeOnClick
       />
 
-      <div className="pt-13.25 flex">
+      <div className="pt-13.25 flex-row grow justify-start">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        <main className="flex-1 lg:pl-56">
+        <main className="flex-1 h-full lg:pl-56 grow ">
           <Outlet />
         </main>
       </div>
-    </div>
+      </>
   );
 };

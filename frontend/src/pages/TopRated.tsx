@@ -45,9 +45,7 @@ export function TopRated() {
   const currentPage = startIndex / 10;
 
   return (
-    <div className="min-h-screen bg-white">
       <div className="pt-[53px] flex">
-        <main className="flex-1 lg:pl-56">
           <div className="p-6 max-w-7xl mx-auto">
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-gray-900">Top Rated Books</h1>
@@ -171,8 +169,6 @@ export function TopRated() {
               </div>
             </div>
           </div>
-        </main>
       </div>
-    </div>
   );
 }

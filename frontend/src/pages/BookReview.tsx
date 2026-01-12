@@ -223,9 +223,7 @@ export function BookReview() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
       <div className="pt-[53px] flex">
-        <main className="flex-1 lg:pl-56">
           <div className="p-4 w-7xl">
             <section>
               {isBookDetailLoading ? (
@@ -486,8 +484,6 @@ export function BookReview() {
               )}
             </section>
           </div>
-        </main>
       </div>
-    </div>
   );
 }
