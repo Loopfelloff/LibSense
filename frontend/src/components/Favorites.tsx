@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Heart, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { deleteFavorite, getFavorites } from "../apis/favorite.js";
-
 interface BookItem {
   id: string;
   title: string;

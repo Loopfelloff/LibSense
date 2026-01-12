@@ -4,7 +4,7 @@ import { prisma } from "../config/prismaClientConfig.js";
 
 const postProfilePicController = async (req: Request, res: Response) => {
   try {
-    const userId = "403d1a57-d529-45db-a6d6-38f4204e2b8b";
+    const { id } = req.user as { id: string };
     if (!req.files) {
       return res.status(400).json({
         success: false,
@@ -33,7 +33,7 @@ const postProfilePicController = async (req: Request, res: Response) => {
 
     const user = await prisma.user.update({
       where: {
-        id: userId,
+        id,
       },
       data: {
         profile_pic_link: result.secure_url,

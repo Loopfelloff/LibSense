@@ -12,6 +12,7 @@ interface ModelValue {
 function ChangeProfilePicModal({ isOpen, onClose, currentPic }: ModelValue) {
   const [preview, setPreview] = useState<string | null>(currentPic || null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [submitting, setSubmitting] = useState<boolean>(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -58,11 +59,14 @@ function ChangeProfilePicModal({ isOpen, onClose, currentPic }: ModelValue) {
     const formData = new FormData();
     formData.append("profilePic", selectedFile);
 
+    setSubmitting(true);
+
     const uploadResult = await changeProfilePic(formData);
     if (uploadResult) {
       toast.success("Profile Picture changed successfully!");
       onClose();
     }
+
     setPreview(null);
     setSelectedFile(null);
   };
@@ -130,9 +134,10 @@ function ChangeProfilePicModal({ isOpen, onClose, currentPic }: ModelValue) {
             </button>
             <button
               onClick={handleSubmit}
-              className="flex-1 px-4 py-2 bg-gray-900 text-white hover:bg-gray-800"
+              disabled={submitting}
+              className="flex-1 px-4 py-2 bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-900"
             >
-              Upload
+              {submitting ? "Uploading..." : "Upload"}
             </button>
           </div>
         </div>
