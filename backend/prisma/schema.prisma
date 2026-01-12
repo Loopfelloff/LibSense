@@ -113,8 +113,8 @@ model Book {
   book_title       String
   book_cover_image String
   description      String
-  avg_book_rating  Int @default(0)
-  book_rating_count Int @default(0)
+  avg_book_rating  Float @default(0)
+  book_rating_count Float @default(0)
   book_written_by  BookWrittenBy[]
   favourites       Favourite[]
   review           Review[]
