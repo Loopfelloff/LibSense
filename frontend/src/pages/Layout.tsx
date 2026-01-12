@@ -20,7 +20,7 @@ export const Layout = () => {
       <div className="pt-13.25 flex-row grow justify-start">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        <main className="flex-1 h-full lg:pl-56 grow ">
+        <main className="flex-1 h-full lg:pl-56 grow flex-row ">
           <Outlet />
         </main>
       </div>
