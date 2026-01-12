@@ -1,7 +1,5 @@
 import { useState , useEffect, useContext} from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Dashboard-Components/Navbar';
-import Sidebar from '../components/Dashboard-Components/Sidebar';
 import { UserContext } from '../context/UserContext';
 import { getTopRated } from '../apis/topRated';
 import { TailSpin } from 'react-loader-spinner';
@@ -15,7 +13,6 @@ type topRatedBooksType = {
 }
 
 export function TopRated() {
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [topRatedBooks , setTopRatedBooks] = useState<topRatedBooksType[]>([])
   const [totalBooks , setTotalBooks] = useState<number>(0) 
   const [isLoading ,  setIsLoading] = useState<boolean>(false)
@@ -49,11 +46,7 @@ export function TopRated() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-
       <div className="pt-[53px] flex">
-        <Sidebar isOpen={sidebarOpen} selectValue="topRated" onClose={() => setSidebarOpen(false)} />
-
         <main className="flex-1 lg:pl-56">
           <div className="p-6 max-w-7xl mx-auto">
             <div className="mb-6">

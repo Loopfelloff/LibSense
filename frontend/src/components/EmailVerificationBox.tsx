@@ -2,7 +2,7 @@ import { useState, useRef} from 'react';
 import type {KeyboardEvent, ChangeEvent } from 'react'
 import { Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import axios, { type AxiosResponse } from 'axios'
+import axios from 'axios'
 
 export default function EmailVerificationBox() {
   const navigate = useNavigate()
