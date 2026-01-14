@@ -102,22 +102,42 @@ const addReviewHandler = async (req : Request , res:Response)=>{
 	    }
 	})
 
-	const result = await prisma.review.create({
-	    data : {
+	const result = await prisma.$transaction(async(tx)=>{
+	    const bookResult = await tx.review.create({
+		data : {
 
-		rating : rating,
-		review_body : reviewBody,
-		user_id : foundUser.id,
-		book_id : bookId
-
+		    rating : rating,
+		    review_body : reviewBody,
+		    user_id : foundUser.id,
+		    book_id : bookId
+		}
+	    })
+	    const bookUpdateResult = await tx.book.update({
+		where : {
+		    id: bookId
+		},
+	       data : {
+		    avg_book_rating : ((foundBook.avg_book_rating * foundBook.book_rating_count) + rating) / (foundBook.book_rating_count + 1),
+		    book_rating_count : foundBook.book_rating_count + 1
+		} 
+	    })
+	    return {
+		bookResult,
+		bookUpdateResult
 	    }
+
 	})
 
-	console.log(result)
+
+
+	const {bookResult , bookUpdateResult} = result
+
+	console.log("after updating the book the average rating is set as ")
+	console.log(bookUpdateResult)
 
 	return res.status(201).json({
 	    success : true,
-	    data : result
+	    data : bookResult
 	})
 
     }
@@ -194,16 +214,48 @@ const updateReviewHandler = async ( req : Request , res : Response)=>{
 	const sendReviewBody = (!reviewBody || reviewBody.trim()==='') ? foundReview.review_body  : reviewBody.trim()
 	const sendRating = (!rating)? foundReview.rating : rating 
 
-	const reviewUpdate = await prisma.review.update({
+	const foundBook = await prisma.book.findUnique({
 	    where : {
-		id : reviewId
-	    },
-	    data : {
-		review_body : sendReviewBody,
-		rating : sendRating
+		 id : foundReview.book_id
 	    }
 	})
 
+	if(!foundBook) return res.status(404).json({
+	    success : false,
+	    errDetails : {
+		errMsg : `the book seems to be deleted or simply doesn't exist`
+	    }
+	})
+
+	const result = await prisma.$transaction(async(tx)=>{
+
+	    const bookUpdateResult = await tx.book.update({
+		where : {
+		    id: foundBook.id
+		},
+	       data : {
+		    avg_book_rating : ((foundBook.avg_book_rating * foundBook.book_rating_count) - foundReview.rating + sendRating)/foundBook.book_rating_count 
+		} 
+	    })
+	    const reviewUpdate = await tx.review.update({
+		where : {
+		    id : reviewId
+		},
+		data : {
+		    review_body : sendReviewBody,
+		    rating : sendRating
+		}
+	    })
+	    return {
+		bookUpdateResult,
+		reviewUpdate
+	    }
+	})
+
+	const {bookUpdateResult , reviewUpdate} = result
+
+	console.log("after updating the book we have the book row as")
+	console.log(bookUpdateResult)
 	console.log(reviewUpdate)
 	return res.status(201).json({
 	    success : true,
@@ -272,12 +324,52 @@ const deleteReviewHandler = async(req : Request , res:Response)=>{
 	    }
 	})
 
-	const deleteReview = await prisma.review.delete({
-	where : {
-	    id : reviewId
-	}
-    })
+	const foundBook = await prisma.book.findUnique({
+	    where : {
+		id : foundReview.book_id
+	    }
+	})
 
+	if(!foundBook) return res.status(404).json({
+	    success : false,
+	    errDetails : {
+		errMsg : `the book is either deleted or never existed in the first place`
+	    }
+	})
+
+	const result = await prisma.$transaction(async(tx)=>{
+
+
+	    const deleteReview = await tx.review.delete({
+	    where : {
+		id : reviewId
+	    }
+	})
+
+	    const divideVal = (foundBook.book_rating_count === 1) ? 1 : foundBook.book_rating_count-1
+
+	    const updateBookAvgRating = await tx.book.update({
+		where : {
+		    id : foundBook.id
+		}
+		,
+		data : {
+		    avg_book_rating :((foundBook.avg_book_rating * foundBook.book_rating_count) - foundReview.rating) / divideVal ,
+		    book_rating_count : foundBook.book_rating_count - 1
+		}
+	    })
+
+	    return {
+		deleteReview,
+		updateBookAvgRating
+	    }
+
+	})
+
+	const {deleteReview , updateBookAvgRating} = result
+
+	console.log("after updating teh average book rating we have")
+	console.log(updateBookAvgRating)
 	console.log(deleteReview)
 
 	return res.status(201).json({

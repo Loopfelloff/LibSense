@@ -1,7 +1,7 @@
 import { Search, Settings, Menu } from "lucide-react";
 import { useContext, useState } from "react";
 import { UserContext } from "../../context/UserContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ChangePasswordModal from "../PasswordChangeModal";
 import ChangeProfilePicModal from "../ProfilePicChangeModal";
 
@@ -14,7 +14,8 @@ function Navbar({ onMenuClick }: NavbarProps) {
   const [showSettingsMenu, setShowSettingsMenu] = useState<boolean>(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showProfilePicModal, setShowProfilePicModal] = useState(false);
-  const user = useContext(UserContext);
+  const user = useContext(UserContext)?.contextState;
+  const navigate = useNavigate();
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white border-b border-gray-300 z-50">
@@ -25,7 +26,12 @@ function Navbar({ onMenuClick }: NavbarProps) {
             <button onClick={onMenuClick} className="lg:hidden p-1">
               <Menu className="w-5 h-5 text-gray-700" />
             </button>
-            <div className="text-gray-900 font-semibold">Libsense</div>
+            <div
+              onClick={() => navigate("/dashboard")}
+              className="text-gray-900 cursor-pointer font-semibold"
+            >
+              Libsense
+            </div>
           </div>
 
           {/* Search */}

@@ -77,6 +77,7 @@ export function Profile() {
                   >
                     <img
                       src={book.book_cover_image}
+                      loading="lazy"
                       alt={book.book_title}
                       className="w-16 h-20 object-cover bg-gray-200"
                     />

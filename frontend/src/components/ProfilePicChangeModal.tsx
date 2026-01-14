@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { X, Upload } from "lucide-react";
 import { changeProfilePic } from "../apis/profile";
 import { toast } from "react-toastify";
+import { UserContext } from "../context/UserContext";
 
 interface ModelValue {
   isOpen: boolean;
@@ -14,6 +15,7 @@ function ChangeProfilePicModal({ isOpen, onClose, currentPic }: ModelValue) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [error, setError] = useState("");
+  const setUser = useContext(UserContext)?.setContextState;
 
   useEffect(() => {
     return () => {
@@ -36,7 +38,7 @@ function ChangeProfilePicModal({ isOpen, onClose, currentPic }: ModelValue) {
     }
 
     // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > 2 * 1024 * 1024) {
       setError("Image size must be less than 5MB");
       return;
     }
@@ -61,14 +63,25 @@ function ChangeProfilePicModal({ isOpen, onClose, currentPic }: ModelValue) {
 
     setSubmitting(true);
 
-    const uploadResult = await changeProfilePic(formData);
-    if (uploadResult) {
+    const result = await changeProfilePic(formData);
+    console.log(result);
+    if (result?.success) {
       toast.success("Profile Picture changed successfully!");
-      onClose();
     }
+
+    if (setUser)
+      setUser((prev) => {
+        if (!prev) return prev;
+
+        return {
+          ...prev,
+          profilePicLink: result?.data.url,
+        };
+      });
 
     setPreview(null);
     setSelectedFile(null);
+    onClose();
   };
 
   const handleClose = () => {

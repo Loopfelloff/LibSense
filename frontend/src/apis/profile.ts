@@ -36,7 +36,7 @@ const changePassword = async (newPassword: string): Promise<boolean> => {
   }
 };
 
-const changeProfilePic = async (formData: FormData): Promise<boolean> => {
+const changeProfilePic = async (formData: FormData) => {
   try {
     const response = await axios.post(
       "http://localhost:5000/users/profile/profilepicture/upload",
@@ -46,7 +46,7 @@ const changeProfilePic = async (formData: FormData): Promise<boolean> => {
         withCredentials: true,
       },
     );
-    return response.data.success;
+    return response.data;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
       alert(`can't add the review due to ${err.name}`);

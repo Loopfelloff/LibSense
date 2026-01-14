@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { cloudinary, uploadToCloudinary } from "../config/cloudinaryConfig.js";
 import { prisma } from "../config/prismaClientConfig.js";
+import { redisClient } from "../config/redisConfiguration.js";
 
 const postProfilePicController = async (req: Request, res: Response) => {
   try {
@@ -27,8 +28,18 @@ const postProfilePicController = async (req: Request, res: Response) => {
       });
     }
     const result = await uploadToCloudinary(file.buffer, {
-      folder: "Libsense",
-      resource_type: "auto",
+      folder: "Libsense/profile_pics",
+      resource_type: "image",
+      transformation: [
+        {
+          width: 256,
+          height: 256,
+          crop: "fill",
+          gravity: "face",
+          quality: "auto",
+          fetch_format: "auto",
+        },
+      ],
     });
 
     const user = await prisma.user.update({
@@ -39,6 +50,7 @@ const postProfilePicController = async (req: Request, res: Response) => {
         profile_pic_link: result.secure_url,
       },
     });
+    await redisClient.del(`user:${id}:profile`);
 
     return res.status(200).json({
       success: true,

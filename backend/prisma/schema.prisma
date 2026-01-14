@@ -113,6 +113,8 @@ model Book {
   book_title       String
   book_cover_image String
   description      String
+  avg_book_rating  Float @default(0)
+  book_rating_count Float @default(0)
   book_written_by  BookWrittenBy[]
   favourites       Favourite[]
   review           Review[]
@@ -150,7 +152,7 @@ model BookStatusVal {
   book    Book   @relation(fields: [book_id], references: [id], onDelete: Cascade)
   user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@unique([book_id, user_id] , name:"user_book_status")
+  @@unique([book_id, user_id], name: "user_book_status")
   @@map("book_status_val")
 }
 
@@ -162,7 +164,7 @@ model Favourite {
   book Book @relation(fields: [book_id], references: [id], onDelete: Cascade)
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@unique([book_id, user_id] , name : "user_book_favourite")
+  @@unique([book_id, user_id], name: "user_book_favourite")
   @@map("favourite")
 }
 

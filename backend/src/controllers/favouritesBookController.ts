@@ -7,8 +7,8 @@ const getFavouriteBook = async (req: Request, res: Response) => {
     const { id } = req.user as { id: string };
     const page = Number(req.query.page) || 1;
     const take = 5;
-
-    let totalCount = Number(await redisClient.get(`user:${id}:totalCount`));
+    const countKey = `user:${id}:totalCount`;
+    let totalCount = Number(await redisClient.get(countKey));
 
     if (!totalCount) {
       totalCount = await prisma.book.count({
@@ -20,7 +20,7 @@ const getFavouriteBook = async (req: Request, res: Response) => {
           },
         },
       });
-      await redisClient.set(`user:${id}:totalCount:`, totalCount);
+      await redisClient.setEx(countKey, 60 * 5, JSON.stringify(totalCount));
     }
 
     const totalPages = Math.ceil(totalCount / take);
@@ -34,8 +34,68 @@ const getFavouriteBook = async (req: Request, res: Response) => {
           },
         },
       },
+      select: {
+        id: true,
+        book_cover_image: true,
+        book_title: true,
+        book_written_by: {
+          select: {
+            book_author: {
+              select: {
+                id: true,
+                author_first_name: true,
+                author_last_name: true,
+                author_middle_name: true,
+              },
+            },
+          },
+        },
+        review: {
+          select: {
+            rating: true,
+          },
+        },
+        book_genres: {
+          select: {
+            genre: {
+              select: {
+                id: true,
+                genre_name: true,
+              },
+            },
+          },
+        },
+      },
       skip,
       take,
+    });
+
+    const flattenedBooks = favouriteBooks.map((book) => {
+      // Average rating
+      const averageRating =
+        book.review.length === 0
+          ? null
+          : (
+              book.review.reduce((sum, r) => sum + r.rating, 0) /
+              book.review.length
+            ).toFixed(1);
+
+      return {
+        id: book.id,
+        title: book.book_title,
+        coverImage: book.book_cover_image,
+
+        authors: book.book_written_by.map((bw) => {
+          const a = bw.book_author;
+          return [a.author_first_name, a.author_middle_name, a.author_last_name]
+            .filter(Boolean)
+            .join(" ");
+        }),
+
+        genres: book.book_genres.map((bg) => bg.genre.genre_name),
+
+        averageRating: averageRating ? Number(averageRating) : null,
+      };
     });
 
     if (favouriteBooks.length == 0) {
@@ -44,12 +104,17 @@ const getFavouriteBook = async (req: Request, res: Response) => {
         data: {
           dataMsg: "Favourite Book not found",
         },
+        pagination: {
+          currentPage: Number(page),
+          totalPages,
+          hasNextPage: Number(page) < totalPages,
+        },
       });
     }
 
     return res.status(200).json({
       success: true,
-      data: favouriteBooks,
+      data: flattenedBooks,
       pagination: {
         currentPage: Number(page),
         totalPages,
