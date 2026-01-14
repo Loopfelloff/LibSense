@@ -15,7 +15,6 @@ function Navbar({ onMenuClick }: NavbarProps) {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showProfilePicModal, setShowProfilePicModal] = useState(false);
   const user = useContext(UserContext)?.contextState;
-  console.log(user);
   const navigate = useNavigate();
 
   return (
