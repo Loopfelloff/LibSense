@@ -6,9 +6,10 @@ interface BookItem {
   id: string;
   title: string;
   author: string;
-  cover: string;
-  rating: number;
-  genre: string;
+  coverImage: string;
+  averageRating: number | null;
+  genres: string[];
+  authors: string[];
 }
 
 export function Favorite() {
@@ -20,6 +21,7 @@ export function Favorite() {
   useEffect(() => {
     const fetchFavorites = async () => {
       const favoriteList = await getFavorites(currentPage);
+      console.log(favoriteList.data);
       setFavoriteBooks(favoriteList.data);
       setTotalPages(favoriteList.pagination.totalPages);
     };
@@ -97,7 +99,7 @@ export function Favorite() {
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             <img
-                              src={book.cover}
+                              src={book.coverImage}
                               alt={book.title}
                               className="w-12 h-16 object-cover bg-gray-200 border border-gray-300"
                             />
@@ -107,17 +109,17 @@ export function Favorite() {
 
                         {/* Author */}
                         <td className="px-4 py-3 text-gray-700">
-                          {book.author}
+                          {book.authors[0]} , {book.authors[1]}
                         </td>
 
                         {/* Genre */}
                         <td className="px-4 py-3 text-gray-700">
-                          {book.genre}
+                          {book.genres[0]}, {book.genres[1]}
                         </td>
 
                         {/* Rating */}
                         <td className="px-4 py-3 text-gray-700">
-                          ⭐ {book.rating}
+                          ⭐ {book.averageRating ? book.averageRating : 0}
                         </td>
 
                         {/* Actions */}

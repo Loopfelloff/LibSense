@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { X, Upload } from "lucide-react";
 import { changeProfilePic } from "../apis/profile";
 import { toast } from "react-toastify";
+import { UserContext } from "../context/UserContext";
 
 interface ModelValue {
   isOpen: boolean;
@@ -14,6 +15,7 @@ function ChangeProfilePicModal({ isOpen, onClose, currentPic }: ModelValue) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [error, setError] = useState("");
+  const authContext = useContext(UserContext)?.setContextState;
 
   useEffect(() => {
     return () => {

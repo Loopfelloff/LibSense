@@ -5,12 +5,9 @@ import { Dashboard } from "./pages/Dashboard";
 import { Profile } from "./pages/Profile";
 import { TopRated } from "./pages/TopRated";
 import { BookReview } from "./pages/BookReview";
-<<<<<<< HEAD
 import { Favorite } from "./components/Favorites";
 import { Layout } from "./pages/Layout";
-=======
 import { YourInterest } from "./pages/YourInterest";
->>>>>>> 69408df982a795b75556db5c7b4c207fd4896634
 
 function App() {
   return (
