@@ -1,13 +1,13 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Footer from "./components/Footer";
-import LoginOrSignup from "./pages/LoginOrSignup";
-import { Dashboard } from "./pages/Dashboard";
-import { Profile } from "./pages/Profile";
-import { TopRated } from "./pages/TopRated";
-import { BookReview } from "./pages/BookReview";
-import { Favorite } from "./components/Favorites";
-import { Layout } from "./pages/Layout";
-import { YourInterest } from "./pages/YourInterest";
+import Footer from "./components/Footer.js";
+import LoginOrSignup from "./pages/LoginOrSignup.js";
+import { Dashboard } from "./pages/Dashboard.js";
+import { Profile } from "./pages/Profile.js";
+import { TopRated } from "./pages/TopRated.js";
+import { BookReview } from "./pages/BookReview.js";
+import { Favorite } from "./components/Favorites.js";
+import { Layout } from "./pages/Layout.js";
+import { YourInterest } from "./pages/YourInterest.js";
 
 function App() {
   return (
@@ -19,18 +19,18 @@ function App() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="profile/:userId" element={<Profile />} />
           <Route path="favorites" element={<Favorite />} />
+          <Route path="/topRated" element={<TopRated />} />
+          <Route path="/interests" element={<YourInterest />} />
+          <Route path="/bookReview/:bookId" element={<BookReview />} />
         </Route>
-        <Route path="/topRated" element={<TopRated />} />
-        <Route path="/interests" element={<YourInterest />} />
-        <Route path="/bookReview/:bookId" element={<BookReview />} />
-        <Route
-          path="/pageNotFound"
-          element={<h1>Hello this is the default 404 page</h1>}
-        />
         {/* <Route path="/restrictedPage" element={<RestrictedPage />} /> */}
         <Route path="/profile/:userId" element={<Profile />} />
         <Route path="/:loginOrSignup" element={<LoginOrSignup />} />
         <Route path="*" element={<h1>Hello this is the default 404 page</h1>} />
+        <Route
+          path="/pageNotFound"
+          element={<h1>Hello this is the default 404 page</h1>}
+        />
       </Routes>
       <Footer />
     </div>

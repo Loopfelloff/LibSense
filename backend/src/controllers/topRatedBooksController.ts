@@ -28,7 +28,7 @@ const topRatedBooksHandler = async (req : Request , res : Response)=>{
 	shiftIndex = Number(shiftIndex)
 
 
-//	const bookResult = await prisma.book.findMany({ // so books with atelast one review pop up
+//	const bookresult = await prisma.book.findmany({ // so books with atelast one review pop up
 //	    where : {
 //		review : {
 //		    some : {}
@@ -38,59 +38,35 @@ const topRatedBooksHandler = async (req : Request , res : Response)=>{
 //	    select : {
 //		id : true
 //	    },
-//	    skip : startIndex,
-//	    take : shiftIndex
+//	    skip : startindex,
+//	    take : shiftindex
 //	})
     
 	// just gives array like ['id1' , 'id2']
 	
-	const totalResult = await prisma.book.count({
-	    where : {
-		review : {
-		    some : {}
-		}
+	const whereClause = {
+	    review : {
+		some : {}
 	    }
-	})
-
-	const tempResult = await prisma.review.groupBy({
-	    by : ['book_id'],
-	    orderBy : {
-		_avg : {
-		    rating :'desc'
-		}
-	    },
-	    _avg : {rating : true},
-	    skip : startIndex,
-	    take : shiftIndex,
-	})
-
-
-
-	const result = await Promise.all(
-	    tempResult.map(async (item)=>{
-		return (
+	}
+	
+	const totalResult = await prisma.book.count(
+	    {
+		where :whereClause 
+	    }
+	)
+	
+	const result = await prisma.book.findMany({
+	    where : whereClause,
+	    orderBy: [
 		{
-		    ... await(prisma.book.findUnique(
-			{
-			    where : {
-				id : item.book_id
-			    },
+		    avg_book_rating : 'desc'
+		},
 
-			    select : {
-				    id : true,
-				    book_cover_image : true,
-				    book_title : true,
-				    description : true,
-				}
-			    
-			}
-		    )),
-			averageRating : item._avg.rating
-
-		    }
-		)
-	    })
-	)	
+	    ],
+	    skip : startIndex,
+	    take : shiftIndex
+	})
 
 
     // paxi required data jo send garnu 

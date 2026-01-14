@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "book" ALTER COLUMN "avg_book_rating" SET DEFAULT 0,
+ALTER COLUMN "avg_book_rating" SET DATA TYPE DOUBLE PRECISION,
+ALTER COLUMN "book_rating_count" SET DEFAULT 0,
+ALTER COLUMN "book_rating_count" SET DATA TYPE DOUBLE PRECISION;

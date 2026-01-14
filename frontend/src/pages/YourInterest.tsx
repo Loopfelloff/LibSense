@@ -1,7 +1,5 @@
 import { useState, useEffect, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Dashboard-Components/Navbar";
-import Sidebar from "../components/Dashboard-Components/Sidebar";
 import { UserContext } from "../context/UserContext";
 import { Search, X, Plus } from "lucide-react";
 import type { ChangeEvent } from "react";
@@ -16,7 +14,6 @@ import type {
 } from "../types/userInterest.js";
 export function YourInterest() {
   const timerId = useRef<number | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<searchGenre[]>([]);
   const [userGenres, setUserGenres] = useState<userPreferredGenre[]>([]);
@@ -111,13 +108,9 @@ export function YourInterest() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gray-50">
-      <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-
+    <div className="min-h-screen w-full ">
       <div className="flex">
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
-        <div className="flex-1 p-6 lg:ml-64">
+        <div className="flex-1 p-6">
           <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
               <h1 className="text-2xl font-bold text-gray-900 mb-2">

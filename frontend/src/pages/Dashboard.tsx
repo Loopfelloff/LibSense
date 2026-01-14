@@ -56,7 +56,7 @@ const recommendedBooks = [
 ];
 
 export function Dashboard() {
-  const authContext = useContext(UserContext);
+  const authContext = useContext(UserContext)?.contextState;
   const navigation = useNavigate();
   useEffect(() => {
     if (!authContext?.loggedIn) navigation("/login");
