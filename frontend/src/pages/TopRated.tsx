@@ -18,7 +18,7 @@ export function TopRated() {
   const [totalBooks , setTotalBooks] = useState<number>(0) 
   const [isLoading ,  setIsLoading] = useState<boolean>(false)
   const [startIndex , setStartIndex] = useState<number>(0)
-  const authContext = useContext(UserContext)
+  const authContext = useContext(UserContext)?.contextState
   const navigation = useNavigate() 
   
   useEffect(()=>{

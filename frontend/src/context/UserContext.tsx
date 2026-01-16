@@ -14,3 +14,4 @@ export type UserContextType = {
 };
 
 export const UserContext = createContext<UserContextType | null>(null);
+

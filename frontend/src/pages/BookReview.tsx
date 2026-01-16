@@ -32,7 +32,7 @@ export function BookReview() {
   const [isAddingReview, setIsAddingReview] = useState<boolean>(false);
   const [newRating, setNewRating] = useState<number>(0);
   const [newReviewBody, setNewReviewBody] = useState<string>('');
-  const authContext = useContext(UserContext);
+  const authContext = useContext(UserContext)?.contextState;
   const navigation = useNavigate();
 
   useEffect(() => {
