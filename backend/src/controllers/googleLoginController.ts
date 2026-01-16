@@ -141,7 +141,7 @@ const googleLoginHandler = async (req : Request , res : Response)=>{
 
 	console.log('the user already existed sso' , user)
 
-	return res.redirect("http://localhost:5173/home")
+	return res.redirect("http://localhost:5173/dashboard")
 
     }
     catch(err : unknown){

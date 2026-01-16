@@ -34,7 +34,8 @@ const loginHandler = async (req : Request , res : Response)=>{
 		password : true,
 		first_name: true,
 		middle_name : true,
-		last_name : true
+		last_name : true,
+		profile_pic_link : true
 	    }
 	})
 
@@ -70,10 +71,13 @@ const loginHandler = async (req : Request , res : Response)=>{
 	return res.status(200).json({
 	    success : true,
 	    data : {
+		id : foundUser.id,
+		loggedIn : true,
+		profilePicLink : foundUser.profile_pic_link,
 		email : foundUser.email,
-		first_name : foundUser.first_name,
-		middle_name : foundUser.middle_name,
-		last_name : foundUser.last_name,
+		firstName : foundUser.first_name,
+		middleName : foundUser.middle_name,
+		lastName : foundUser.last_name,
 	    }
 	})
 

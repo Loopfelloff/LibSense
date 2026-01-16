@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState ,useContext} from 'react';
+import { UserContext } from '../context/UserContext';
+import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Book, Mail, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axios from 'axios'
@@ -13,6 +15,8 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isSending , setIsSending] = useState<boolean>(false);
   const [errMsg , setErrMsg] = useState<string | null>(null)
+  const navigation = useNavigate()
+  const setContextState = useContext(UserContext)?.setContextState
   const [formData, setFormData] = useState<formData>({
     email: '',
     password: '',
@@ -40,6 +44,12 @@ export default function LoginForm() {
 
 	  console.log(response.status)
 	  console.log(response.data)
+	  if(setContextState !== undefined){
+	      console.log('from the login set context one')
+	      console.log(response.data.data)
+	      setContextState(response.data.data)
+	      navigation("/")
+	  }
 	  
       }
 
