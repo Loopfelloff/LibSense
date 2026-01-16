@@ -6,20 +6,25 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export async function main() {
-  const filePath = path.join(__dirname, "./books_clean.json");
+export async function insertBooks() {
+  const filePath = path.join(__dirname, "./books_final.json");
 
   const payloads = JSON.parse(fs.readFileSync(filePath, "utf-8"));
 
   console.log(`📦 Inserting ${payloads.length} authors into the database...`);
 
   for (const payload of payloads) {
-    await prisma.book.create({
-      data: {
+    await prisma.book.upsert({
+      where: {
+        isbn: payload.book.isbn,
+      },
+      update: {},
+      create: {
         isbn: payload.book.isbn,
         book_title: payload.book.book_title,
         book_cover_image: payload.book.book_cover_image,
         description: payload.book.description,
+
         book_written_by: {
           create: payload.authors.map((author) => ({
             book_author: {
@@ -31,6 +36,7 @@ export async function main() {
             },
           })),
         },
+
         book_genres: {
           create: payload.genres.map((genre) => ({
             genre: {
