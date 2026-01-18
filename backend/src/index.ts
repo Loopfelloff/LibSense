@@ -19,17 +19,19 @@ import { checkForEmailEntryHandler } from "./controllers/checkForEmailEntryContr
 import { router as bookReviewHandler } from "./routes/bookreviewRoutes.js";
 import { corsOptions } from "./config/corsConfig.js";
 import cors from "cors";
-import type { Request, Response } from "express";
 import cookieParser from "cookie-parser";
-
 import { bookStatusRouter } from "./routes/bookStatusRoute.js";
 import { authHandler } from "./controllers/authController.js";
+import { getAllBooks } from "../prisma/vector_embedding/bookEmbedding.js";
+import { getUserProfile } from "../prisma/vector_embedding/userEmbedding.js";
 import { prisma } from "./config/prismaClientConfig.js";
 const app = express();
+
+await prisma.bookVector.deleteMany({});
+getAllBooks();
 app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());
-
 app.use("/registerAccount", verifyEmailHandler);
 app.use("/verifyOtp", verifyOtpHandler);
 app.use("/checkForEmail", checkForEmailEntryHandler);
