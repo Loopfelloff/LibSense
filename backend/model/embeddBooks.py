@@ -1,4 +1,3 @@
-from pathlib import Path
 from .utils.processText import process_text
 from pydantic import BaseModel
 from uuid import UUID
@@ -22,14 +21,14 @@ def processBook(book: Book):
     return str(book.id), vector
 
 
-@app.post("/embeddbook/all")
+@app.post("/embedd/books/all")
 def embedd_books_for_db(books: List[Book]):
     return [
         {"id": book_id, "vector": vector} for book_id, vector in map(processBook, books)
     ]
 
 
-@app.post("/embeddbook")
+@app.post("/embedd/books")
 def embedd_book(book: Book):
     book_id, vector = processBook(book)
     return {"id": book_id, "vector": vector}

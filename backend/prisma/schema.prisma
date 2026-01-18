@@ -24,6 +24,7 @@ model User {
   sent_messages             Message[]
   review                    Review[]
   user_role                 UserRole                  @relation(fields: [user_role_id], references: [id])
+  userVector                UserVector?
 
   @@map("user")
 }
@@ -178,6 +179,17 @@ model BookVector {
 
   @@index([embedding], map: "book_vector_hnsw_idx")
   @@map("book_vector")
+}
+
+model UserVector {
+  id         String                @id @default(uuid())
+  user_id    String                @unique
+  embedding  Unsupported("vector")
+  created_at DateTime?             @default(now()) @db.Timestamp(6)
+  user       User                  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([embedding], map: "user_vector_hnsw_idx")
+  @@map("user_vector")
 }
 
 enum Roles {

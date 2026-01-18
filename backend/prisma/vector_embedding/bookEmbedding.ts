@@ -58,7 +58,7 @@ export const getAllBooks = async () => {
   console.log("hi");
   try {
     const response = await axios.post(
-      "http://127.0.0.1:8000/embeddbook/all",
+      "http://127.0.0.1:8000/embedd/books/all",
       bookTexts,
       {
         headers: {
@@ -71,9 +71,9 @@ export const getAllBooks = async () => {
   } catch (err: unknown) {
     if (err instanceof Error) console.log(err.message);
   }
-  await Promise.all(
-    vectorArr.map((book) => insertEmbeddings(book.vector, book.id)),
-  );
+  // await Promise.all(
+  //   vectorArr.map((book) => insertEmbeddings(book.vector, book.id)),
+  // );
 };
 
 const insertEmbeddings = async (vectorArray: number[], book_id: string) => {
