@@ -38,7 +38,7 @@ class BookVector(Base):
     id = Column(String, primary_key=True)
     book_id = Column(String, ForeignKey("book.id", ondelete="CASCADE"), unique=True)
 
-    embedding = Column(Vector(1536))
+    embedding = Column(Vector(384))
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

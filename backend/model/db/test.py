@@ -3,11 +3,10 @@ import joblib
 from sqlalchemy.orm import Session
 from .database import SessionLocal, BookVector, Book
 from pathlib import Path
+from model.sentenceTransformers import transformer_model
 
 app = FastAPI()
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-VECTORIZER_PATH = BASE_DIR / "artifacts" / "tfidf_vectorizer.pkl"
 
 
 def get_db():
@@ -18,15 +17,10 @@ def get_db():
         db.close()
 
 
-vectorizer = joblib.load(VECTORIZER_PATH)
-
-
 @app.get("/test-recommendation/{search}")
 def test_rec(search: str, db: Session = Depends(get_db)):
 
-    search = search.lower()
-
-    target_embedding = vectorizer.transform([search]).toarray()[0].tolist()
+    target_embedding = transformer_model.encode(search)
 
     results = (
         db.query(BookVector)

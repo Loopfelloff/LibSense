@@ -25,7 +25,7 @@ import { authHandler } from "./controllers/authController.js";
 import { getUserProfile } from "../prisma/vector_embedding/userEmbedding.js";
 import { getAllBooks } from "../prisma/vector_embedding/bookEmbedding.js";
 
-getUserProfile();
+getAllBooks();
 const app = express();
 app.use(cors(corsOptions));
 app.use(cookieParser());

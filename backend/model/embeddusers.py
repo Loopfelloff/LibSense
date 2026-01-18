@@ -6,6 +6,7 @@ from uuid import UUID
 from typing import List, Optional
 from .api.fastapi import app
 
+
 class Book(BaseModel):
     id: UUID
     title: str
@@ -14,4 +15,4 @@ class Book(BaseModel):
     genre: Optional[str] = None
 
 
-@app.post()
+# @app.post()

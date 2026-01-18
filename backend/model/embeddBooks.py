@@ -1,13 +1,10 @@
-import joblib
 from pathlib import Path
 from .utils.processText import process_text
 from pydantic import BaseModel
 from uuid import UUID
 from typing import List, Optional
 from .api.fastapi import app
-
-BASE_DIR = Path(__file__).resolve().parents[1]
-MODEL_DIR = BASE_DIR / "model" / "artifacts"
+from .sentenceTransformers import transformer_model
 
 
 class Book(BaseModel):
@@ -18,29 +15,21 @@ class Book(BaseModel):
     genre: Optional[str] = None
 
 
-vectorizer = joblib.load(MODEL_DIR / "tfidf_vectorizer.pkl")
+def processBook(book: Book):
+    text = " ".join([book.title, book.description, book.author, book.genre or ""])
+    processed = process_text(text)
+    vector = transformer_model.encode(processed).tolist()
+    return str(book.id), vector
 
 
 @app.post("/embeddbook/all")
-def embedd_books_for_db(books: List[Book]) -> list:
-    result = []
-
-    for b in books:
-        book_dict = b.model_dump()
-        id = b.id
-        text = " ".join(str(word) for word in book_dict.values())
-        processed = process_text(text)
-        vector = vectorizer.transform([processed]).toarray()[0].tolist()
-        result.append({"id": id, "vector": vector})
-
-    return result
+def embedd_books_for_db(books: List[Book]):
+    return [
+        {"id": book_id, "vector": vector} for book_id, vector in map(processBook, books)
+    ]
 
 
 @app.post("/embeddbook")
 def embedd_book(book: Book):
-    book_dict = book.model_dump()
-    id = book.id
-    text = " ".join(str(word) for word in book_dict.values())
-    processed = process_text(text)
-    vector = vectorizer.transform([processed]).toarray()[0].tolist()
-    return {"id": id, "vector": vector}
+    book_id, vector = processBook(book)
+    return {"id": book_id, "vector": vector}
