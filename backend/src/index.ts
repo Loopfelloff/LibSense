@@ -22,13 +22,11 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { bookStatusRouter } from "./routes/bookStatusRoute.js";
 import { authHandler } from "./controllers/authController.js";
-import { getAllBooks } from "../prisma/vector_embedding/bookEmbedding.js";
 import { getUserProfile } from "../prisma/vector_embedding/userEmbedding.js";
-import { prisma } from "./config/prismaClientConfig.js";
-const app = express();
+import { getAllBooks } from "../prisma/vector_embedding/bookEmbedding.js";
 
-await prisma.bookVector.deleteMany({});
-getAllBooks();
+getUserProfile();
+const app = express();
 app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());

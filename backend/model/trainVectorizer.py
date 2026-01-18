@@ -1,25 +1,23 @@
 import joblib
-
 from sklearn.feature_extraction.text import TfidfVectorizer
-
 from model.utils.processText import process_text
 from model.utils.createBookText import create_book_text_train
-
 import json
-
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parents[1]  # backend/
 BOOKS_PATH = BASE_DIR / "prisma" / "seed" / "books_final.json"
 MODEL_DIR = BASE_DIR / "model" / "artifacts"
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
-vectorizer = TfidfVectorizer(max_features=1536, stop_words="english", lowercase=True)
+
+vectorizer = TfidfVectorizer(
+    max_features=1536, ngram_range=(1, 2), stop_words="english", lowercase=True
+)
 
 
 def load_books_from_json():
-    with open("prisma/seed/books_final.json", "r") as f:
+    with open(BOOKS_PATH, "r") as f:
         books_list = json.load(f)
-
     return books_list
 
 

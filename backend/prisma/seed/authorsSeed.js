@@ -11,8 +11,6 @@ export async function insertBooks() {
 
   const payloads = JSON.parse(fs.readFileSync(filePath, "utf-8"));
 
-  console.log(`📦 Inserting ${payloads.length} authors into the database...`);
-
   for (const payload of payloads) {
     await prisma.book.upsert({
       where: {

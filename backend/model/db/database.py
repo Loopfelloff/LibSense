@@ -1,0 +1,45 @@
+import os
+from dotenv import load_dotenv
+import joblib
+from sqlalchemy import create_engine, Column, Float, String, DateTime, ForeignKey, func
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import relationship
+from pgvector.sqlalchemy import Vector
+
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+
+class Book(Base):
+    __tablename__ = "book"
+
+    id = Column(String, primary_key=True, index=True)
+    isbn = Column(String, unique=True, nullable=False)
+    book_title = Column(String, nullable=False)
+    book_cover_image = Column(String)
+    description = Column(String)
+    avg_book_rating = Column(Float, default=0.0)
+    book_rating_count = Column(Float, default=0.0)
+    book_vector = relationship("BookVector", back_populates="book", uselist=False)
+
+
+class BookVector(Base):
+    __tablename__ = "book_vector"
+
+    id = Column(String, primary_key=True)
+    book_id = Column(String, ForeignKey("book.id", ondelete="CASCADE"), unique=True)
+
+    embedding = Column(Vector(1536))
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    book = relationship("Book", back_populates="book_vector")

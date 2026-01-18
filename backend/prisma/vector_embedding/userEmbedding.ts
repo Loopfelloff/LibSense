@@ -106,5 +106,8 @@ const createUserText = (user) => {
     weight: WEIGHTS.currently_reading,
   });
 
-  return weightedTexts;
+  return {
+    id,
+    categories: weightedTexts,
+  };
 };

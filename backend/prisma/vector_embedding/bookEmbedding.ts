@@ -57,7 +57,7 @@ export const getAllBooks = async () => {
 
   try {
     const response = await axios.post(
-      "http://127.0.0.1:8000/embeddbooks",
+      "http://127.0.0.1:8000/embeddbook/all",
       bookTexts,
       {
         headers: {
