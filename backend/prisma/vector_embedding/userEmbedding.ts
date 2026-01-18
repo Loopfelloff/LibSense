@@ -1,13 +1,4 @@
 import { prisma } from "../../src/config/prismaClientConfig.js";
-import { removeStopwords, eng, fra } from "stopword";
-
-const WEIGHTS = {
-  interests: 1.0,
-  favorites: 0.7,
-  read_books: 0.5,
-  currently_reading: 0.3,
-  want_to_read: 0.1,
-};
 
 const groupBookStatus = (bookStatusVal = []) => {
   return bookStatusVal.reduce(
@@ -55,59 +46,60 @@ export const getUserProfile = async () => {
 };
 
 const preprocessText = (text: string = ""): string => {
-  const removedText = text
+  return text
     .toLowerCase()
     .replace(/[^\w\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-
-  return removeStopwords(removedText.split(" ")).join(" ");
 };
 
 const createUserText = (user) => {
-  const weightedTexts: { text: string; weight: number }[] = [];
   const id = user.id;
+  const parts: string[] = [];
 
   if (user.user_preferences?.length > 0) {
     const preferredGenres = user.user_preferences
       .map(({ genre }) => genre.genre_name)
-      .join(" ");
+      .join(", ");
 
-    weightedTexts.push({
-      text: preprocessText(preferredGenres),
-      weight: WEIGHTS.interests,
-    });
+    parts.push(`Preferred genres: ${preferredGenres}.`);
   }
 
   const readBooks = user.book_status.read
-    .map((book) => [book.book_title, book.description].join(" "))
+    .slice(0, 10)
+    .map(
+      (book) => `${book.book_title}. ${book.description?.slice(0, 400) || ""}`,
+    )
     .join(" ");
 
-  weightedTexts.push({
-    text: preprocessText(readBooks),
-    weight: WEIGHTS.read_books,
-  });
-
-  const willReadBooks = user.book_status.willRead
-    .map((book) => [book.book_title, book.description].join(" "))
-    .join(" ");
-
-  weightedTexts.push({
-    text: preprocessText(willReadBooks),
-    weight: WEIGHTS.want_to_read,
-  });
+  if (readBooks) {
+    parts.push(`Books the user has read: ${readBooks}`);
+  }
 
   const currentlyReadingBooks = user.book_status.currentlyReading
-    .map((book) => [book.book_title, book.description].join(" "))
+    .slice(0, 5)
+    .map(
+      (book) => `${book.book_title}. ${book.description?.slice(0, 400) || ""}`,
+    )
     .join(" ");
 
-  weightedTexts.push({
-    text: preprocessText(currentlyReadingBooks),
-    weight: WEIGHTS.currently_reading,
-  });
+  if (currentlyReadingBooks) {
+    parts.push(`Books the user is currently reading: ${currentlyReadingBooks}`);
+  }
+
+  const willReadBooks = user.book_status.willRead
+    .slice(0, 5)
+    .map((book) => book.book_title)
+    .join(", ");
+
+  if (willReadBooks) {
+    parts.push(`Books the user wants to read: ${willReadBooks}.`);
+  }
+
+  const mergedText = preprocessText(parts.join(" "));
 
   return {
     id,
-    categories: weightedTexts,
+    text: mergedText,
   };
 };
