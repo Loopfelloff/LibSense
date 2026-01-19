@@ -1,6 +1,9 @@
 import type { Request, Response } from "express";
 import { redisClient } from "../config/redisConfiguration.js";
 import { prisma } from "../config/prismaClientConfig.js";
+import { Queue } from "bullmq";
+
+const queue = new Queue("user_embeddings");
 
 const getFavouriteBook = async (req: Request, res: Response) => {
   try {
@@ -38,6 +41,7 @@ const getFavouriteBook = async (req: Request, res: Response) => {
         id: true,
         book_cover_image: true,
         book_title: true,
+        avg_book_rating: true,
         book_written_by: {
           select: {
             book_author: {
@@ -48,11 +52,6 @@ const getFavouriteBook = async (req: Request, res: Response) => {
                 author_middle_name: true,
               },
             },
-          },
-        },
-        review: {
-          select: {
-            rating: true,
           },
         },
         book_genres: {
@@ -72,13 +71,6 @@ const getFavouriteBook = async (req: Request, res: Response) => {
 
     const flattenedBooks = favouriteBooks.map((book) => {
       // Average rating
-      const averageRating =
-        book.review.length === 0
-          ? null
-          : (
-              book.review.reduce((sum, r) => sum + r.rating, 0) /
-              book.review.length
-            ).toFixed(1);
 
       return {
         id: book.id,
@@ -94,7 +86,7 @@ const getFavouriteBook = async (req: Request, res: Response) => {
 
         genres: book.book_genres.map((bg) => bg.genre.genre_name),
 
-        averageRating: averageRating ? Number(averageRating) : null,
+        averageRating: book.avg_book_rating,
       };
     });
 
@@ -152,6 +144,20 @@ const postFavouriteBook = async (req: Request, res: Response) => {
         book_id: bookId,
       },
     });
+
+    await queue.add(
+      "user_embeddings",
+      {
+        id,
+      },
+      {
+        jobId: id,
+        attempts: 3,
+        removeOnComplete: true,
+        delay: 10000,
+      },
+    );
+
     return res.status(200).json({
       success: true,
       data: favourite,
@@ -180,6 +186,19 @@ const removeFavouriteBook = async (req: Request, res: Response) => {
         user_id: id,
       },
     });
+
+    await queue.add(
+      "user_embeddings",
+      {
+        id,
+      },
+      {
+        jobId: id,
+        attempts: 3,
+        delay: 10000,
+        removeOnComplete: true,
+      },
+    );
 
     return res.status(200).json({
       success: true,

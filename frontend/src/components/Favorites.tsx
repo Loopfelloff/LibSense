@@ -1,15 +1,7 @@
 import { useEffect, useState } from "react";
 import { Heart, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { deleteFavorite, getFavorites } from "../apis/favorite.js";
-interface BookItem {
-  id: string;
-  title: string;
-  author: string;
-  coverImage: string;
-  averageRating: number | null;
-  genres: string[];
-  authors: string[];
-}
+import type { BookItem } from "../types/favoriteBooks.js";
 
 export function Favorite() {
   const [favoriteBooks, setFavoriteBooks] = useState<BookItem[]>([]);

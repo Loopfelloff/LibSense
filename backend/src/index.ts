@@ -24,8 +24,8 @@ import { bookStatusRouter } from "./routes/bookStatusRoute.js";
 import { authHandler } from "./controllers/authController.js";
 import { getUserProfile } from "../prisma/vector_embedding/userEmbedding.js";
 import { getAllBooks } from "../prisma/vector_embedding/bookEmbedding.js";
+import { recommendationRouter } from "./routes/recommendationRoute.js";
 
-getUserProfile();
 const app = express();
 app.use(cors(corsOptions));
 app.use(cookieParser());
@@ -61,6 +61,7 @@ app.use("/users", authenticationMiddleware);
 app.use("/users/profile", profileRouter);
 app.use("/users/books/favorites", favouriteRouter);
 app.use("/users/books/status", bookStatusRouter);
+app.use("/users/books/recommendations", recommendationRouter);
 
 app.listen(process.env.PORT, () => {
   console.log("Listening to port ", process.env.PORT);

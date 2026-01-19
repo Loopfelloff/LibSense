@@ -1,5 +1,6 @@
 import { prisma } from "../../src/config/prismaClientConfig.js";
 import axios from "axios";
+import { Worker, Job } from "bullmq";
 
 const preprocessText = (text: string = ""): string => {
   return text
@@ -85,7 +86,7 @@ const groupBookStatus = (bookStatusVal = []) => {
   );
 };
 
-export const getUserProfile = async () => {
+export const getAllUserProfile = async () => {
   const users = await prisma.user.findMany({
     include: {
       favourites: { include: { book: true } },
@@ -119,9 +120,45 @@ export const getUserProfile = async () => {
     if (err instanceof Error) console.log(err.message);
   }
   await Promise.all(
-    vectorArr.map((user) => insertEmbeddings(user.vector, user.id)),
+    vectorArr?.map((user) => insertEmbeddings(user.vector, user.id)),
   );
   console.log(JSON.stringify(userTexts, null, 2));
+};
+
+export const getUserProfile = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    include: {
+      favourites: { include: { book: true } },
+      book_status_val: { include: { book: true } },
+      user_preferences: { include: { genre: true } },
+    },
+  });
+  const userAfterGrouping = {
+    ...user,
+    book_status: groupBookStatus(user?.book_status_val),
+  };
+  const userTexts = createUserText(userAfterGrouping);
+
+  let vectorObj = {};
+
+  try {
+    const response = await axios.post(
+      "http://127.0.0.1:8000/embedd/users",
+      userTexts,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+    vectorObj = response.data;
+    console.log(JSON.stringify(vectorObj, null, 3));
+  } catch (err: unknown) {
+    if (err instanceof Error) console.log(err.message);
+  }
 };
 
 const insertEmbeddings = async (vectorArray: number[], user_id: string) => {

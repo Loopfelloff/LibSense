@@ -32,6 +32,13 @@ class Book(Base):
     book_vector = relationship("BookVector", back_populates="book", uselist=False)
 
 
+class User(Base):
+    __tablename__ = "user"
+
+    id = Column(String, primary_key=True, index=True)
+    user_vector = relationship("UserVector", back_populates="user", uselist=False)
+
+
 class BookVector(Base):
     __tablename__ = "book_vector"
 
@@ -43,3 +50,16 @@ class BookVector(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     book = relationship("Book", back_populates="book_vector")
+
+
+class UserVector(Base):
+    __tablename__ = "user_vector"
+
+    id = Column(String, primary_key=True)
+    user_id = Column(String, ForeignKey("user.id", ondelete="CASCADE"), unique=True)
+
+    embedding = Column(Vector(384))
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", back_populates="user_vector")

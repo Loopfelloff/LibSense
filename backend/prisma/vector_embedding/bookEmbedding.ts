@@ -66,6 +66,7 @@ export const getAllBooks = async () => {
         },
       },
     );
+
     vectorArr = response.data;
     console.log(JSON.stringify(vectorArr[0], null, 3));
   } catch (err: unknown) {
