@@ -1,5 +1,3 @@
-from fastapi import FastAPI
-
 from .embeddBooks import router as books_router
 from .embeddUsers import router as user_router
 from .cosineDistance import router as search_router

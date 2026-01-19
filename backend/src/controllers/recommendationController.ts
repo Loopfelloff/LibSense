@@ -7,11 +7,11 @@ const getRecommendations = async (req: Request, res: Response) => {
   try {
     const { id } = req.user as { id: string };
     const countKey = `user:${id}:recommendations`;
-    const cachedRecommendationBooksId = JSON.parse(
-      await redisClient.get(countKey),
-    );
+    const rawData = await redisClient.get(countKey);
 
-    let recommendationBooksId = cachedRecommendationBooksId ?? [];
+    const cachedRecommendationBooksId = JSON.parse(rawData ?? "[]");
+
+    let recommendationBooksId = cachedRecommendationBooksId;
     if (
       !cachedRecommendationBooksId ||
       cachedRecommendationBooksId?.length == 0
@@ -24,7 +24,7 @@ const getRecommendations = async (req: Request, res: Response) => {
           },
         );
         recommendationBooksId = response.data.recommendations.map(
-          ({ book_id }: string) => book_id,
+          ({ book_id }: { book_id: string }) => book_id,
         );
         await redisClient.set(countKey, JSON.stringify(recommendationBooksId), {
           EX: 60 * 60,

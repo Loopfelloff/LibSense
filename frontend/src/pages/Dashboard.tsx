@@ -17,14 +17,14 @@ export function Dashboard() {
   const navigation = useNavigate();
 
   const BOOKS_TO_SHOW = 6;
-
   useEffect(() => {
     if (!authContext?.loggedIn) navigation("/login");
+    if (!authContext) return;
     console.log("running");
     const fetchRecommendations = async () => {
       try {
         setIsLoading(true);
-        const favoriteList = await getRecommendations(authContext?.id);
+        const favoriteList = await getRecommendations(authContext.id);
         console.log(favoriteList.data);
         setAllRecommendedBooks(favoriteList.data);
         setDisplayedBooks(favoriteList.data.slice(0, BOOKS_TO_SHOW));
@@ -36,7 +36,7 @@ export function Dashboard() {
       }
     };
     fetchRecommendations();
-  }, [authContext?.loggedIn, authContext?.id, navigation]);
+  }, [authContext, authContext?.id, navigation]);
 
   const handleAddOption = async (bookId: string, option: string) => {
     console.log(`Adding book ${bookId} to ${option}`);
@@ -109,7 +109,7 @@ export function Dashboard() {
                         >
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
-                              <div className="w-10 h-14 bg-gray-200 flex-shrink-0 overflow-hidden rounded">
+                              <div className="w-10 h-14 bg-gray-200 shrink-0 overflow-hidden rounded">
                                 <img
                                   src={book.coverImage}
                                   alt={book.title}
