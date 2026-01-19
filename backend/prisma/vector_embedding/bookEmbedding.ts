@@ -58,7 +58,7 @@ export const getAllBooks = async () => {
   console.log("hi");
   try {
     const response = await axios.post(
-      "http://127.0.0.1:8000/embedd/books/all",
+      "http://127.0.0.1:8000/books/embedd/all",
       bookTexts,
       {
         headers: {
@@ -72,6 +72,51 @@ export const getAllBooks = async () => {
   } catch (err: unknown) {
     if (err instanceof Error) console.log(err.message);
   }
+  // await Promise.all(
+  //   vectorArr.map((book) => insertEmbeddings(book.vector, book.id)),
+  // );
+};
+
+export const getBooks = async (bookId: string) => {
+  const book = await prisma.book.findUnique({
+    where: {
+      id: bookId,
+    },
+    include: {
+      book_written_by: {
+        include: {
+          book_author: true,
+        },
+      },
+      book_genres: {
+        include: {
+          genre: true,
+        },
+      },
+    },
+  });
+  const bookTexts = createBookText(book);
+
+  let vectorObj = {};
+
+  console.log("hi");
+  try {
+    const response = await axios.post(
+      "http://127.0.0.1:8000/books/embedd",
+      bookTexts,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    vectorObj = response.data;
+    console.log(JSON.stringify(vectorObj, null, 3));
+  } catch (err: unknown) {
+    if (err instanceof Error) console.log(err.message);
+  }
+  await insertEmbeddings(vectorObj.vector, vectorObj.id);
   // await Promise.all(
   //   vectorArr.map((book) => insertEmbeddings(book.vector, book.id)),
   // );

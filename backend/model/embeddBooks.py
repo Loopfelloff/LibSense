@@ -1,9 +1,11 @@
+from fastapi import APIRouter
 from .utils.processText import process_text
 from pydantic import BaseModel
 from uuid import UUID
 from typing import List, Optional
-from .api.fastapi import app
 from .sentenceTransformers import transformer_model
+
+router = APIRouter()
 
 
 class Book(BaseModel):
@@ -21,14 +23,14 @@ def processBook(book: Book):
     return str(book.id), vector
 
 
-@app.post("/embedd/books/all")
+@router.post("/embedd/all")
 def embedd_books_for_db(books: List[Book]):
     return [
         {"id": book_id, "vector": vector} for book_id, vector in map(processBook, books)
     ]
 
 
-@app.post("/embedd/books")
+@router.post("/embedd")
 def embedd_book(book: Book):
     book_id, vector = processBook(book)
     return {"id": book_id, "vector": vector}

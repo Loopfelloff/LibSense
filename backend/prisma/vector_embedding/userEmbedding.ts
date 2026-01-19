@@ -106,7 +106,7 @@ export const getAllUserProfile = async () => {
   console.log("hi");
   try {
     const response = await axios.post(
-      "http://127.0.0.1:8000/embedd/users/all",
+      "http://127.0.0.1:8000/users/embedd/all",
       userTexts,
       {
         headers: {
@@ -146,7 +146,7 @@ export const getUserProfile = async (userId: string) => {
 
   try {
     const response = await axios.post(
-      "http://127.0.0.1:8000/embedd/users",
+      "http://127.0.0.1:8000/users/embedd",
       userTexts,
       {
         headers: {
@@ -159,6 +159,7 @@ export const getUserProfile = async (userId: string) => {
   } catch (err: unknown) {
     if (err instanceof Error) console.log(err.message);
   }
+  await insertEmbeddings(vectorObj.vector, vectorObj.id);
 };
 
 const insertEmbeddings = async (vectorArray: number[], user_id: string) => {

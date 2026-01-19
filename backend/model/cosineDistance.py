@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException
-from sqlalchemy import not_
+from fastapi.routing import APIRouter
 from sqlalchemy.orm import Session
 from model.db.database import (
     BookStatusVal,
@@ -12,8 +12,9 @@ from model.db.database import (
 from pathlib import Path
 from model.sentenceTransformers import transformer_model
 
-app = FastAPI()
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+router = APIRouter()
 
 
 def get_db():
@@ -24,7 +25,7 @@ def get_db():
         db.close()
 
 
-@app.get("/search/{search}")
+@router.get("/search/{search}")
 def cosine_similarity(search: str, db: Session = Depends(get_db)):
 
     target_embedding = transformer_model.encode(search)
@@ -49,7 +50,7 @@ def cosine_similarity(search: str, db: Session = Depends(get_db)):
     }
 
 
-@app.get("/recommend/books/{userId}")
+@router.get("/recommend/books/{userId}")
 def recommend_books(userId: str, db: Session = Depends(get_db)):
     user_vector = db.query(UserVector).filter(UserVector.user_id == userId).first()
 
