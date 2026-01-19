@@ -1,7 +1,16 @@
 from fastapi import FastAPI, Depends, HTTPException
 import joblib
+from sqlalchemy import not_, or_
 from sqlalchemy.orm import Session
-from model.db.database import SessionLocal, BookVector, Book, User, UserVector
+from model.db.database import (
+    BookStatusVal,
+    SessionLocal,
+    BookVector,
+    Book,
+    Status,
+    User,
+    UserVector,
+)
 from pathlib import Path
 from model.sentenceTransformers import transformer_model
 
@@ -49,9 +58,19 @@ def recommend_books(userId: str, db: Session = Depends(get_db)):
     if not user_vector:
         raise HTTPException(status_code=404, detail="User vector not found")
 
+        # .outerjoin(
+        #     BookStatusVal,
+        #     (BookStatusVal.user_id == userId) & (BookStatusVal.book_id == Book.id),
+        # )
+
     results = (
         db.query(BookVector)
         .join(Book)
+        .outerjoin(
+            BookStatusVal,
+            (BookStatusVal.book_id == Book.id) & (BookStatusVal.user_id == userId),
+        )
+        .filter(BookStatusVal.id.is_(None))
         .order_by(BookVector.embedding.cosine_distance(user_vector.embedding))
         .limit(6)
         .all()

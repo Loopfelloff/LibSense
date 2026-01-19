@@ -139,14 +139,6 @@ export function Dashboard() {
                                 >
                                   Add to Currently Reading
                                 </button>
-                                <button
-                                  onClick={() =>
-                                    handleAddOption(book.id, "finished")
-                                  }
-                                  className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
-                                >
-                                  Add to Finished
-                                </button>
                               </div>
                             )}
                           </td>

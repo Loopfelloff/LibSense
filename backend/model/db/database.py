@@ -1,7 +1,17 @@
+import enum
 import os
 from dotenv import load_dotenv
-import joblib
-from sqlalchemy import create_engine, Column, Float, String, DateTime, ForeignKey, func
+from sqlalchemy import (
+    Enum,
+    UniqueConstraint,
+    create_engine,
+    Column,
+    Float,
+    String,
+    DateTime,
+    ForeignKey,
+    func,
+)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import relationship
@@ -17,6 +27,12 @@ if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
+
+class Status(enum.Enum):
+    READING = "READING"
+    READ = "READ"
+    WILLREAD = "WILLREAD"
 
 
 class Book(Base):
@@ -44,11 +60,8 @@ class BookVector(Base):
 
     id = Column(String, primary_key=True)
     book_id = Column(String, ForeignKey("book.id", ondelete="CASCADE"), unique=True)
-
     embedding = Column(Vector(384))
-
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-
     book = relationship("Book", back_populates="book_vector")
 
 
@@ -57,9 +70,20 @@ class UserVector(Base):
 
     id = Column(String, primary_key=True)
     user_id = Column(String, ForeignKey("user.id", ondelete="CASCADE"), unique=True)
-
     embedding = Column(Vector(384))
-
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-
     user = relationship("User", back_populates="user_vector")
+
+
+class BookStatusVal(Base):
+    __tablename__ = "book_status_val"
+
+    id = Column(String, primary_key=True)
+    status = Column(Enum(Status))
+    user_id = Column(String, ForeignKey("user.id", ondelete="CASCADE"))
+    book_id = Column(String, ForeignKey("book.id", ondelete="CASCADE"))
+
+    book = relationship("Book")
+    user = relationship("User")
+
+    __table_args__ = (UniqueConstraint("book_id", "user_id", name="user_book_status"),)
