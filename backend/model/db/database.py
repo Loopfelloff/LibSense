@@ -87,3 +87,19 @@ class BookStatusVal(Base):
     user = relationship("User")
 
     __table_args__ = (UniqueConstraint("book_id", "user_id", name="user_book_status"),)
+
+
+class Favourite(Base):
+    __tablename__ = "favourite"
+
+    id = Column(String, primary_key=True)
+    status = Column(Enum(Status))
+    user_id = Column(String, ForeignKey("user.id", ondelete="CASCADE"))
+    book_id = Column(String, ForeignKey("book.id", ondelete="CASCADE"))
+
+    book = relationship("Book")
+    user = relationship("User")
+
+    __table_args__ = (
+        UniqueConstraint("book_id", "user_id", name="user_book_favourite"),
+    )

@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { prisma } from "../config/prismaClientConfig.js";
 import { Status } from "../../generated/prisma/index.js";
+import { redisClient } from "../config/redisConfiguration.js";
 
 type BookStatus = "read" | "willread" | "reading";
 
@@ -55,7 +56,7 @@ const getBooksByStatus = async (req: Request, res: Response) => {
 
 const editBookByStatus = async (req: Request, res: Response) => {
   try {
-    const { type, bookId } = req.query as {
+    const { type, bookId } = req.body as {
       type?: BookStatus;
       bookId?: string;
     };
@@ -79,7 +80,7 @@ const editBookByStatus = async (req: Request, res: Response) => {
 
     const editRecord = await prisma.bookStatusVal.upsert({
       where: {
-        book_id_user_id: {
+        user_book_status: {
           book_id: bookId,
           user_id: id,
         },
@@ -94,6 +95,8 @@ const editBookByStatus = async (req: Request, res: Response) => {
       },
     });
 
+    const countKey = `user:${id}:recommendations`;
+    await redisClient.del(countKey);
     return res.status(200).json({
       success: true,
       data: editRecord,
@@ -114,7 +117,7 @@ const editBookByStatus = async (req: Request, res: Response) => {
 
 const deleteBookByStatus = async (req: Request, res: Response) => {
   try {
-    const { bookId } = req.query as { bookId?: string };
+    const { bookId } = req.body as { bookId?: string };
 
     const { id } = req.user as { id: string };
 
@@ -131,6 +134,8 @@ const deleteBookByStatus = async (req: Request, res: Response) => {
         user_id: id,
       },
     });
+    const countKey = `user:${id}:recommendations`;
+    await redisClient.del(countKey);
     return res.status(200).json({
       success: true,
     });

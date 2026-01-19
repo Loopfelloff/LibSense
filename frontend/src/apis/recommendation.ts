@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const getRecommendations = async (id) => {
+const getRecommendations = async (id: string) => {
   try {
     const response = await axios.get(
       "http://localhost:5000/users/books/recommendations",

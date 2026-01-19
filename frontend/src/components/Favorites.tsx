@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Heart, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { deleteFavorite, getFavorites } from "../apis/favorite.js";
 import type { BookItem } from "../types/favoriteBooks.js";
+import { useNavigate } from "react-router-dom";
 
 export function Favorite() {
   const [favoriteBooks, setFavoriteBooks] = useState<BookItem[]>([]);
@@ -18,6 +19,7 @@ export function Favorite() {
     };
     fetchFavorites();
   }, [currentPage]);
+  const navigation = useNavigate();
 
   const handleRemoveBook = async (id: string) => {
     if (
@@ -85,6 +87,9 @@ export function Favorite() {
                       <tr
                         key={book.id}
                         className="bg-white cursor-pointer hover:bg-gray-50"
+                        onClick={() => {
+                          navigation(`/bookReview/${book.id}`);
+                        }}
                       >
                         {/* Book */}
                         <td className="px-4 py-3">

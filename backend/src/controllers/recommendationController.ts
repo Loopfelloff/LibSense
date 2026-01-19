@@ -12,7 +12,10 @@ const getRecommendations = async (req: Request, res: Response) => {
     );
 
     let recommendationBooksId = cachedRecommendationBooksId ?? [];
-    if (!cachedRecommendationBooksId) {
+    if (
+      !cachedRecommendationBooksId ||
+      cachedRecommendationBooksId?.length == 0
+    ) {
       try {
         const response = await axios.get(
           `http://127.0.0.1:8000/recommend/books/${id}`,
@@ -21,10 +24,10 @@ const getRecommendations = async (req: Request, res: Response) => {
           },
         );
         recommendationBooksId = response.data.recommendations.map(
-          ({ book_id }) => book_id,
+          ({ book_id }: string) => book_id,
         );
         await redisClient.set(countKey, JSON.stringify(recommendationBooksId), {
-          EX: 60 * 60, // 1 hour
+          EX: 60 * 60,
         });
       } catch (err: unknown) {
         if (err instanceof Error) console.log(err.message);

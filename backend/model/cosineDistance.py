@@ -1,14 +1,12 @@
 from fastapi import FastAPI, Depends, HTTPException
-import joblib
-from sqlalchemy import not_, or_
+from sqlalchemy import not_
 from sqlalchemy.orm import Session
 from model.db.database import (
     BookStatusVal,
+    Favourite,
     SessionLocal,
     BookVector,
     Book,
-    Status,
-    User,
     UserVector,
 )
 from pathlib import Path
@@ -35,7 +33,7 @@ def cosine_similarity(search: str, db: Session = Depends(get_db)):
         db.query(BookVector)
         .join(Book)
         .order_by(BookVector.embedding.cosine_distance(target_embedding))
-        .limit(6)
+        .limit(12)
         .all()
     )
     return {
@@ -57,18 +55,16 @@ def recommend_books(userId: str, db: Session = Depends(get_db)):
 
     if not user_vector:
         raise HTTPException(status_code=404, detail="User vector not found")
-
-        # .outerjoin(
-        #     BookStatusVal,
-        #     (BookStatusVal.user_id == userId) & (BookStatusVal.book_id == Book.id),
-        # )
-
     results = (
         db.query(BookVector)
         .join(Book)
         .outerjoin(
             BookStatusVal,
             (BookStatusVal.book_id == Book.id) & (BookStatusVal.user_id == userId),
+        )
+        .outerjoin(
+            Favourite,
+            (Favourite.book_id == Book.id) & (Favourite.user_id == userId),
         )
         .filter(BookStatusVal.id.is_(None))
         .order_by(BookVector.embedding.cosine_distance(user_vector.embedding))

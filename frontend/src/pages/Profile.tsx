@@ -4,7 +4,7 @@ import { getUserProfile } from "../apis/profile";
 import { getBooksByStatus } from "../apis/bookStatus";
 import type { User } from "../types/profile";
 import type { Book } from "../types/books";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 export function Profile() {
   const [user, setUser] = useState<User | null>(null);
@@ -12,6 +12,7 @@ export function Profile() {
   const [readBooks, setReadBooks] = useState<Book[]>([]);
   const { userId } = useParams<{ userId: string }>();
   console.log({ userId });
+  const navigation = useNavigate();
 
   useEffect(() => {
     if (!userId) return;
@@ -73,7 +74,10 @@ export function Profile() {
                 {readingBooks.map((book) => (
                   <div
                     key={book.id}
-                    className="flex gap-3 p-3 w-fit border border-gray-300 "
+                    className="flex cursor-pointer gap-3 p-3 w-fit border border-gray-300 "
+                    onClick={() => {
+                      navigation(`/bookReview/${book.id}`);
+                    }}
                   >
                     <img
                       src={book.book_cover_image}
@@ -105,7 +109,10 @@ export function Profile() {
                 {readBooks.map((book) => (
                   <div
                     key={book.id}
-                    className="flex gap-3 p-3 w-fit border border-gray-300 "
+                    className="flex cursor-pointer gap-3 p-3 w-fit border border-gray-300 "
+                    onClick={() => {
+                      navigation(`/bookReview/${book.id}`);
+                    }}
                   >
                     <img
                       src={book.book_cover_image}

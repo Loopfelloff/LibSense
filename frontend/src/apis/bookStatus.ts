@@ -14,4 +14,17 @@ const getBooksByStatus = async (
   return response.data.data;
 };
 
-export { getBooksByStatus };
+const postBooksByStatus = async (bookId: string, status: string) => {
+  const response = await axios.post(
+    "http://localhost:5000/users/books/status",
+    {
+      bookId,
+      type: status,
+    },
+    {
+      withCredentials: true,
+    },
+  );
+  return response.data;
+};
+export { getBooksByStatus, postBooksByStatus };

@@ -129,11 +129,11 @@ const getFavouriteBook = async (req: Request, res: Response) => {
 
 const postFavouriteBook = async (req: Request, res: Response) => {
   try {
-    const { bookId } = req.params as { bookId: string };
+    const { bookId } = req.body as { bookId: string };
     const { id } = req.user as { id: string };
     const favourite = await prisma.favourite.upsert({
       where: {
-        book_id_user_id: {
+        user_book_favourite: {
           book_id: bookId,
           user_id: id,
         },
@@ -158,6 +158,8 @@ const postFavouriteBook = async (req: Request, res: Response) => {
       },
     );
 
+    const countKey = `user:${id}:recommendations`;
+    await redisClient.del(countKey);
     return res.status(200).json({
       success: true,
       data: favourite,
@@ -200,6 +202,8 @@ const removeFavouriteBook = async (req: Request, res: Response) => {
       },
     );
 
+    const countKey = `user:${id}:recommendations`;
+    await redisClient.del(countKey);
     return res.status(200).json({
       success: true,
     });

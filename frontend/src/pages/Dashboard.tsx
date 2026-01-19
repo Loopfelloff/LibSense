@@ -3,22 +3,32 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import { getRecommendations } from "../apis/recommendation";
 import type { BookItem } from "../types/favoriteBooks";
+import { handleAddClick } from "../utils/optionsclick";
 
 export function Dashboard() {
-  const [recommendedBooks, setRecommendedBooks] = useState<BookItem | []>([]);
+  const [allRecommendedBooks, setAllRecommendedBooks] = useState<BookItem[]>(
+    [],
+  );
+  const [displayedBooks, setDisplayedBooks] = useState<BookItem[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const authContext = useContext(UserContext)?.contextState;
   const navigation = useNavigate();
 
+  const BOOKS_TO_SHOW = 6;
+
   useEffect(() => {
     if (!authContext?.loggedIn) navigation("/login");
+    console.log("running");
     const fetchRecommendations = async () => {
       try {
         setIsLoading(true);
         const favoriteList = await getRecommendations(authContext?.id);
         console.log(favoriteList.data);
-        setRecommendedBooks(favoriteList.data);
+        setAllRecommendedBooks(favoriteList.data);
+        setDisplayedBooks(favoriteList.data.slice(0, BOOKS_TO_SHOW));
+        setCurrentIndex(BOOKS_TO_SHOW);
       } catch (error) {
         console.error("Error fetching recommendations:", error);
       } finally {
@@ -26,12 +36,24 @@ export function Dashboard() {
       }
     };
     fetchRecommendations();
-  }, []);
+  }, [authContext?.loggedIn, authContext?.id, navigation]);
 
-  const handleAddOption = (bookId: string, option: string) => {
+  const handleAddOption = async (bookId: string, option: string) => {
     console.log(`Adding book ${bookId} to ${option}`);
-    // Add your logic here to handle the selected option
+    await handleAddClick(bookId, option);
     setOpenDropdown(null);
+
+    // Remove the added book and add next one if available
+    const updatedBooks = displayedBooks.filter((book) => book.id !== bookId);
+
+    // If there are more books available, add the next one
+    if (currentIndex < allRecommendedBooks.length) {
+      const nextBook = allRecommendedBooks[currentIndex];
+      setDisplayedBooks([...updatedBooks, nextBook]);
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      setDisplayedBooks(updatedBooks);
+    }
   };
 
   return (
@@ -45,6 +67,9 @@ export function Dashboard() {
           <div className="border border-gray-300 rounded">
             <div className="px-4 py-3 bg-gray-50 border-b border-gray-300 flex items-center justify-between">
               <div className="text-gray-900 font-medium">Recommended Books</div>
+              <div className="text-gray-600 text-sm">
+                Showing {displayedBooks.length} of {allRecommendedBooks.length}
+              </div>
             </div>
             <div className="overflow-x-auto min-h-96 min-w-full">
               {isLoading ? (
@@ -73,9 +98,15 @@ export function Dashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-300">
-                    {recommendedBooks &&
-                      recommendedBooks.map((book: BookItem) => (
-                        <tr key={book.id} className="bg-white hover:bg-gray-50">
+                    {displayedBooks.length > 0 ? (
+                      displayedBooks.map((book: BookItem) => (
+                        <tr
+                          key={book.id}
+                          onClick={() => {
+                            navigation(`/bookReview/${book.id}`);
+                          }}
+                          className="bg-white cursor-pointer hover:bg-gray-50"
+                        >
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
                               <div className="w-10 h-14 bg-gray-200 flex-shrink-0 overflow-hidden rounded">
@@ -101,11 +132,12 @@ export function Dashboard() {
                           </td>
                           <td className="px-4 py-3 relative">
                             <button
-                              onClick={() =>
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setOpenDropdown(
                                   openDropdown === book.id ? null : book.id,
-                                )
-                              }
+                                );
+                              }}
                               className="px-3 py-1 border border-gray-700 text-gray-700 hover:bg-gray-100"
                             >
                               Add
@@ -113,28 +145,31 @@ export function Dashboard() {
                             {openDropdown === book.id && (
                               <div className="absolute right-4 top-12 bg-white border border-gray-300 rounded shadow-lg z-10 min-w-40">
                                 <button
-                                  onClick={() =>
-                                    handleAddOption(book.id, "favorites")
-                                  }
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleAddOption(book.id, "favorites");
+                                  }}
                                   className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 border-b border-gray-200"
                                 >
                                   Add to Favorites
                                 </button>
                                 <button
-                                  onClick={() =>
-                                    handleAddOption(book.id, "will-read")
-                                  }
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleAddOption(book.id, "will-read");
+                                  }}
                                   className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 border-b border-gray-200"
                                 >
                                   Add to Will Read
                                 </button>
                                 <button
-                                  onClick={() =>
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     handleAddOption(
                                       book.id,
                                       "currently-reading",
-                                    )
-                                  }
+                                    );
+                                  }}
                                   className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 border-b border-gray-200"
                                 >
                                   Add to Currently Reading
@@ -143,7 +178,17 @@ export function Dashboard() {
                             )}
                           </td>
                         </tr>
-                      ))}
+                      ))
+                    ) : (
+                      <tr>
+                        <td
+                          colSpan={5}
+                          className="px-4 py-8 text-center text-gray-500"
+                        >
+                          No more recommendations available
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               )}

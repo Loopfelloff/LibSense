@@ -12,6 +12,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 type SelectValue =
   | "dashBoard"
+  | "myLibrary"
   | "favorites"
   | "topRated"
   | "community"
@@ -24,6 +25,7 @@ interface SidebarProps {
 
 const routeMap: Record<SelectValue, string> = {
   dashBoard: "/dashboard",
+  myLibrary: "/myLibrary",
   favorites: "/favorites",
   topRated: "/topRated",
   community: "/community",
@@ -43,6 +45,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
     key: SelectValue;
   }[] = [
     { icon: Home, label: "Dashboard", key: "dashBoard" },
+    { icon: Library, label: "My Library", key: "myLibrary" },
     { icon: Heart, label: "Favorites", key: "favorites" },
     { icon: Star, label: "Top Rated", key: "topRated" },
     { icon: Users, label: "Community", key: "community" },

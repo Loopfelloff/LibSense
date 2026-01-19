@@ -38,7 +38,7 @@ app.use("/auth", googleLoginHandler);
 app.use("/failure", failureHandler);
 app.use("/mock", mockDataHandler); // remove the underlying handler and stuff after the mocking or testing phase is complete during deployment
 // we have to later on add middleware instead to verify if this is from a verified request or not.
-app.use("/book", authenticationMiddleware); // use this middelware for every restricted request
+app.use("/book", authenticationMiddleware);
 app.use("/auth", authenticationMiddleware);
 app.use("/auth", authHandler);
 app.use("/review", authenticationMiddleware);
