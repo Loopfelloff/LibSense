@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from fastapi.routing import APIRouter
 import joblib
-from utils.top_fifty_genre import item
+from model.utils.top_fifty_genre import item
 from pydantic import BaseModel
 from model.utils.text_process_for_classification import transformText
 class BookDescription(BaseModel):
