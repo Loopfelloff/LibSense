@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
+import type{Request, Response} from 'express'
 import { router as verifyEmailHandler } from "./routes/signupRoute.js";
 import { router as verifyOtpHandler } from "./routes/verifyOtpRoute.js";
 import { router as loginHandler } from "./routes/loginRoute.js";
@@ -14,6 +15,7 @@ import { router as checkIfStatusExistHandler } from "./routes/checkIfStatusExist
 import { router as mockDataHandler } from "./routes/mockDataRoute.js";
 import { router as interestHandler } from "./routes/interestRoute.js";
 import { router as addToWillReadHandler } from "./routes/addToWillReadRoute.js";
+import {router as genreClassificationHandler} from "./routes/genreClassificationRoute.js"
 import { authenticationMiddleware } from "./middlewares/authenticationMiddleware.js";
 import { checkForEmailEntryHandler } from "./controllers/checkForEmailEntryController.js";
 import { router as bookReviewHandler } from "./routes/bookreviewRoutes.js";
@@ -53,6 +55,8 @@ app.use("/addToWillRead", authenticationMiddleware);
 app.use("/addToWillRead", addToWillReadHandler);
 app.use("/checkIfStatusExist", authenticationMiddleware);
 app.use("/checkIfStatusExist", checkIfStatusExistHandler);
+app.use("/genreClassification", authenticationMiddleware);
+app.use("/genreClassification", genreClassificationHandler);
 
 app.use("/registerAccount", verifyEmailHandler);
 app.use("/verifyOtp", verifyOtpHandler);
@@ -62,6 +66,10 @@ app.use("/users/profile", profileRouter);
 app.use("/users/books/favorites", favouriteRouter);
 app.use("/users/books/status", bookStatusRouter);
 app.use("/users/books/recommendations", recommendationRouter);
+app.get("/test" , async(req:Request , res : Response)=>
+{
+	return res.json({"message" : "sdlfjsd"})
+    })
 
 app.listen(process.env.PORT, () => {
   console.log("Listening to port ", process.env.PORT);
