@@ -1,10 +1,13 @@
 import type { Request, Response } from "express";
 import axios from 'axios'
+import { prisma } from "../config/prismaClientConfig.js";
+import type { reqUser } from "../types/reqUserType.js";
 
 const genreClassificationHandler = async(req : Request , res : Response)=>{
     try{
 
 	let {description} = req.body as {description : string}
+	const user = req.user as reqUser
 
 	if(!description) return res.status(400).json({
 	    success : false,
@@ -18,14 +21,14 @@ const genreClassificationHandler = async(req : Request , res : Response)=>{
 	    errMsg : `missing description in the request header` 
 	})
 
+
+	let recommendedGenres : string[] = []
+
 	try{
 
 	    const response = await axios.post("http://127.0.0.1:8000/genre_classification" , {description : description})
 
-	    return res.status(200).json({
-		success : true,
-		data : response.data.data
-	    })
+	    recommendedGenres = response.data.data as string[]
 
 	}
 	catch(error : unknown){
@@ -43,7 +46,104 @@ const genreClassificationHandler = async(req : Request , res : Response)=>{
 
 	}
 
+	if (recommendedGenres.length === 0) return res.status(404).json({
+	    success:true,
+	    data : []
+	})
 
+	let genreIdList : {id : string;}[] | string[]
+	let bookIdList : {book_id:string;}[] | string[]
+
+	genreIdList = await prisma.genre.findMany({
+	    where : {
+		genre_name :{
+		    in : recommendedGenres
+		}
+	    },
+	    select : 
+	    {
+		id : true
+	    }
+	})
+
+
+	genreIdList = genreIdList.map(item=>item.id)
+
+	bookIdList = await prisma.bookStatusVal.findMany({
+	    where:{
+		user_id : user.id
+	    }
+	    ,
+	    select : {
+		book_id : true
+	    }
+	})
+
+	bookIdList= bookIdList.map(item=>item.book_id)
+	type BookWithGenre = {
+    id: string;
+    book_title: string;
+    book_cover_image: string;
+    avg_book_rating: number;
+    book_rating_count: number;
+    book_genres: {
+        genre: {
+            genre_name: string;
+        };
+    }[];
+}
+
+const highestRatedGenreBookList: BookWithGenre[] = []
+const usedBookIds = new Set<string>()
+
+for (const genre_id of genreIdList) {
+    const foundBook = await prisma.book.findFirst({
+        where : {
+            book_genres: {
+                some: {
+                    genre_id: genre_id
+                }
+            },
+            id: {
+                notIn: [...bookIdList, ...Array.from(usedBookIds)]
+            }
+        },
+        select:{
+            id: true,
+            book_title: true,
+            book_cover_image: true,
+            avg_book_rating: true,
+            book_rating_count: true,
+            book_genres: {
+                where: {
+                    genre_id: genre_id
+                },
+                select: {
+                    genre: {
+                        select: {
+                            genre_name: true
+                        }
+                    }
+                }
+            }
+        },
+        orderBy: {
+            avg_book_rating: 'desc'
+        }
+    })
+    
+    if (foundBook) {
+        usedBookIds.add(foundBook.id)
+        highestRatedGenreBookList.push(foundBook)
+    }
+}
+
+	res.status(200).json({
+
+	    success : true,
+	    data : highestRatedGenreBookList
+
+	})
 
 
     }
