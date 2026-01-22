@@ -31,13 +31,10 @@ def replaceWithSynonym(text):
     for word in list_word:
         if word in original_word:
             filtered_word.append(word)
-            print("yes exists")
         elif word in synonym_word:
             filtered_word.append(synonym_word[word][0])
-            print("yes exists as synonym")
         elif word not in synonym_word and word not in original_word:
             filtered_word.append(word)
-            print("not it doesnt' exists at all")
     return " ".join(filtered_word)
 
 

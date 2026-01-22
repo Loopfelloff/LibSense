@@ -4,23 +4,27 @@ import joblib
 from model.utils.top_fifty_genre import item
 from pydantic import BaseModel
 from model.utils.text_process_for_classification import transformText
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 class BookDescription(BaseModel):
-    text : str | None
+    description : str | None
 router = APIRouter()
 @router.post("/genre_classification")
 def classified_genre(description : BookDescription | None):
 
     if description is None:
         raise HTTPException(status_code=400 , detail="missing description in the request header") 
-    if description.text is None:
+    if description.description is None:
         raise HTTPException(status_code=400 , detail="missing description in the request header") 
 
-    description_text = description.text.strip()
+    description_text = description.description.strip()
 
     if description_text == '':
         raise HTTPException(status_code=400 , detail="missing description in the request header") 
 
-    pipeline = joblib.load("../trained_model/one_vs_all_approach.joblib")
+    pipeline = joblib.load(f"{BASE_DIR}/trained_model/one_vs_all_approach.joblib")
 
     recommendedGenre = [] 
 
