@@ -5,8 +5,6 @@ from typing import List
 from .sentenceTransformers import transformer_model
 
 router = APIRouter()
-
-
 class User(BaseModel):
     id: UUID
     text: str
