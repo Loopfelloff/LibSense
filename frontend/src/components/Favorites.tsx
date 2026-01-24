@@ -1,15 +1,8 @@
 import { useEffect, useState } from "react";
 import { Heart, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { deleteFavorite, getFavorites } from "../apis/favorite.js";
-interface BookItem {
-  id: string;
-  title: string;
-  author: string;
-  coverImage: string;
-  averageRating: number | null;
-  genres: string[];
-  authors: string[];
-}
+import type { BookItem } from "../types/favoriteBooks.js";
+import { useNavigate } from "react-router-dom";
 
 export function Favorite() {
   const [favoriteBooks, setFavoriteBooks] = useState<BookItem[]>([]);
@@ -26,14 +19,11 @@ export function Favorite() {
     };
     fetchFavorites();
   }, [currentPage]);
+  const navigation = useNavigate();
 
   const handleRemoveBook = async (id: string) => {
-    if (
-      confirm("Are you sure you want to remove this book from your favorites?")
-    ) {
-      setFavoriteBooks(favoriteBooks.filter((book) => book.id !== id));
-      await deleteFavorite(id);
-    }
+    setFavoriteBooks(favoriteBooks.filter((book) => book.id !== id));
+    await deleteFavorite(id);
   };
 
   const goToPage = (page: number) => {
@@ -93,6 +83,9 @@ export function Favorite() {
                       <tr
                         key={book.id}
                         className="bg-white cursor-pointer hover:bg-gray-50"
+                        onClick={() => {
+                          navigation(`/bookReview/${book.id}`);
+                        }}
                       >
                         {/* Book */}
                         <td className="px-4 py-3">
@@ -125,7 +118,10 @@ export function Favorite() {
                         {isEditing && (
                           <td className="px-4 py-3">
                             <button
-                              onClick={() => handleRemoveBook(book.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveBook(book.id);
+                              }}
                               className="p-2 border border-gray-300 text-gray-700 hover:bg-gray-100"
                               title="Remove from favorites"
                             >

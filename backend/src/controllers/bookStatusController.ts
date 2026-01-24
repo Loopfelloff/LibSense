@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { prisma } from "../config/prismaClientConfig.js";
 import { Status } from "../../generated/prisma/index.js";
+import { redisClient } from "../config/redisConfiguration.js";
 
 type BookStatus = "read" | "willread" | "reading";
 
@@ -13,7 +14,7 @@ const statusMap: Record<string, Status> = {
 const getBooksByStatus = async (req: Request, res: Response) => {
   try {
     const { type } = req.query as { type?: BookStatus };
-    const { userId } = req.query as { userId?: string };
+    const { id } = req.user as { id: string };
 
     if (!type)
       return res.status(401).json({
@@ -28,7 +29,7 @@ const getBooksByStatus = async (req: Request, res: Response) => {
       where: {
         user_statuses: {
           some: {
-            user_id: userId,
+            user_id: id,
             status: prismaStatus,
           },
         },
@@ -55,11 +56,11 @@ const getBooksByStatus = async (req: Request, res: Response) => {
 
 const editBookByStatus = async (req: Request, res: Response) => {
   try {
-    const { type, bookId } = req.query as {
+    const { type, bookId } = req.body as {
       type?: BookStatus;
       bookId?: string;
     };
-    const userId = "403d1a57-d529-45db-a6d6-38f4204e2b8b";
+    const { id } = req.user as { id: string };
     if (!type || !bookId)
       return res.status(401).json({
         success: false,
@@ -79,21 +80,23 @@ const editBookByStatus = async (req: Request, res: Response) => {
 
     const editRecord = await prisma.bookStatusVal.upsert({
       where: {
-        book_id_user_id: {
+        user_book_status: {
           book_id: bookId,
-          user_id: userId,
+          user_id: id,
         },
       },
       update: {
         status: prismaStatus,
       },
       create: {
-        user_id: userId,
+        user_id: id,
         book_id: bookId,
         status: prismaStatus,
       },
     });
 
+    const countKey = `user:${id}:recommendations`;
+    await redisClient.del(countKey);
     return res.status(200).json({
       success: true,
       data: editRecord,
@@ -114,8 +117,9 @@ const editBookByStatus = async (req: Request, res: Response) => {
 
 const deleteBookByStatus = async (req: Request, res: Response) => {
   try {
-    const { bookId } = req.query as { bookId?: string };
-    const { userId } = req.params;
+    const { bookId } = req.body as { bookId?: string };
+
+    const { id } = req.user as { id: string };
 
     if (!bookId)
       return res.status(401).json({
@@ -127,9 +131,11 @@ const deleteBookByStatus = async (req: Request, res: Response) => {
     await prisma.bookStatusVal.deleteMany({
       where: {
         book_id: bookId,
-        user_id: userId,
+        user_id: id,
       },
     });
+    const countKey = `user:${id}:recommendations`;
+    await redisClient.del(countKey);
     return res.status(200).json({
       success: true,
     });

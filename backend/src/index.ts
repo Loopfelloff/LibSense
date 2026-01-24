@@ -19,12 +19,16 @@ import { checkForEmailEntryHandler } from "./controllers/checkForEmailEntryContr
 import { router as bookReviewHandler } from "./routes/bookreviewRoutes.js";
 import { corsOptions } from "./config/corsConfig.js";
 import cors from "cors";
-import type { Request, Response } from "express";
 import cookieParser from "cookie-parser";
-
 import { bookStatusRouter } from "./routes/bookStatusRoute.js";
 import { authHandler } from "./controllers/authController.js";
-import { prisma } from "./config/prismaClientConfig.js";
+import {
+  getAllUserProfile,
+  getUserProfile,
+} from "../prisma/vector_embedding/userEmbedding.js";
+import { getAllBooks } from "../prisma/vector_embedding/bookEmbedding.js";
+import { recommendationRouter } from "./routes/recommendationRoute.js";
+
 const app = express();
 app.use(cors(corsOptions));
 app.use(cookieParser());
@@ -37,7 +41,7 @@ app.use("/auth", googleLoginHandler);
 app.use("/failure", failureHandler);
 app.use("/mock", mockDataHandler); // remove the underlying handler and stuff after the mocking or testing phase is complete during deployment
 // we have to later on add middleware instead to verify if this is from a verified request or not.
-app.use("/book", authenticationMiddleware); // use this middelware for every restricted request
+app.use("/book", authenticationMiddleware);
 app.use("/auth", authenticationMiddleware);
 app.use("/auth", authHandler);
 app.use("/review", authenticationMiddleware);
@@ -60,6 +64,7 @@ app.use("/users", authenticationMiddleware);
 app.use("/users/profile", profileRouter);
 app.use("/users/books/favorites", favouriteRouter);
 app.use("/users/books/status", bookStatusRouter);
+app.use("/users/books/recommendations", recommendationRouter);
 
 app.listen(process.env.PORT, () => {
   console.log("Listening to port ", process.env.PORT);

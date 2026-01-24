@@ -7,177 +7,170 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id                        String                    @id @default(uuid())
-  first_name                String
-  middle_name               String?
-  last_name                 String
-  email                     String                    @unique
-  password                  String?
-  profile_pic_link          String?
-  user_role_id              String
-  provider_id               String?                   @unique
-  conversation_participants ConversationParticipant[]
-  user_preferences          UserPreferences[]
-  book_status_val           BookStatusVal[]
-  favourites                Favourite[]
-  sent_messages             Message[]
-  review                    Review[]
-  user_role                 UserRole                  @relation(fields: [user_role_id], references: [id])
-
-  @@map("user")
-}
-
-model UserRole {
-  id    String @id @default(uuid())
-  role  Roles
-  users User[]
-
-  @@map("user_role")
-}
-
-model Genre {
-  id               String            @id @default(uuid())
-  genre_name       String            @unique
-  book_genres      BookGenres[]
-  user_preferences UserPreferences[]
-
-  @@map("genre")
-}
-
 model BookGenres {
-  id       String @id @default(uuid())
+  id       String @id
   book_id  String
   genre_id String
-  book     Book   @relation(fields: [book_id], references: [id], onDelete: Cascade)
-  genre    Genre  @relation(fields: [genre_id], references: [id], onDelete: Cascade)
+  book     book   @relation(fields: [book_id], references: [id], onDelete: Cascade)
+  genre    genre  @relation(fields: [genre_id], references: [id], onDelete: Cascade)
 
   @@unique([book_id, genre_id])
 }
 
-model UserPreferences {
-  id       String @id @default(uuid())
-  user_id  String
-  genre_id String
-  genre    Genre  @relation(fields: [genre_id], references: [id], onDelete: Cascade)
-  user     User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@unique([user_id, genre_id], name: "user_genre_preference")
-}
-
-model Conversation {
-  id                        String                    @id @default(uuid())
-  conversation_participants ConversationParticipant[]
-  messages                  Message[]
-
-  @@map("conversation")
-}
-
-model ConversationParticipant {
-  id              String       @id @default(uuid())
-  conversation_id String
-  participant_id  String
-  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
-  user            User         @relation(fields: [participant_id], references: [id], onDelete: Cascade)
-
-  @@unique([conversation_id, participant_id])
-}
-
-model Message {
-  id              String       @id @default(uuid())
-  conversation_id String
-  sender_id       String
-  message_body    String
-  sent_date       DateTime     @default(now())
-  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
-  sender          User         @relation(fields: [sender_id], references: [id], onDelete: Cascade)
-
-  @@map("message")
-}
-
-model Book {
-  id                String          @id @default(uuid())
-  isbn              String          @unique
-  book_title        String
-  book_cover_image  String
-  description       String
-  avg_book_rating   Float           @default(0)
-  book_rating_count Float           @default(0)
-  book_genres       BookGenres[]
-  book_vector       BookVector?
-  book_written_by   BookWrittenBy[]
-  user_statuses     BookStatusVal[]
-  favourites        Favourite[]
-  review            Review[]
-
-  @@map("book")
-}
-
-model BookAuthor {
-  id                 String          @id @default(uuid())
-  author_first_name  String
-  author_last_name   String
-  author_middle_name String?
-  book_written_by    BookWrittenBy[]
-
-  @@map("book_author")
-}
-
 model BookWrittenBy {
-  id             String     @id @default(uuid())
+  id             String      @id
   book_author_id String
   book_id        String
-  book_author    BookAuthor @relation(fields: [book_author_id], references: [id], onDelete: Cascade)
-  book           Book       @relation(fields: [book_id], references: [id], onDelete: Cascade)
+  book_author    book_author @relation(fields: [book_author_id], references: [id], onDelete: Cascade)
+  book           book        @relation(fields: [book_id], references: [id], onDelete: Cascade)
 
   @@unique([book_author_id, book_id])
 }
 
-model BookStatusVal {
-  id      String @id @default(uuid())
+model ConversationParticipant {
+  id              String       @id
+  conversation_id String
+  participant_id  String
+  conversation    conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  user            user         @relation(fields: [participant_id], references: [id], onDelete: Cascade)
+
+  @@unique([conversation_id, participant_id])
+}
+
+model UserPreferences {
+  id       String @id
+  user_id  String
+  genre_id String
+  genre    genre  @relation(fields: [genre_id], references: [id], onDelete: Cascade)
+  user     user   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, genre_id])
+}
+
+model book {
+  id                String            @id
+  isbn              String            @unique
+  book_title        String
+  book_cover_image  String
+  description       String
+  avg_book_rating   Float             @default(0)
+  book_rating_count Float             @default(0)
+  BookGenres        BookGenres[]
+  BookWrittenBy     BookWrittenBy[]
+  book_status_val   book_status_val[]
+  book_vector       book_vector?
+  favourite         favourite[]
+  review            review[]
+}
+
+model book_author {
+  id                 String          @id
+  author_first_name  String
+  author_last_name   String
+  author_middle_name String?
+  BookWrittenBy      BookWrittenBy[]
+}
+
+model book_status_val {
+  id      String @id
   book_id String
   user_id String
   status  Status
-  book    Book   @relation(fields: [book_id], references: [id], onDelete: Cascade)
-  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  book    book   @relation(fields: [book_id], references: [id], onDelete: Cascade)
+  user    user   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@unique([book_id, user_id], name: "user_book_status")
-  @@map("book_status_val")
+  @@unique([book_id, user_id])
 }
 
-model Favourite {
-  id      String @id @default(uuid())
+model book_vector {
+  id         String                @id
+  book_id    String                @unique
+  embedding  Unsupported("vector")
+  created_at DateTime?             @default(now()) @db.Timestamp(6)
+  book       book                  @relation(fields: [book_id], references: [id], onDelete: Cascade)
+
+  @@index([embedding], map: "book_vector_hnsw_idx")
+}
+
+model conversation {
+  id                      String                    @id
+  ConversationParticipant ConversationParticipant[]
+  message                 message[]
+}
+
+model favourite {
+  id      String @id
   book_id String
   user_id String
-  book    Book   @relation(fields: [book_id], references: [id], onDelete: Cascade)
-  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  book    book   @relation(fields: [book_id], references: [id], onDelete: Cascade)
+  user    user   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@unique([book_id, user_id], name: "user_book_favourite")
-  @@map("favourite")
+  @@unique([book_id, user_id])
 }
 
-model Review {
-  id          String @id @default(uuid())
+model genre {
+  id              String            @id
+  genre_name      String            @unique
+  BookGenres      BookGenres[]
+  UserPreferences UserPreferences[]
+}
+
+model message {
+  id              String       @id
+  conversation_id String
+  sender_id       String
+  message_body    String
+  sent_date       DateTime     @default(now())
+  conversation    conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  user            user         @relation(fields: [sender_id], references: [id], onDelete: Cascade)
+}
+
+model review {
+  id          String @id
   rating      Int
   review_body String
   user_id     String
   book_id     String
-  book        Book   @relation(fields: [book_id], references: [id], onDelete: Cascade)
-  user        User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  book        book   @relation(fields: [book_id], references: [id], onDelete: Cascade)
+  user        user   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@unique([book_id, user_id], name: "book_user_unique_review")
-  @@map("review")
+  @@unique([book_id, user_id])
 }
 
-model BookVector {
-  id         String                @id @default(uuid())
-  book_id    String                @unique
+model user {
+  id                      String                    @id
+  first_name              String
+  middle_name             String?
+  last_name               String
+  email                   String                    @unique
+  password                String?
+  profile_pic_link        String?
+  user_role_id            String
+  provider_id             String?                   @unique
+  ConversationParticipant ConversationParticipant[]
+  UserPreferences         UserPreferences[]
+  book_status_val         book_status_val[]
+  favourite               favourite[]
+  message                 message[]
+  review                  review[]
+  user_role               user_role                 @relation(fields: [user_role_id], references: [id])
+  user_vector             user_vector?
+}
+
+model user_role {
+  id   String @id
+  role Roles
+  user user[]
+}
+
+model user_vector {
+  id         String                @id
+  user_id    String                @unique
   embedding  Unsupported("vector")
   created_at DateTime?             @default(now()) @db.Timestamp(6)
-  book       Book                  @relation(fields: [book_id], references: [id], onDelete: Cascade)
+  user       user                  @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@index([embedding], map: "book_vector_hnsw_idx")
-  @@map("book_vector")
+  @@index([embedding], map: "user_vector_hnsw_idx")
 }
 
 enum Roles {

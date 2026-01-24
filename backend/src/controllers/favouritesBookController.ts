@@ -1,6 +1,9 @@
 import type { Request, Response } from "express";
 import { redisClient } from "../config/redisConfiguration.js";
 import { prisma } from "../config/prismaClientConfig.js";
+import { Queue } from "bullmq";
+
+const queue = new Queue("user_embeddings");
 
 const getFavouriteBook = async (req: Request, res: Response) => {
   try {
@@ -38,6 +41,7 @@ const getFavouriteBook = async (req: Request, res: Response) => {
         id: true,
         book_cover_image: true,
         book_title: true,
+        avg_book_rating: true,
         book_written_by: {
           select: {
             book_author: {
@@ -48,11 +52,6 @@ const getFavouriteBook = async (req: Request, res: Response) => {
                 author_middle_name: true,
               },
             },
-          },
-        },
-        review: {
-          select: {
-            rating: true,
           },
         },
         book_genres: {
@@ -72,13 +71,6 @@ const getFavouriteBook = async (req: Request, res: Response) => {
 
     const flattenedBooks = favouriteBooks.map((book) => {
       // Average rating
-      const averageRating =
-        book.review.length === 0
-          ? null
-          : (
-              book.review.reduce((sum, r) => sum + r.rating, 0) /
-              book.review.length
-            ).toFixed(1);
 
       return {
         id: book.id,
@@ -94,7 +86,7 @@ const getFavouriteBook = async (req: Request, res: Response) => {
 
         genres: book.book_genres.map((bg) => bg.genre.genre_name),
 
-        averageRating: averageRating ? Number(averageRating) : null,
+        averageRating: book.avg_book_rating,
       };
     });
 
@@ -137,22 +129,37 @@ const getFavouriteBook = async (req: Request, res: Response) => {
 
 const postFavouriteBook = async (req: Request, res: Response) => {
   try {
-    const bookId = "d6305d28-a733-44ca-a0e7-8176655feaf2";
-    const userId = "403d1a57-d529-45db-a6d6-38f4204e2b8b";
-
+    const { bookId } = req.body as { bookId: string };
+    const { id } = req.user as { id: string };
     const favourite = await prisma.favourite.upsert({
       where: {
-        book_id_user_id: {
+        user_book_favourite: {
           book_id: bookId,
-          user_id: userId,
+          user_id: id,
         },
       },
       update: {},
       create: {
-        user_id: userId,
+        user_id: id,
         book_id: bookId,
       },
     });
+
+    await queue.add(
+      "user_embeddings",
+      {
+        id,
+      },
+      {
+        jobId: id,
+        attempts: 3,
+        removeOnComplete: true,
+        delay: 10000,
+      },
+    );
+
+    const countKey = `user:${id}:recommendations`;
+    await redisClient.del(countKey);
     return res.status(200).json({
       success: true,
       data: favourite,
@@ -182,6 +189,21 @@ const removeFavouriteBook = async (req: Request, res: Response) => {
       },
     });
 
+    await queue.add(
+      "user_embeddings",
+      {
+        id,
+      },
+      {
+        jobId: id,
+        attempts: 3,
+        delay: 10000,
+        removeOnComplete: true,
+      },
+    );
+
+    const countKey = `user:${id}:recommendations`;
+    await redisClient.del(countKey);
     return res.status(200).json({
       success: true,
     });

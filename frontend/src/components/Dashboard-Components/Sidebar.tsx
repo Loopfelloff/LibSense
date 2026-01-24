@@ -6,7 +6,7 @@ import {
   X,
   Users,
   MessageSquare,
-  UserStar
+  UserStar,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -30,7 +30,7 @@ const routeMap: Record<SelectValue, string> = {
   topRated: "/topRated",
   community: "/community",
   chats: "/chats",
-  interests : "/interests"
+  interests: "/interests",
 };
 
 function Sidebar({ isOpen, onClose }: SidebarProps) {
@@ -50,7 +50,7 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
     { icon: Star, label: "Top Rated", key: "topRated" },
     { icon: Users, label: "Community", key: "community" },
     { icon: MessageSquare, label: "Chats", key: "chats" },
-    { icon: UserStar, label: "Your Interests", key : "interests"}
+    { icon: UserStar, label: "Your Interests", key: "interests" },
   ];
 
   return (

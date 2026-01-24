@@ -1,8 +1,52 @@
-node_modules/
-.env
+### --- PYTHON & VIRTUAL ENVIRONMENTS --- ###
+# Ignore any folder named .venv or venv anywhere in the project
+**/.venv/
+**/venv/
+**/env/
+**/ENV/
 
-/generated/prisma
+# Byte-compiled / optimized / DLL files
+**/__pycache__/
+*.py[cod]
+*$py.class
 
-/generated/prisma
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
 
+
+### --- DATABASE & PRISMA --- ###
+# Ignore SQLite databases
+*.db
+*.db-journal
+
+# Prisma generated client (best practice is to generate it on build)
+**/generated/prisma/
+
+# Seed data if it contains large/private JSON
+**/prisma/seed/books_final.json
+
+# Redis dump files
 dump.rdb
+
+**/artifacts/
+
+### --- NODE / JAVASCRIPT --- ###
+**/node_modules/
+.npm
+.eslintcache
+
+
+### --- ENVIRONMENT & SECRETS --- ###
+# Very important: ignore all .env files
+.env
+.env.*
+!.env.example
+
+
+### --- OS & IDE FILES --- ###
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
