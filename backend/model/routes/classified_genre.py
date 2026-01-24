@@ -1,10 +1,10 @@
 from fastapi import HTTPException
 from fastapi.routing import APIRouter
 import joblib
-from model.utils.top_fifty_genre import item
 from pydantic import BaseModel
 from model.utils.text_process_for_classification import transformText
 from pathlib import Path
+import json
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -31,6 +31,10 @@ def classified_genre(description : BookDescription | None):
     # right now i am directly using the raw text to test the api later on make sure to lemmatize and everything 
 
     found_genre = pipeline.predict([transformText(description_text.lower())])[0]
+
+    with open(f"{BASE_DIR}/utils/top_fifty_genre.json", "r", encoding="utf-8") as f:
+        top_fifty_genre_json = json.load(f) 
+    item  = top_fifty_genre_json["topFifty"]
 
     for index , i in enumerate(item):
         if found_genre[index] == 1:
