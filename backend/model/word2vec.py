@@ -55,11 +55,6 @@ try:
         print(f"✓ Model saved successfully to {MODEL_PATH}")
         print(f"✓ Vocabulary size: {len(model.wv)} words")
 
-        if "harry" in model.wv:
-            print(f"\nExample - Words similar to 'harry':")
-            for word, score in model.wv.most_similar("harry", topn=5):
-                print(f"  {word}: {score:.3f}")
-
 except FileNotFoundError:
     print(f"Error: File not found at {CSV_PATH}")
 except Exception as e:

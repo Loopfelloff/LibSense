@@ -59,26 +59,26 @@ export const getAllBooks = async () => {
 
   console.log(JSON.stringify(bookTexts[0], null, 3));
   console.log(JSON.stringify(bookTexts[1], null, 3));
-  // try {
-  //   const response = await axios.post(
-  //     "http://127.0.0.1:8000/books/embedd/all",
-  //     bookTexts,
-  //     {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //     },
-  //   );
-  //
-  //   vectorArr = response.data;
-  //   console.log(JSON.stringify(vectorArr[0], null, 3));
-  //   console.log(JSON.stringify(vectorArr[1], null, 3));
-  // } catch (err: unknown) {
-  //   if (err instanceof Error) console.log(err.message);
-  // }
-  // await Promise.all(
-  //   vectorArr.map((book) => insertEmbeddings(book.vector, book.id)),
-  // );
+  try {
+    const response = await axios.post(
+      "http://127.0.0.1:8000/books/embedd/all",
+      bookTexts,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    vectorArr = response.data;
+    console.log(JSON.stringify(vectorArr[0], null, 3));
+    console.log(JSON.stringify(vectorArr[1], null, 3));
+  } catch (err: unknown) {
+    if (err instanceof Error) console.log(err.message);
+  }
+  await Promise.all(
+    vectorArr.map((book) => insertEmbeddings(book.vector, book.id)),
+  );
 };
 
 export const getBooks = async (bookId: string) => {

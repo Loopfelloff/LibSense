@@ -1,9 +1,14 @@
+from pathlib import Path
 from fastapi import APIRouter
+from gensim.models import Word2Vec
 from .utils.processText import process_text
 from pydantic import BaseModel
 from uuid import UUID
-from typing import List, Optional
-from .sentenceTransformers import transformer_model
+from typing import List
+import numpy as np
+
+MODEL_PATH = Path(__file__).parent / "artifacts" / "word2vec.model"
+model = Word2Vec.load(str(MODEL_PATH))
 
 router = APIRouter()
 
@@ -14,10 +19,18 @@ class Book(BaseModel):
 
 
 def processBook(book: Book):
-    processed = process_text(book.text)
-    print(processed)
-    vector = transformer_model.encode(processed).tolist()
-    return str(book.id), vector
+    book_vector = np.zeros(model.vector_size)
+    wordVector = []
+
+    token = process_text(book.text)
+    for token in token:
+        if token in model.wv:
+            wordVector.append(model.wv[token])
+
+    if len(wordVector) > 0:
+        book_vector = np.mean(wordVector, axis=0)
+
+    return str(book.id), book_vector.tolist()
 
 
 @router.post("/embedd/all")

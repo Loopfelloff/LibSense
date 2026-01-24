@@ -19,7 +19,7 @@ const createUserText = (user) => {
       .map(({ genre }) => genre.genre_name)
       .join(", ");
 
-    parts.push(`Preferred genres: ${preferredGenres}.`);
+    parts.push(preferredGenres);
   }
 
   const readBooks = user.book_status.read
@@ -30,7 +30,7 @@ const createUserText = (user) => {
     .join(" ");
 
   if (readBooks) {
-    parts.push(`Books the user has read: ${readBooks}`);
+    parts.push(readBooks);
   }
 
   const currentlyReadingBooks = user.book_status.currentlyReading
@@ -41,7 +41,7 @@ const createUserText = (user) => {
     .join(" ");
 
   if (currentlyReadingBooks) {
-    parts.push(`Books the user is currently reading: ${currentlyReadingBooks}`);
+    parts.push(currentlyReadingBooks);
   }
 
   const willReadBooks = user.book_status.willRead
@@ -50,7 +50,17 @@ const createUserText = (user) => {
     .join(", ");
 
   if (willReadBooks) {
-    parts.push(`Books the user wants to read: ${willReadBooks}.`);
+    parts.push(willReadBooks);
+  }
+  const favoriteBooks = user.favourites
+    .slice(0, 10)
+    .map(
+      (fav) =>
+        `${fav.book.book_title}. ${fav.book.description?.slice(0, 400) || ""}`,
+    )
+    .join(" ");
+  if (favoriteBooks) {
+    parts.push(favoriteBooks);
   }
 
   const mergedText = preprocessText(parts.join(" "));
@@ -99,6 +109,7 @@ export const getAllUserProfile = async () => {
     ...user,
     book_status: groupBookStatus(user.book_status_val),
   }));
+  console.log(newUsers);
 
   const userTexts = newUsers.map(createUserText);
 
