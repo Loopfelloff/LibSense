@@ -60,7 +60,7 @@ class BookVector(Base):
 
     id = Column(String, primary_key=True)
     book_id = Column(String, ForeignKey("book.id", ondelete="CASCADE"), unique=True)
-    embedding = Column(Vector(384))
+    embedding = Column(Vector(100))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     book = relationship("Book", back_populates="book_vector")
 
@@ -70,7 +70,7 @@ class UserVector(Base):
 
     id = Column(String, primary_key=True)
     user_id = Column(String, ForeignKey("user.id", ondelete="CASCADE"), unique=True)
-    embedding = Column(Vector(384))
+    embedding = Column(Vector(100))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     user = relationship("User", back_populates="user_vector")
 

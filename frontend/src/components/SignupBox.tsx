@@ -1,222 +1,240 @@
-import { useState , useRef} from 'react';
-import { Eye, EyeOff, Book, User, Mail, Lock } from 'lucide-react';
-import {Link , useNavigate} from 'react-router-dom'
-import type { ChangeEvent } from 'react';
-import { checkUsernameValidity, checkEmailValidity , checkPasswordValidity , checkConfirmPasswordValidity} from '../utils/formValidation';
-import axios from 'axios';
+import { useState, useRef } from "react";
+import { Eye, EyeOff, Book, User, Mail, Lock } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import type { ChangeEvent } from "react";
+import {
+  checkUsernameValidity,
+  checkEmailValidity,
+  checkPasswordValidity,
+  checkConfirmPasswordValidity,
+} from "../utils/formValidation";
+import axios from "axios";
 
-type formData ={
-    firstName : string;
-    middleName : string;
-    lastName : string;
-    email : string;
-    password : string;
-    confirmPassword : string;
-}
+type formData = {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
 
 type passwordError = {
-    symbol : boolean;
-    num : boolean;
-    totalLength : boolean;
-}
+  symbol: boolean;
+  num: boolean;
+  totalLength: boolean;
+};
 
 type userNameError = {
-    firstName : boolean;
-    lastName : boolean ;
-    totalLength : boolean;
-}
-
+  firstName: boolean;
+  lastName: boolean;
+  totalLength: boolean;
+};
 
 export default function SignupForm() {
-    // state variables
-  const navigate = useNavigate()
-  const [isWaiting , setIsWaiting] = useState<boolean>(false)
+  // state variables
+  const navigate = useNavigate();
+  const [isWaiting, setIsWaiting] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [userNameAlreadyExists , setUserNameAlreadyExists] = useState<boolean>(false)
-  const timerId = useRef<ReturnType <typeof setTimeout> | null > (null)
-  const [userNameValidity , setUserNameValidity] = useState<userNameError>(
-      {
-	  firstName : false,
-	  lastName : false,
-	  totalLength : false
-      }
-  )
-  const [passwordValidity , setPasswordValidity] = useState<passwordError>({
-      symbol : false,
-      num : false,
-      totalLength : false
-  })
-  const [emailValidity , setEmailValidity] = useState<boolean>(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
+  const [userNameAlreadyExists, setUserNameAlreadyExists] =
+    useState<boolean>(false);
+  const timerId = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [userNameValidity, setUserNameValidity] = useState<userNameError>({
+    firstName: false,
+    lastName: false,
+    totalLength: false,
+  });
+  const [passwordValidity, setPasswordValidity] = useState<passwordError>({
+    symbol: false,
+    num: false,
+    totalLength: false,
+  });
+  const [emailValidity, setEmailValidity] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
   const [formData, setFormData] = useState<formData>({
-    firstName: '',
-    middleName : '',
-    lastName : '',
-    email: '',
-    password: '',
-    confirmPassword: ''
+    firstName: "",
+    middleName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
 
-  const [confirmPasswordValidity , setConfirmPasswordValidity ] = useState<boolean>(false)
-  const [formValidation , setFormValidation] = useState<boolean>(true)
-  // function 
+  const [confirmPasswordValidity, setConfirmPasswordValidity] =
+    useState<boolean>(false);
+  const [formValidation, setFormValidation] = useState<boolean>(true);
+  // function
 
-  const checkForEmailEntry = (email : string)=>{
+  const checkForEmailEntry = (email: string) => {
+    if (email.trim() === "") return;
 
-      if(email.trim() === '') return
+    if (timerId.current) clearTimeout(timerId.current);
 
+    setIsWaiting(true);
 
-      if(timerId.current) clearTimeout(timerId.current);
+    timerId.current = setTimeout(async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/checkForEmail",
+          {
+            params: {
+              email: email,
+            },
+          },
+        );
 
+        console.log(response.data);
+        console.log(response.status);
+        setUserNameAlreadyExists(false);
 
-      setIsWaiting(true)
+        if (checkForFormValidation(formData)) {
+          setFormValidation(true);
+        } else {
+          setFormValidation(false);
+        }
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          console.log(err.response?.data);
+          console.log(err.response?.status);
+          setUserNameAlreadyExists(true);
+          setFormValidation(true);
+        } else {
+          console.error("Unexpected Error : ", err);
+        }
+      } finally {
+        setIsWaiting(false);
+      }
+    }, 1000);
+  };
 
-	timerId.current = setTimeout(async ()=>{
-
-
-	  try{
-
-	      const response = await axios.get("http://localhost:5000/checkForEmail",  {
-		  params: {
-		      email : email 
-		  }
-	      })
-
-	      console.log(response.data)
-	      console.log(response.status)
-	      setUserNameAlreadyExists(false)
-
-	      if(checkForFormValidation(formData)){
-		    setFormValidation(true)
-	      }
-	      else{
-		  setFormValidation(false)
-	      }
-
-	  }
-	  catch(err){
-	      if(axios.isAxiosError(err)){
-		 console.log(err.response?.data) 
-		 console.log(err.response?.status) 
-		 setUserNameAlreadyExists(true)
-		 setFormValidation(true)
-
-	      }
-	      else{
-		  console.error("Unexpected Error : " , err)
-	      }
-
-	  }
-	  finally{
-	      setIsWaiting(false)
-	  }
-
-      }, 1000)
-
-  }
-
-  const checkForFormValidation : (formData : formData)=>boolean = (formData : formData )=>{
-    const currentUserNameValidity = checkUsernameValidity(formData.firstName , formData.middleName , formData.lastName) 
-    setUserNameValidity(currentUserNameValidity)
-    const currentPasswordValidity = checkPasswordValidity(formData.password)
-    const currentEmailValidity = checkEmailValidity(formData.email)
-    const {firstName , lastName , totalLength} = currentUserNameValidity 
-    const {symbol , num } = currentPasswordValidity
-    const totalLengthPassword = currentPasswordValidity.totalLength
-    const email = currentEmailValidity
-    const confirmPassword = checkConfirmPasswordValidity(formData.password , formData.confirmPassword)
-    if(firstName || lastName || totalLength || symbol || num || totalLengthPassword || email || confirmPassword ) return true;
-    else return false
-	
-  }
-  const handleChange = (e : ChangeEvent<HTMLInputElement> ) => {
-      if(e.target.name === 'email') setUserNameAlreadyExists(false)
-      setFormData({
+  const checkForFormValidation: (formData: formData) => boolean = (
+    formData: formData,
+  ) => {
+    const currentUserNameValidity = checkUsernameValidity(
+      formData.firstName,
+      formData.middleName,
+      formData.lastName,
+    );
+    setUserNameValidity(currentUserNameValidity);
+    const currentPasswordValidity = checkPasswordValidity(formData.password);
+    const currentEmailValidity = checkEmailValidity(formData.email);
+    const { firstName, lastName, totalLength } = currentUserNameValidity;
+    const { symbol, num } = currentPasswordValidity;
+    const totalLengthPassword = currentPasswordValidity.totalLength;
+    const email = currentEmailValidity;
+    const confirmPassword = checkConfirmPasswordValidity(
+      formData.password,
+      formData.confirmPassword,
+    );
+    if (
+      firstName ||
+      lastName ||
+      totalLength ||
+      symbol ||
+      num ||
+      totalLengthPassword ||
+      email ||
+      confirmPassword
+    )
+      return true;
+    else return false;
+  };
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.name === "email") setUserNameAlreadyExists(false);
+    setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
 
-    const  {firstName , middleName , lastName, email , password, confirmPassword } : formData = {
-	...formData,
-	[e.target.name] : e.target.value
+    const {
+      firstName,
+      middleName,
+      lastName,
+      email,
+      password,
+      confirmPassword,
+    }: formData = {
+      ...formData,
+      [e.target.name]: e.target.value,
+    };
+
+    const currentUserNameValidity = checkUsernameValidity(
+      firstName,
+      middleName,
+      lastName,
+    );
+    const currentEmailValidity = checkEmailValidity(email);
+    const currentPasswordValidity = checkPasswordValidity(password);
+    const currentConfirmPasswordValidity = checkConfirmPasswordValidity(
+      password,
+      confirmPassword,
+    );
+
+    setUserNameValidity(currentUserNameValidity);
+
+    setPasswordValidity(currentPasswordValidity);
+
+    setEmailValidity(currentEmailValidity);
+
+    setConfirmPasswordValidity(currentConfirmPasswordValidity);
+
+    const newFormData: formData = {
+      firstName,
+      middleName,
+      lastName,
+      email,
+      password,
+      confirmPassword,
+    };
+
+    if (checkForFormValidation(newFormData) || userNameAlreadyExists) {
+      setFormValidation(true);
+    } else {
+      setFormValidation(false);
     }
-
-
-    const currentUserNameValidity = checkUsernameValidity(firstName , middleName , lastName)
-    const currentEmailValidity = checkEmailValidity(email)
-    const currentPasswordValidity = checkPasswordValidity(password)
-    const currentConfirmPasswordValidity = checkConfirmPasswordValidity(password , confirmPassword)
-
-    setUserNameValidity(currentUserNameValidity)
-
-    setPasswordValidity(currentPasswordValidity)
-
-    setEmailValidity(currentEmailValidity)
-
-    setConfirmPasswordValidity(currentConfirmPasswordValidity)
-
-    const newFormData : formData= {
-
-	firstName,
-	middleName,
-	lastName,
-	email,
-	password,
-	confirmPassword
-    }
-
-
-    if(checkForFormValidation(newFormData) || userNameAlreadyExists){
-	setFormValidation(true)
-    }
-    else {
-	setFormValidation(false)
-    }
-
-
   };
 
+  const handleSubmit: () => Promise<void> = async () => {
+    if (checkForFormValidation(formData)) return;
+    setFormValidation(true);
 
-  const handleSubmit : ()=> Promise<void> = async () => {
-    if(checkForFormValidation(formData)) return
-    setFormValidation(true)
-    
     try {
-	const response = await axios.post("http://localhost:5000/registerAccount", {
-	    firstName : formData.firstName,
-	    middleName : formData.middleName,
-	    lastName : formData.lastName,
-	    email : formData.email,
-	    password : formData.password
-	} , {
-	    withCredentials : true
-	})
-	setFormValidation(false)
-	console.log(response.data)
-	return navigate("/emailverification")
+      const response = await axios.post(
+        "http://localhost:5000/registerAccount",
+        {
+          firstName: formData.firstName,
+          middleName: formData.middleName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password,
+        },
+        {
+          withCredentials: true,
+        },
+      );
+      setFormValidation(false);
+      console.log(response.data);
+      return navigate("/emailverification");
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        console.log(err.response?.data);
+        console.log(err.response?.status);
+      } else {
+        console.error("unexpected error :", err);
+      }
     }
-
-    catch(err){
-	if(axios.isAxiosError(err)){
-	    console.log(err.response?.data)
-	    console.log(err.response?.status)
-	}
-	else{
-	    console.error('unexpected error :' , err)
-	}
-    }
-    
   };
-
 
   return (
     <div className="grow  bg-gray-50 flex items-center gap-6 justify-center pt-18  w-full">
-      <div 
+      <div
         className="w-full max-w-md bg-white flex flex-col"
         style={{
-          borderRadius: '16px',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.10), 0 8px 10px -6px rgba(0, 0, 0, 0.10)',
-          height: 'fit-content'
+          borderRadius: "16px",
+          boxShadow:
+            "0 20px 25px -5px rgba(0, 0, 0, 0.10), 0 8px 10px -6px rgba(0, 0, 0, 0.10)",
+          height: "fit-content",
         }}
       >
         <div className="flex flex-col items-center pt-12 pb-8">
@@ -224,7 +242,9 @@ export default function SignupForm() {
             <Book className="w-6 h-6 text-gray-700" />
           </div>
           <h2 className="text-xl font-semibold text-gray-800 mb-1">libsense</h2>
-          <p className="text-sm text-gray-600">Create your account to get started.</p>
+          <p className="text-sm text-gray-600">
+            Create your account to get started.
+          </p>
         </div>
 
         <div className="px-8 flex-1 flex flex-col">
@@ -239,19 +259,29 @@ export default function SignupForm() {
                   type="text"
                   name="firstName"
                   value={formData.firstName}
-                  onChange={(e : ChangeEvent<HTMLInputElement>) =>{
-		      handleChange(e)
-		  }}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    handleChange(e);
+                  }}
                   placeholder="Enter your full name"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
-		{(userNameValidity.firstName) ? <span className ="text-red-900">The first name field can't be null</span> : (userNameValidity.totalLength) ? <span className="text-red-900">The total username length must be greater than 8</span>: <></>}
+                {userNameValidity.firstName ? (
+                  <span className="text-red-900">
+                    The first name field can't be null
+                  </span>
+                ) : userNameValidity.totalLength ? (
+                  <span className="text-red-900">
+                    The total username length must be greater than 8
+                  </span>
+                ) : (
+                  <></>
+                )}
               </div>
             </div>
-	    
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-		Middle Name*
+                Middle Name*
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -259,18 +289,25 @@ export default function SignupForm() {
                   type="text"
                   name="middleName"
                   value={formData.middleName}
-                  onChange={(e : ChangeEvent<HTMLInputElement>) =>{
-		      handleChange(e)
-		  }}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    handleChange(e);
+                  }}
                   placeholder="Enter your full name"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                />{ (userNameValidity.totalLength) ? <span className="text-red-900">The total username length must be greater than 8</span>: <></>}
+                />
+                {userNameValidity.totalLength ? (
+                  <span className="text-red-900">
+                    The total username length must be greater than 8
+                  </span>
+                ) : (
+                  <></>
+                )}
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-		Last Name
+                Last Name
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -278,13 +315,23 @@ export default function SignupForm() {
                   type="text"
                   name="lastName"
                   value={formData.lastName}
-                  onChange={(e : ChangeEvent<HTMLInputElement>) =>{
-		      handleChange(e)
-		  }}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    handleChange(e);
+                  }}
                   placeholder="Enter your full name"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
-		{(userNameValidity.lastName) ? <span className ="text-red-900">The last name field can't be null</span> : (userNameValidity.totalLength) ? <span className="text-red-900">The total username length must be greater than 8</span>: <></>}
+                {userNameValidity.lastName ? (
+                  <span className="text-red-900">
+                    The last name field can't be null
+                  </span>
+                ) : userNameValidity.totalLength ? (
+                  <span className="text-red-900">
+                    The total username length must be greater than 8
+                  </span>
+                ) : (
+                  <></>
+                )}
               </div>
             </div>
 
@@ -298,15 +345,25 @@ export default function SignupForm() {
                   type="email"
                   name="email"
                   value={formData.email}
-                  onChange={(e:ChangeEvent<HTMLInputElement>)=>{
-		      checkForEmailEntry(e.currentTarget.value)
-		      handleChange(e)
-		  }}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    checkForEmailEntry(e.currentTarget.value);
+                    handleChange(e);
+                  }}
                   placeholder="Enter your email"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
-		{(emailValidity) ? <span className ="text-red-900">Email isn't in the correct format</span> : <></>}
-		{(userNameAlreadyExists) ? <span className ="text-red-900">Email already in use</span> : <></>}
+                {emailValidity ? (
+                  <span className="text-red-900">
+                    Email isn't in the correct format
+                  </span>
+                ) : (
+                  <></>
+                )}
+                {userNameAlreadyExists ? (
+                  <span className="text-red-900">Email already in use</span>
+                ) : (
+                  <></>
+                )}
               </div>
             </div>
 
@@ -317,20 +374,38 @@ export default function SignupForm() {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
                   className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
-		{(passwordValidity.totalLength) ? <span className ="text-red-900">Password must be atleast 8 characters long</span> : (passwordValidity.symbol) ? <span className ="text-red-900">Password must contain at least one symbol </span>: (passwordValidity.num) ? <span className ="text-red-900">Password must contain atleast one number</span> : <></> }
+                {passwordValidity.totalLength ? (
+                  <span className="text-red-900">
+                    Password must be atleast 8 characters long
+                  </span>
+                ) : passwordValidity.symbol ? (
+                  <span className="text-red-900">
+                    Password must contain at least one symbol{" "}
+                  </span>
+                ) : passwordValidity.num ? (
+                  <span className="text-red-900">
+                    Password must contain atleast one number
+                  </span>
+                ) : (
+                  <></>
+                )}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -342,20 +417,30 @@ export default function SignupForm() {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
-                  type={showConfirmPassword ? 'text' : 'password'}
+                  type={showConfirmPassword ? "text" : "password"}
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   placeholder="Confirm your password"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
-		{(confirmPasswordValidity) ? <span className="text-red-900">This must match with the actual password</span> : <></>}
+                {confirmPasswordValidity ? (
+                  <span className="text-red-900">
+                    This must match with the actual password
+                  </span>
+                ) : (
+                  <></>
+                )}
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -365,7 +450,11 @@ export default function SignupForm() {
             <button
               onClick={handleSubmit}
               className="w-full bg-slate-800 text-white py-3 rounded-lg font-medium hover:bg-slate-700 transition-colors"
-	      style = { (formValidation || isWaiting) ? {backgroundColor: 'gray' , cursor : 'not-allowed'  } : {backgroundColor : 'rgb(51, 65, 85)', cursor : 'pointer' } }
+              style={
+                formValidation || isWaiting
+                  ? { backgroundColor: "gray", cursor: "not-allowed" }
+                  : { backgroundColor: "rgb(51, 65, 85)", cursor: "pointer" }
+              }
             >
               Create Account
             </button>
@@ -377,9 +466,7 @@ export default function SignupForm() {
             <div className="flex-1 border-t border-gray-300"></div>
           </div>
 
-          <button
-            className="w-full bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
-          >
+          <button className="w-full bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
@@ -398,15 +485,16 @@ export default function SignupForm() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-	<a href="http://localhost:5000/auth/google">
-	    Continue with google
-	</a>
+            <a href="http://localhost:5000/auth/google">Continue with google</a>
           </button>
 
           <div className="text-center mb-8">
             <p className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
                 Login
               </Link>
             </p>
