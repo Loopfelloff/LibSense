@@ -121,9 +121,6 @@ export const getBooks = async (bookId: string) => {
     if (err instanceof Error) console.log(err.message);
   }
   await insertEmbeddings(vectorObj.vector, vectorObj.id);
-  // await Promise.all(
-  //   vectorArr.map((book) => insertEmbeddings(book.vector, book.id)),
-  // );
 };
 
 const insertEmbeddings = async (vectorArray: number[], book_id: string) => {
