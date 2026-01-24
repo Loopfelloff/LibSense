@@ -2,10 +2,9 @@ import { prisma } from "../../src/config/prismaClientConfig.js";
 import axios from "axios";
 
 const createBookText = (book) => {
-  const parts = {};
-  parts.id = book.id;
-  parts.title = book.book_title;
-  parts.description = book.description;
+  let textParts = [];
+  textParts.push(book.book_title);
+  textParts.push(book.description);
 
   if (book.book_written_by && book.book_written_by?.length > 0) {
     const authorName = book.book_written_by
@@ -19,7 +18,7 @@ const createBookText = (book) => {
           .join(" ");
       })
       .join(" ");
-    parts.author = authorName;
+    textParts.push(authorName);
   }
 
   if (book.book_genres?.length > 0) {
@@ -29,9 +28,12 @@ const createBookText = (book) => {
       })
       .join(" ");
 
-    parts.genre = genres;
+    textParts.push(genres);
   }
-  return parts;
+  return {
+    id: book.id,
+    text: textParts.join(" ").toLowerCase(),
+  };
 };
 
 export const getAllBooks = async () => {
@@ -55,23 +57,25 @@ export const getAllBooks = async () => {
 
   let vectorArr = [];
 
-  console.log("hi");
-  try {
-    const response = await axios.post(
-      "http://127.0.0.1:8000/books/embedd/all",
-      bookTexts,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    vectorArr = response.data;
-    console.log(JSON.stringify(vectorArr[0], null, 3));
-  } catch (err: unknown) {
-    if (err instanceof Error) console.log(err.message);
-  }
+  console.log(JSON.stringify(bookTexts[0], null, 3));
+  console.log(JSON.stringify(bookTexts[1], null, 3));
+  // try {
+  //   const response = await axios.post(
+  //     "http://127.0.0.1:8000/books/embedd/all",
+  //     bookTexts,
+  //     {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //     },
+  //   );
+  //
+  //   vectorArr = response.data;
+  //   console.log(JSON.stringify(vectorArr[0], null, 3));
+  //   console.log(JSON.stringify(vectorArr[1], null, 3));
+  // } catch (err: unknown) {
+  //   if (err instanceof Error) console.log(err.message);
+  // }
   // await Promise.all(
   //   vectorArr.map((book) => insertEmbeddings(book.vector, book.id)),
   // );

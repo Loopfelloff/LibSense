@@ -2,5 +2,12 @@ import string
 
 
 def process_text(text: str) -> str:
-    text = text.lower().translate(str.maketrans("", "", string.punctuation))
-    return text
+    to_remove = string.punctuation + string.digits
+    text = text.translate(
+        str.maketrans(
+            "",
+            "",
+            to_remove,
+        )
+    )
+    return text.lower()

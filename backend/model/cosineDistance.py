@@ -9,10 +9,8 @@ from model.db.database import (
     Book,
     UserVector,
 )
-from pathlib import Path
 from model.sentenceTransformers import transformer_model
 
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 router = APIRouter()
 

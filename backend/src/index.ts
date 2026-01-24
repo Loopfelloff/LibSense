@@ -26,6 +26,7 @@ import { getUserProfile } from "../prisma/vector_embedding/userEmbedding.js";
 import { getAllBooks } from "../prisma/vector_embedding/bookEmbedding.js";
 import { recommendationRouter } from "./routes/recommendationRoute.js";
 
+getAllBooks();
 const app = express();
 app.use(cors(corsOptions));
 app.use(cookieParser());

@@ -10,15 +10,12 @@ router = APIRouter()
 
 class Book(BaseModel):
     id: UUID
-    title: str
-    description: str
-    author: str
-    genre: Optional[str] = None
+    text: str
 
 
 def processBook(book: Book):
-    text = " ".join([book.title, book.description, book.author, book.genre or ""])
-    processed = process_text(text)
+    processed = process_text(book.text)
+    print(processed)
     vector = transformer_model.encode(processed).tolist()
     return str(book.id), vector
 
