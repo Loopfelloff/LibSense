@@ -1,9 +1,13 @@
-import { Routes, Route } from "react-router-dom";
-import Footer from "./components/Footer";
-import LoginOrSignup from "./pages/LoginOrSignup";
-// import { Dashboard } from "./pages/Dashboard";
-import RestrictedPage from "./pages/restrictedPage";
-import { Profile } from "./pages/Profile";
+import { Routes, Route, Navigate } from "react-router-dom";
+import Footer from "./components/Footer.js";
+import LoginOrSignup from "./pages/LoginOrSignup.js";
+import { Dashboard } from "./pages/Dashboard.js";
+import { Profile } from "./pages/Profile.js";
+import { TopRated } from "./pages/TopRated.js";
+import { BookReview } from "./pages/BookReview.js";
+import { Favorite } from "./components/Favorites.js";
+import { Layout } from "./pages/Layout.js";
+import { YourInterest } from "./pages/YourInterest.js";
 
 import {AdminPanel} from "./pages/adminPanel"
 
@@ -13,18 +17,23 @@ function App() {
       <Routes>
         {/* Of course you can add the routes up in here as of now this is just the bare one */}
         <Route path="/" element={<AdminPanel />} />
+        <Route path="/layout" element={<Layout />}>
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="profile/:userId" element={<Profile />} />
+          <Route path="favorites" element={<Favorite />} />
+          <Route path="/topRated" element={<TopRated />} />
+          <Route path="/interests" element={<YourInterest />} />
+          <Route path="/bookReview/:bookId" element={<BookReview />} />
+        </Route>
+        {/* <Route path="/restrictedPage" element={<RestrictedPage />} /> */}
+        <Route path="/profile/:userId" element={<Profile />} />
+        <Route path="/:loginOrSignup" element={<LoginOrSignup />} />
+        <Route path="*" element={<h1>Hello this is the default 404 page</h1>} />
         <Route
           path="/pageNotFound"
           element={<h1>Hello this is the default 404 page</h1>}
         />
-        <Route path="/restrictedPage" element={<RestrictedPage />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/:loginOrSignup" element={<LoginOrSignup />} />
-        <Route
-          path="/home/*"
-          element={<h1>Hello this is the home followed by something page</h1>}
-        />
-        <Route path="*" element={<h1>Hello this is the default 404 page</h1>} />
       </Routes>
       <Footer />
     </div>

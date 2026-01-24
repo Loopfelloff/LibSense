@@ -40,7 +40,10 @@ const authenticationMiddleware = async (
       String(process.env.ACCESS_TOKEN_SECRET),
     )
 
-    const { id, email, firstName, lastName, middleName } = result
+    console.log("from second in the middle ware ")
+    console.log(result)
+
+    const { id, email, firstName, lastName, middleName } = result;
 
     req.user = {
       id: id,
@@ -50,7 +53,10 @@ const authenticationMiddleware = async (
       middleName: middleName,
     }
 
-    next()
+    console.log("from the first in teh middleware ")
+    console.log(req.user)
+
+    next();
   } catch (err: unknown) {
     if (err instanceof Error) {
       if (err.name === "TokenExpiredError") {

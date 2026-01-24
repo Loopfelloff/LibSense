@@ -1,0 +1,28 @@
+import axios from "axios";
+import type { Dispatch , SetStateAction} from "react";
+import type { updateReviewPayload } from "../types/updateReviewPayload";
+const updateBookReview = async (requestPayload : updateReviewPayload , setIsLoading :  Dispatch<SetStateAction<boolean>>)=>{
+    try{
+	setIsLoading(true)
+	const response = await axios.put("http://localhost:5000/review/update", requestPayload , {
+	    withCredentials : true,
+	})
+
+	return response.data.data
+	
+    }
+    catch(err:unknown){
+	if(axios.isAxiosError(err)){
+	    alert(`can't update your review due to ${ err.name}` ,)
+	    console.log(err.response?.data)
+	    console.log(err.response?.status)
+	}
+    }
+    finally{
+	setIsLoading(false)
+    }
+}
+
+export {updateBookReview}
+
+

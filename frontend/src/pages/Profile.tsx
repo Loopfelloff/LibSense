@@ -4,14 +4,18 @@ import { getUserProfile } from "../apis/profile";
 import { getBooksByStatus } from "../apis/bookStatus";
 import type { User } from "../types/profile";
 import type { Book } from "../types/books";
+import { useNavigate, useParams } from "react-router-dom";
 
 export function Profile() {
   const [user, setUser] = useState<User | null>(null);
   const [readingBooks, setReadingBooks] = useState<Book[]>([]);
   const [readBooks, setReadBooks] = useState<Book[]>([]);
+  const { userId } = useParams<{ userId: string }>();
+  console.log({ userId });
+  const navigation = useNavigate();
 
   useEffect(() => {
-    const userId = "403d1a57-d529-45db-a6d6-38f4204e2b8b";
+    if (!userId) return;
     const userInformation = async (userId: string) => {
       const [profile, readBooksRes, readingBooksRes] = await Promise.all([
         getUserProfile(userId),
@@ -25,9 +29,8 @@ export function Profile() {
 
       console.log(profile, readBooksRes, readingBooksRes);
     };
-
     userInformation(userId);
-  }, []);
+  }, [userId]);
 
   return (
     <div className="min-h-screen w-screen bg-white">
@@ -71,10 +74,14 @@ export function Profile() {
                 {readingBooks.map((book) => (
                   <div
                     key={book.id}
-                    className="flex gap-3 p-3 w-fit border border-gray-300 "
+                    className="flex cursor-pointer gap-3 p-3 w-fit border border-gray-300 "
+                    onClick={() => {
+                      navigation(`/bookReview/${book.id}`);
+                    }}
                   >
                     <img
                       src={book.book_cover_image}
+                      loading="lazy"
                       alt={book.book_title}
                       className="w-16 h-20 object-cover bg-gray-200"
                     />
@@ -102,7 +109,10 @@ export function Profile() {
                 {readBooks.map((book) => (
                   <div
                     key={book.id}
-                    className="flex gap-3 p-3 w-fit border border-gray-300 "
+                    className="flex cursor-pointer gap-3 p-3 w-fit border border-gray-300 "
+                    onClick={() => {
+                      navigation(`/bookReview/${book.id}`);
+                    }}
                   >
                     <img
                       src={book.book_cover_image}

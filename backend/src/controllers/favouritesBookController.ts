@@ -1,48 +1,94 @@
-import type { Request, Response } from "express"
-import { redisClient } from "../config/redisConfiguration.js"
-import { prisma } from "../config/prismaClientConfig.js"
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client"
+import type { Request, Response } from "express";
+import { redisClient } from "../config/redisConfiguration.js";
+import { prisma } from "../config/prismaClientConfig.js";
+import { Queue } from "bullmq";
+
+const queue = new Queue("user_embeddings");
 
 const getFavouriteBook = async (req: Request, res: Response) => {
   try {
-    const userId = "403d1a57-d529-45db-a6d6-38f4204e2b8b"
-    const key = `user:${userId}:favourites`
-    const cachedFavourite = await redisClient.get(key)
-    // const limit = 10
-    // let totalPages = Number(await redisClient.get(`user:${userId}:totalPages`))
+    const { id } = req.user as { id: string };
+    const page = Number(req.query.page) || 1;
+    const take = 5;
+    const countKey = `user:${id}:totalCount`;
+    let totalCount = Number(await redisClient.get(countKey));
 
-    if (cachedFavourite) {
-      return res.status(200).json({
-        success: true,
-        data: JSON.parse(cachedFavourite),
-      })
+    if (!totalCount) {
+      totalCount = await prisma.book.count({
+        where: {
+          favourites: {
+            some: {
+              user_id: id,
+            },
+          },
+        },
+      });
+      await redisClient.setEx(countKey, 60 * 5, JSON.stringify(totalCount));
     }
 
-    // if (!totalPages) {
-    //   const totalFavourites = await prisma.book.count({
-    //     where: {
-    //       favourites: {
-    //         some: {
-    //           user_id: userId,
-    //         },
-    //       },
-    //     },
-    //   })
-    //   totalPages = totalFavourites / limit
-    //   await redisClient.set(`user:${userId}:totalPages:`, totalPages)
-    // }
-    //
+    const totalPages = Math.ceil(totalCount / take);
+    const skip = Number(page - 1) * Number(take);
+
     const favouriteBooks = await prisma.book.findMany({
       where: {
         favourites: {
           some: {
-            user_id: userId,
+            user_id: id,
           },
         },
       },
-      // skip: (totalPages - 1) * limit,
-      // take: limit,
-    })
+      select: {
+        id: true,
+        book_cover_image: true,
+        book_title: true,
+        avg_book_rating: true,
+        book_written_by: {
+          select: {
+            book_author: {
+              select: {
+                id: true,
+                author_first_name: true,
+                author_last_name: true,
+                author_middle_name: true,
+              },
+            },
+          },
+        },
+        book_genres: {
+          select: {
+            genre: {
+              select: {
+                id: true,
+                genre_name: true,
+              },
+            },
+          },
+        },
+      },
+      skip,
+      take,
+    });
+
+    const flattenedBooks = favouriteBooks.map((book) => {
+      // Average rating
+
+      return {
+        id: book.id,
+        title: book.book_title,
+        coverImage: book.book_cover_image,
+
+        authors: book.book_written_by.map((bw) => {
+          const a = bw.book_author;
+          return [a.author_first_name, a.author_middle_name, a.author_last_name]
+            .filter(Boolean)
+            .join(" ");
+        }),
+
+        genres: book.book_genres.map((bg) => bg.genre.genre_name),
+
+        averageRating: book.avg_book_rating,
+      };
+    });
 
     if (favouriteBooks.length == 0) {
       return res.status(200).json({
@@ -50,21 +96,23 @@ const getFavouriteBook = async (req: Request, res: Response) => {
         data: {
           dataMsg: "Favourite Book not found",
         },
-      })
+        pagination: {
+          currentPage: Number(page),
+          totalPages,
+          hasNextPage: Number(page) < totalPages,
+        },
+      });
     }
-
-    await redisClient.set(
-      `favourite:${userId}`,
-      JSON.stringify(favouriteBooks),
-      {
-        EX: 60 * 10,
-      },
-    )
 
     return res.status(200).json({
       success: true,
-      data: favouriteBooks,
-    })
+      data: flattenedBooks,
+      pagination: {
+        currentPage: Number(page),
+        totalPages,
+        hasNextPage: Number(page) < totalPages,
+      },
+    });
   } catch (err: unknown) {
     if (err instanceof Error) {
       console.error(err.message)
@@ -81,23 +129,37 @@ const getFavouriteBook = async (req: Request, res: Response) => {
 
 const postFavouriteBook = async (req: Request, res: Response) => {
   try {
-    const bookId = "d6305d28-a733-44ca-a0e7-8176655feaf2"
-    const userId = "403d1a57-d529-45db-a6d6-38f4204e2b8b"
-
+    const { bookId } = req.body as { bookId: string };
+    const { id } = req.user as { id: string };
     const favourite = await prisma.favourite.upsert({
       where: {
-        book_id_user_id: {
+        user_book_favourite: {
           book_id: bookId,
-          user_id: userId,
+          user_id: id,
         },
       },
       update: {},
       create: {
-        user_id: userId,
+        user_id: id,
         book_id: bookId,
       },
-    })
-    await redisClient.del(`favourite:${userId}`)
+    });
+
+    await queue.add(
+      "user_embeddings",
+      {
+        id,
+      },
+      {
+        jobId: id,
+        attempts: 3,
+        removeOnComplete: true,
+        delay: 10000,
+      },
+    );
+
+    const countKey = `user:${id}:recommendations`;
+    await redisClient.del(countKey);
     return res.status(200).json({
       success: true,
       data: favourite,
@@ -118,16 +180,30 @@ const postFavouriteBook = async (req: Request, res: Response) => {
 
 const removeFavouriteBook = async (req: Request, res: Response) => {
   try {
-    const bookId = "d6305d28-a733-44ca-a0e7-8176655feaf2"
-    const userId = "403d1a57-d529-45db-a6d6-38f4204e2b8b"
+    const { bookId } = req.params as { bookId: string };
+    const { id } = req.user as { id: string };
     await prisma.favourite.deleteMany({
       where: {
         book_id: bookId,
-        user_id: userId,
+        user_id: id,
       },
     })
 
-    await redisClient.del(`favourite:${userId}`)
+    await queue.add(
+      "user_embeddings",
+      {
+        id,
+      },
+      {
+        jobId: id,
+        attempts: 3,
+        delay: 10000,
+        removeOnComplete: true,
+      },
+    );
+
+    const countKey = `user:${id}:recommendations`;
+    await redisClient.del(countKey);
     return res.status(200).json({
       success: true,
     })
