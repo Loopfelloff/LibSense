@@ -2,6 +2,8 @@ import type { Request, Response } from "express";
 import axios from 'axios'
 import { prisma } from "../config/prismaClientConfig.js";
 import type { reqUser } from "../types/reqUserType.js";
+import { redisClient } from "../config/redisConfiguration.js";
+import type { SearchResult } from "../types/searchResult.js";
 
 const genreClassificationHandler = async(req : Request , res : Response)=>{
     try{
@@ -20,6 +22,7 @@ const genreClassificationHandler = async(req : Request , res : Response)=>{
 	    success : false,
 	    errMsg : `missing description in the request header` 
 	})
+
 
 
 	let recommendedGenres : string[] = []
@@ -80,20 +83,8 @@ const genreClassificationHandler = async(req : Request , res : Response)=>{
 	})
 
 	bookIdList= bookIdList.map(item=>item.book_id)
-	type BookWithGenre = {
-    id: string;
-    book_title: string;
-    book_cover_image: string;
-    avg_book_rating: number;
-    book_rating_count: number;
-    book_genres: {
-        genre: {
-            genre_name: string;
-        };
-    }[];
-}
 
-const highestRatedGenreBookList: BookWithGenre[] = []
+const highestRatedGenreBookList: SearchResult[] = []
 const usedBookIds = new Set<string>()
 
 for (const genre_id of genreIdList) {

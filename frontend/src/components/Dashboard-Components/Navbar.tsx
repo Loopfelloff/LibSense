@@ -5,7 +5,8 @@ import { Link, useNavigate } from "react-router-dom";
 import ChangePasswordModal from "../PasswordChangeModal";
 import ChangeProfilePicModal from "../ProfilePicChangeModal";
 import SearchResults from "../SearchResults";
-import { searchBooks, type SearchResult } from "../../apis/searchApi";
+import { searchBooks} from "../../apis/searchApi";
+import type { SearchResult } from '../../types/searchResultTypes';
 import { useDebounce } from "../../hooks/useDebounce";
 
 interface NavbarProps {
