@@ -24,8 +24,11 @@ const genreClassificationHandler = async(req : Request , res : Response)=>{
 	})
 
 
-
 	let recommendedGenres : string[] = []
+
+	let existsInCache : number[] = []
+
+	let cachedRecommendedBooks : (SearchResult | null)[] = []
 
 	try{
 
@@ -52,6 +55,43 @@ const genreClassificationHandler = async(req : Request , res : Response)=>{
 	if (recommendedGenres.length === 0) return res.status(404).json({
 	    success:true,
 	    data : []
+	})
+
+	existsInCache = await Promise.all(
+	    recommendedGenres.map(async(item)=>{
+		let existsOrNot = await redisClient.exists(`genre:${item}:topBook`)
+		return existsOrNot
+	    })
+	)
+
+	let tempRecommendedGenres = [...recommendedGenres]
+
+	recommendedGenres = recommendedGenres.filter((_ , index) => !existsInCache[index])
+
+	cachedRecommendedBooks = await Promise.all(
+	    existsInCache.map(async(item , index)=>{
+		if(item){
+		    const data = await redisClient.get(`genre:${tempRecommendedGenres[index]}:topBook`) as string
+		    if(!data) return null
+		    const toReturn = JSON.parse(data) as SearchResult
+		    return toReturn
+		}
+		else{
+		    return null
+		}
+
+	    })
+	)
+
+	cachedRecommendedBooks = cachedRecommendedBooks.filter((item) : item is SearchResult => item !== null)
+
+	console.log('after caching')
+
+	console.log(cachedRecommendedBooks)
+
+	if(recommendedGenres.length ===0) return res.status(200).json({
+	    success : true,
+	    data : cachedRecommendedBooks
 	})
 
 	let genreIdList : {id : string;}[] | string[]
@@ -84,57 +124,71 @@ const genreClassificationHandler = async(req : Request , res : Response)=>{
 
 	bookIdList= bookIdList.map(item=>item.book_id)
 
-const highestRatedGenreBookList: SearchResult[] = []
-const usedBookIds = new Set<string>()
+	let highestRatedGenreBookList: SearchResult[] = []
+	const usedBookIds = new Set<string>()
 
-for (const genre_id of genreIdList) {
-    const foundBook = await prisma.book.findFirst({
-        where : {
-            book_genres: {
-                some: {
-                    genre_id: genre_id
-                }
-            },
-            id: {
-                notIn: [...bookIdList, ...Array.from(usedBookIds)]
-            }
-        },
-        select:{
-            id: true,
-            book_title: true,
-            book_cover_image: true,
-            avg_book_rating: true,
-            book_rating_count: true,
-            book_genres: {
-                where: {
-                    genre_id: genre_id
-                },
-                select: {
-                    genre: {
-                        select: {
-                            genre_name: true
-                        }
-                    }
-                }
-            }
-        },
-        orderBy: {
-            avg_book_rating: 'desc'
-        }
-    })
-    
-    if (foundBook) {
-        usedBookIds.add(foundBook.id)
-        highestRatedGenreBookList.push(foundBook)
-    }
-}
+	for (const genre_id of genreIdList) {
+	    const foundBook = await prisma.book.findFirst({
+		where : {
+		    book_genres: {
+			some: {
+			    genre_id: genre_id
+			}
+		    },
+		    id: {
+			notIn: [...bookIdList, ...Array.from(usedBookIds)]
+		    }
+		},
+		select:{
+		    id: true,
+		    book_title: true,
+		    book_cover_image: true,
+		    avg_book_rating: true,
+		    book_rating_count: true,
+		    book_genres: {
+			where: {
+			    genre_id: genre_id
+			},
+			select: {
+			    genre: {
+				select: {
+				    genre_name: true
+				}
+			    }
+			}
+		    }
+		},
+		orderBy: {
+		    avg_book_rating: 'desc'
+		}
+	    }) as SearchResult | null
+	    
+	    if (foundBook) {
+		usedBookIds.add(foundBook.id)
+		highestRatedGenreBookList.push(foundBook)
+		await redisClient.set(`genre:${foundBook.book_genres[0].genre.genre_name}:topBook`, JSON.stringify(foundBook) , {
+		    EX : 60 * 60
+		} )
+	    }
+	}
+
+	const toSendArr = [...highestRatedGenreBookList , ...cachedRecommendedBooks]
+
+	toSendArr.sort((a,b)=> {
+	    if(a!==null && b !== null){
+		return b.avg_book_rating - a.avg_book_rating
+	    }
+	    return 0
+	})
 
 	res.status(200).json({
 
 	    success : true,
-	    data : highestRatedGenreBookList
+	    data : toSendArr
 
 	})
+
+
 
 
     }

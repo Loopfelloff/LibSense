@@ -53,7 +53,7 @@ function SearchResults({ results, onClose }: SearchResultsProps) {
                 </span>
               </div>
               <div className="flex flex-wrap gap-1 mt-2">
-                {book.book_genres.map((bg, idx) => (
+                {book.book_genres.map((bg, idx : number) => (
                   <span
                     key={idx}
                     className="text-xs px-2 py-1 bg-gray-200 text-gray-700"
