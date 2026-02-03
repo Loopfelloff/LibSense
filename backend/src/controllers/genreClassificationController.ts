@@ -166,9 +166,13 @@ const genreClassificationHandler = async(req : Request , res : Response)=>{
 	    if (foundBook) {
 		usedBookIds.add(foundBook.id)
 		highestRatedGenreBookList.push(foundBook)
-		await redisClient.set(`genre:${foundBook.book_genres[0].genre.genre_name}:topBook`, JSON.stringify(foundBook) , {
-		    EX : 60 * 60
-		} )
+		const bookCachedOrNot = await redisClient.exists(`book:${foundBook.book_title}`)
+		if(!bookCachedOrNot){
+		    await redisClient.set(`genre:${foundBook.book_genres[0].genre.genre_name}:topBook`, JSON.stringify(foundBook) , {
+			EX : 60 * 60
+		    } )
+		    await redisClient.set(`book:${foundBook.book_title}` , JSON.stringify({existence : true}), {EX : 60*60})
+		}
 	    }
 	}
 
