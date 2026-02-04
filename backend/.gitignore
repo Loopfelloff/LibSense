@@ -30,6 +30,7 @@ build/
 # Redis dump files
 dump.rdb
 
+**/artifacts/
 
 ### --- NODE / JAVASCRIPT --- ###
 **/node_modules/

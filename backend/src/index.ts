@@ -22,7 +22,10 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { bookStatusRouter } from "./routes/bookStatusRoute.js";
 import { authHandler } from "./controllers/authController.js";
-import { getUserProfile } from "../prisma/vector_embedding/userEmbedding.js";
+import {
+  getAllUserProfile,
+  getUserProfile,
+} from "../prisma/vector_embedding/userEmbedding.js";
 import { getAllBooks } from "../prisma/vector_embedding/bookEmbedding.js";
 import { recommendationRouter } from "./routes/recommendationRoute.js";
 import { router as adminRoutes } from "./routes/adminPanelRoutes.js"

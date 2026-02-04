@@ -1,26 +1,44 @@
+from pathlib import Path
 from fastapi import APIRouter
+<<<<<<< HEAD
 from utils.processText import process_text  # No dot
 from pydantic import BaseModel
 from uuid import UUID
 from typing import List, Optional
 from sentenceTransformers import transformer_model# No dot
+=======
+from gensim.models import Word2Vec
+from .utils.processText import process_text
+from pydantic import BaseModel
+from uuid import UUID
+from typing import List
+import numpy as np
+
+MODEL_PATH = Path(__file__).parent / "artifacts" / "word2vec.model"
+model = Word2Vec.load(str(MODEL_PATH))
+>>>>>>> f690f8fe69fbc23e5d91190313e78a9ed8abc3db
 
 router = APIRouter()
 
 
 class Book(BaseModel):
     id: UUID
-    title: str
-    description: str
-    author: str
-    genre: Optional[str] = None
+    text: str
 
 
 def processBook(book: Book):
-    text = " ".join([book.title, book.description, book.author, book.genre or ""])
-    processed = process_text(text)
-    vector = transformer_model.encode(processed).tolist()
-    return str(book.id), vector
+    book_vector = np.zeros(model.vector_size)
+    wordVector = []
+
+    token = process_text(book.text)
+    for token in token:
+        if token in model.wv:
+            wordVector.append(model.wv[token])
+
+    if len(wordVector) > 0:
+        book_vector = np.mean(wordVector, axis=0)
+
+    return str(book.id), book_vector.tolist()
 
 
 @router.post("/embedd/all")
