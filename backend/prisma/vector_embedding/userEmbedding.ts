@@ -96,6 +96,7 @@ const groupBookStatus = (bookStatusVal = []) => {
 };
 
 export const getAllUserProfile = async () => {
+    console.log("first one")
   const users = await prisma.user.findMany({
     include: {
       favourites: { include: { book: true } },
@@ -103,10 +104,11 @@ export const getAllUserProfile = async () => {
       user_preferences: { include: { genre: true } },
     },
   });
+    console.log("second one")
 
   const newUsers = users.map((user) => ({
     ...user,
-    book_status: groupBookStatus(user.book_status_val),
+    book_status: groupBookStatus(user?.book_status_val || []),
   }));
   console.log(newUsers);
 
@@ -136,6 +138,7 @@ export const getAllUserProfile = async () => {
 };
 
 export const getUserProfile = async (userId: string) => {
+    console.log("hey")
   const user = await prisma.user.findUnique({
     where: {
       id: userId,
@@ -148,7 +151,7 @@ export const getUserProfile = async (userId: string) => {
   });
   const userAfterGrouping = {
     ...user,
-    book_status: groupBookStatus(user?.book_status_val),
+    book_status: groupBookStatus(user?.book_status_val || []),
   };
   const userTexts = createUserText(userAfterGrouping);
 

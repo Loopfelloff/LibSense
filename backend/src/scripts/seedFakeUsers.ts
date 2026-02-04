@@ -1,6 +1,8 @@
 import { prisma } from "../config/prismaClientConfig.js";
+import type{Request , Response} from 'express'
 import { v4 as uuid4 } from "uuid";
 import { genSaltSync, hashSync } from "bcrypt-ts";
+import { getAllUserProfile , getUserProfile} from "../../prisma/vector_embedding/userEmbedding.js";
 
 type preferencesType={
     id : string;
@@ -86,5 +88,32 @@ const seedUser = async () => {
   }
 };
 
-await seedUser();
+export const seedFakeUserVector = async(req: Request , res:Response)=>{
+    try{
+
+	const allUserId = await prisma.user.findMany({
+	    select :{
+		id : true
+	    }
+	})
+
+	await Promise.all(allUserId.map(async (userId,index)=>{
+	    console.log(index)
+	    await getUserProfile(userId.id)
+	}))
+
+	console.log("seeding complete")
+
+	return res.json({
+	    success : true
+	})
+
+    }
+    catch(err : unknown){
+	if(err instanceof Error){
+	    console.log(err.stack)
+	}
+    }
+}
+
 
