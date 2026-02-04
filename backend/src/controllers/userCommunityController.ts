@@ -50,6 +50,15 @@ const userCommunityHandler = async(req : Request , res : Response)=>{
 		    in : userCommunity
 		}
 	    }
+	    ,
+	    select : {
+		id : true,
+		first_name : true,
+		middle_name : true,
+		last_name : true,
+		email : true,
+		profile_pic_link:true
+	    }
 	})
 
 	return res.status(200).json({
