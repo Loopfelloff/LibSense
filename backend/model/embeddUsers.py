@@ -3,13 +3,9 @@ from gensim.models import Word2Vec
 from pydantic import BaseModel
 from uuid import UUID
 from typing import List
-<<<<<<< HEAD
-from sentenceTransformers import transformer_model
-=======
 from pathlib import Path
 import numpy as np
 from .utils.processText import process_text
->>>>>>> f690f8fe69fbc23e5d91190313e78a9ed8abc3db
 
 MODEL_PATH = Path(__file__).parent / "artifacts" / "word2vec.model"
 model = Word2Vec.load(str(MODEL_PATH))

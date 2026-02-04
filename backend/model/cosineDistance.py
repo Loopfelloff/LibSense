@@ -1,12 +1,8 @@
 from fastapi import Depends, HTTPException
 from fastapi.routing import APIRouter
 from sqlalchemy.orm import Session
-<<<<<<< HEAD
-from db.database import (
-=======
 from .utils.processText import process_text
 from model.db.database import (
->>>>>>> f690f8fe69fbc23e5d91190313e78a9ed8abc3db
     BookStatusVal,
     Favourite,
     SessionLocal,
@@ -14,17 +10,12 @@ from model.db.database import (
     Book,
     UserVector,
 )
-<<<<<<< HEAD
-from sentenceTransformers import transformer_model
-from pathlib import Path
-=======
 from gensim.models import Word2Vec
 from pathlib import Path
 import numpy as np
 
 MODEL_PATH = Path(__file__).parent / "artifacts" / "word2vec.model"
 model = Word2Vec.load(str(MODEL_PATH))
->>>>>>> f690f8fe69fbc23e5d91190313e78a9ed8abc3db
 
 
 router = APIRouter()
