@@ -19,6 +19,7 @@ import {router as genreClassificationHandler} from "./routes/genreClassification
 import { authenticationMiddleware } from "./middlewares/authenticationMiddleware.js";
 import { checkForEmailEntryHandler } from "./controllers/checkForEmailEntryController.js";
 import { router as bookReviewHandler } from "./routes/bookreviewRoutes.js";
+import {router as userCommunityHandler} from  "./routes/userCommunityRoute.js"
 import { corsOptions } from "./config/corsConfig.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -62,19 +63,15 @@ app.use("/checkIfStatusExist", authenticationMiddleware);
 app.use("/checkIfStatusExist", checkIfStatusExistHandler);
 app.use("/genreClassification", authenticationMiddleware);
 app.use("/genreClassification", genreClassificationHandler);
-
 app.use("/registerAccount", verifyEmailHandler);
 app.use("/verifyOtp", verifyOtpHandler);
-
 app.use("/users", authenticationMiddleware);
 app.use("/users/profile", profileRouter);
 app.use("/users/books/favorites", favouriteRouter);
 app.use("/users/books/status", bookStatusRouter);
 app.use("/users/books/recommendations", recommendationRouter);
-app.get("/test" , async(req:Request , res : Response)=>
-{
-	return res.json({"message" : "sdlfjsd"})
-    })
+app.use("/userClustering", authenticationMiddleware)
+app.use("/userClustering", userCommunityHandler)
 
 app.listen(process.env.PORT, () => {
   console.log("Listening to port ", process.env.PORT);
