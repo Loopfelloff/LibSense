@@ -26,65 +26,82 @@ type ModalType = 'addBook' | 'editBook' | 'addAuthor' | 'editAuthor' | 'viewBook
 
 const AdminPanel: React.FC = () => {
   const [activeView, setActiveView] = useState('overview')
-  const [books, setBooks] = useState<Book[]>([])
-  const [authors, setAuthors] = useState<AuthorWithBooks[]>([])
+  const [recentAuthors, setRecentAuthors] = useState<AuthorWithBooks[]>([])
+  const [recentBooks, setRecentBooks] = useState<Book[]>([])
+  const [totalBooks, setTotalBooks] = useState(0)
+  const [totalAuthors, setTotalAuthors] = useState(0)
   const [modalOpen, setModalOpen] = useState(false)
   const [modalType, setModalType] = useState<ModalType>('addBook')
   const [selectedItem, setSelectedItem] = useState<any>(null)
   const [loading, setLoading] = useState(false)
+  const [refreshBookList, setRefreshBookList] = useState(0)
+  const [refreshAuthorList, setRefreshAuthorList] = useState(0)
 
-  // Load data
-  const loadBooks = async () => {
+  // Load statistics (total counts)
+  const loadStatistics = async () => {
     try {
-      setLoading(true)
-      const data = await api.getAllBooks()
-      setBooks(data)
+      const stats = await api.getStatistics()
+      setTotalBooks(stats.totalBooks)
+      setTotalAuthors(stats.totalAuthors)
     } catch (error) {
-      console.error('Error loading books:', error)
-      alert('Failed to load books')
-    } finally {
-      setLoading(false)
+      console.error('Error loading statistics:', error)
     }
   }
 
-  const loadAuthors = async () => {
+  // Load recent authors for overview
+  const loadRecentAuthors = async () => {
     try {
-      setLoading(true)
-      const data = await api.getAllAuthors()
-      setAuthors(data)
+      const data = await api.getAllAuthors(1, 5) // Get first 5 authors for overview
+      if (data.success) {
+        setRecentAuthors(data.authors)
+      }
     } catch (error) {
       console.error('Error loading authors:', error)
-      alert('Failed to load authors')
-    } finally {
-      setLoading(false)
+    }
+  }
+
+  // Load recent books for overview
+  const loadRecentBooks = async () => {
+    try {
+      const data = await api.getAllBooks(1, 5) // Get first 5 books for overview
+      if (data.success) {
+        setRecentBooks(data.books)
+      }
+    } catch (error) {
+      console.error('Error loading recent books:', error)
     }
   }
 
   useEffect(() => {
-    loadBooks()
-    loadAuthors()
+    loadStatistics()
+    loadRecentAuthors()
+    loadRecentBooks()
   }, [])
 
   // Success handlers that refresh data and close modal
   const handleBookSuccess = async () => {
-    await loadBooks()
-    await loadAuthors()
+    await loadStatistics() // Refresh statistics
+    await loadRecentAuthors() // Refresh authors in case they were linked to books
+    await loadRecentBooks() // Refresh recent books for overview
+    setRefreshBookList(prev => prev + 1) // Trigger BookList to refresh
     setModalOpen(false)
   }
 
   const handleAuthorSuccess = async () => {
-    await loadAuthors()
-    await loadBooks() // Refresh books too as they may reference authors
+    await loadStatistics() // Refresh statistics
+    await loadRecentAuthors()
+    await loadRecentBooks() // Refresh recent books in case author data changed
+    setRefreshBookList(prev => prev + 1) // Refresh books as they may reference authors
+    setRefreshAuthorList(prev => prev + 1) // Trigger AuthorList to refresh
     setModalOpen(false)
   }
 
   // Book handlers
   const handleDeleteBook = async (bookId: string) => {
-    if (!window.confirm('Are you sure you want to delete this book?')) return
     try {
       setLoading(true)
       await api.deleteBook(bookId)
-      await loadBooks()
+      await loadStatistics() // Refresh statistics after delete
     } catch (error: any) {
       console.error('Error deleting book:', error)
       alert(error.message || 'Failed to delete book')
@@ -99,8 +116,10 @@ const AdminPanel: React.FC = () => {
     try {
       setLoading(true)
       await api.deleteAuthor(authorId)
-      await loadAuthors()
-      await loadBooks() // Refresh books as they may reference this author
+      await loadStatistics() // Refresh statistics after delete
+      await loadRecentAuthors()
+      await loadRecentBooks() // Refresh recent books
+      setRefreshBookList(prev => prev + 1) // Refresh books as they may reference this author
     } catch (error: any) {
       console.error('Error deleting author:', error)
       alert(error.message || 'Failed to delete author')
@@ -138,11 +157,18 @@ const AdminPanel: React.FC = () => {
           </div>
         )}
         
-        {activeView === 'overview' && <Overview books={books} authors={authors} />}
+        {activeView === 'overview' && (
+          <Overview 
+            books={recentBooks} 
+            authors={recentAuthors} 
+            totalBooks={totalBooks}
+            totalAuthors={totalAuthors}
+          />
+        )}
         
         {activeView === 'books' && (
           <BookList
-            books={books}
+            key={refreshBookList}
             onAdd={() => {
               setModalType('addBook')
               setModalOpen(true)
@@ -168,7 +194,7 @@ const AdminPanel: React.FC = () => {
         
         {activeView === 'authors' && (
           <AuthorList
-            authors={authors}
+            key={refreshAuthorList}
             onAdd={() => {
               setModalType('addAuthor')
               setModalOpen(true)
@@ -211,7 +237,7 @@ const AdminPanel: React.FC = () => {
         {modalType === 'manageAuthors' && selectedItem && (
           <ManageBookAuthorsForm
             book={selectedItem}
-            allAuthors={authors}
+            allAuthors={recentAuthors}
             onSuccess={handleBookSuccess}
             onCancel={() => setModalOpen(false)}
           />

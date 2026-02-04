@@ -9,7 +9,7 @@ import { Favorite } from "./components/Favorites.js";
 import { Layout } from "./pages/Layout.js";
 import { YourInterest } from "./pages/YourInterest.js";
 
-import {AdminPanel} from "./pages/adminPanel"
+import { AdminPanel } from "./pages/adminPanel"
 
 function App() {
   return (
@@ -18,14 +18,15 @@ function App() {
         {/* Of course you can add the routes up in here as of now this is just the bare one */}
         <Route path="/" element={<AdminPanel />} />
         <Route path="/layout" element={<Layout />}>
-          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="profile/:userId" element={<Profile />} />
           <Route path="favorites" element={<Favorite />} />
-          <Route path="/topRated" element={<TopRated />} />
-          <Route path="/interests" element={<YourInterest />} />
-          <Route path="/bookReview/:bookId" element={<BookReview />} />
+          <Route path="topRated" element={<TopRated />} />
+          <Route path="interests" element={<YourInterest />} />
+          <Route path="bookReview/:bookId" element={<BookReview />} />
         </Route>
+
         {/* <Route path="/restrictedPage" element={<RestrictedPage />} /> */}
         <Route path="/profile/:userId" element={<Profile />} />
         <Route path="/:loginOrSignup" element={<LoginOrSignup />} />

@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Plus, Eye, Edit, Users, Trash2, Search } from 'lucide-react'
 import type { Book } from '../../../types/adminPanel'
+import { api } from '../../../apis/adminApi'
 
 interface BookListProps {
-  books: Book[]
   onAdd: () => void
   onEdit: (book: Book) => void
   onDelete: (id: string) => void
@@ -12,15 +12,79 @@ interface BookListProps {
 }
 
 export const BookList: React.FC<BookListProps> = ({
-  books,
   onAdd,
   onEdit,
   onDelete,
   onView,
   onManageAuthors
 }) => {
+  const [books, setBooks] = useState<Book[]>([])
   const [search, setSearch] = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const observer = useRef<IntersectionObserver | null>(null)
+  const lastBookRef = useRef<HTMLDivElement | null>(null)
+
+  // Fetch books function
+  const fetchBooks = async (pageNum: number) => {
+    setLoading(true)
+    try {
+      const data = await api.getAllBooks(pageNum, 10)
+      
+      if (data.success) {
+        if (pageNum === 1) {
+          setBooks(data.books)
+        } else {
+          // Filter out duplicates before adding
+          setBooks(prev => {
+            const existingIds = new Set(prev.map((b: Book) => b.id))
+            const newBooks = data.books.filter((b: Book) => !existingIds.has(b.id))
+            return [...prev, ...newBooks]
+          })
+        }
+        setHasMore(data.pagination.hasMore)
+      }
+    } catch (error) {
+      console.error('Error fetching books:', error)
+    }
+    setLoading(false)
+  }
+
+  // Initial load
+  useEffect(() => {
+    fetchBooks(1)
+  }, [])
+
+  // Intersection observer for lazy loading
+  useEffect(() => {
+    if (loading) return
+    if (!hasMore) return
+
+    if (observer.current) observer.current.disconnect()
+
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        setPage(prev => prev + 1)
+      }
+    })
+
+    if (lastBookRef.current) {
+      observer.current.observe(lastBookRef.current)
+    }
+
+    return () => {
+      if (observer.current) observer.current.disconnect()
+    }
+  }, [loading, hasMore])
+
+  // Fetch new page
+  useEffect(() => {
+    if (page > 1) {
+      fetchBooks(page)
+    }
+  }, [page])
 
   const filteredBooks = books.filter((book) => {
     const searchLower = search.toLowerCase().trim()
@@ -43,9 +107,10 @@ export const BookList: React.FC<BookListProps> = ({
     return false
   })
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (deleteConfirm === id) {
-      onDelete(id)
+      await onDelete(id)
+      setBooks(prev => prev.filter(book => book.id !== id))
       setDeleteConfirm(null)
     } else {
       setDeleteConfirm(id)
@@ -79,9 +144,10 @@ export const BookList: React.FC<BookListProps> = ({
 
       <div className="space-y-4">
         {filteredBooks.length > 0 ? (
-          filteredBooks.map((book) => (
+          filteredBooks.map((book, index) => (
             <div
               key={book.id}
+              ref={index === filteredBooks.length - 1 ? lastBookRef : null}
               className="border border-gray-200 rounded-lg p-4 flex gap-4 bg-white shadow-sm hover:shadow-md transition"
             >
               {book.book_cover_image ? (
@@ -174,9 +240,15 @@ export const BookList: React.FC<BookListProps> = ({
         )}
       </div>
 
+      {loading && (
+        <div className="text-center py-4">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      )}
+
       {filteredBooks.length > 0 && (
         <div className="mt-6 text-sm text-gray-500 text-center">
-          Showing {filteredBooks.length} of {books.length} book{books.length !== 1 ? 's' : ''}
+          Showing {filteredBooks.length} book{filteredBooks.length !== 1 ? 's' : ''}
         </div>
       )}
     </div>

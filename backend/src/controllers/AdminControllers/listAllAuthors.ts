@@ -1,9 +1,13 @@
 import type { Request, Response } from 'express'
 import { prisma } from '../../config/prismaClientConfig.js'
 
-
 export const getAllAuthors = async (req: Request, res: Response) => {
     try {
+        const page = parseInt(req.query.page as string) || 1
+        const limit = parseInt(req.query.limit as string) || 10
+        const skip = (page - 1) * limit
+
+        const totalAuthors = await prisma.bookAuthor.count()
 
         const authors = await prisma.bookAuthor.findMany({
             select: {
@@ -28,8 +32,9 @@ export const getAllAuthors = async (req: Request, res: Response) => {
             orderBy: {
                 author_first_name: "asc",
             },
+            skip: skip,
+            take: limit,
         })
-
 
         const formattedAuthors = authors.map((author) => ({
             id: author.id,
@@ -39,7 +44,19 @@ export const getAllAuthors = async (req: Request, res: Response) => {
             books: author.book_written_by.map((bw) => bw.book),
         }))
 
-        return res.status(200).json({ success: true, authors: formattedAuthors })
+        const totalPages = Math.ceil(totalAuthors / limit)
+        const hasMore = page < totalPages
+
+        return res.status(200).json({
+            success: true,
+            authors: formattedAuthors,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalAuthors,
+                hasMore,
+            },
+        })
     } catch (error: unknown) {
         console.error(error)
 

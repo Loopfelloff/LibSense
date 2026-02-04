@@ -30,10 +30,10 @@ interface UpdateBookPayload {
 
 export const api = {
 
-  getAllBooks: async (): Promise<Book[]> => {
-    const res = await fetch(`${API_BASE_URL}/listBooks`)
+  getAllBooks: async (page: number = 1, limit: number = 10): Promise<any> => {
+    const res = await fetch(`${API_BASE_URL}/listBooks?page=${page}&limit=${limit}`)
     const data = await handleResponse(res)
-    return data.books
+    return data
   },
 
   getBookDetail: async (bookId: string): Promise<Book> => {
@@ -114,10 +114,10 @@ export const api = {
   ///////////////////////////////////////////////////
 
 
-  getAllAuthors: async (): Promise<AuthorWithBooks[]> => {
-    const res = await fetch(`${API_BASE_URL}/listAuthors`)
+  getAllAuthors: async (page: number = 1, limit: number = 10): Promise<any> => {
+    const res = await fetch(`${API_BASE_URL}/listAuthors?page=${page}&limit=${limit}`)
     const data = await handleResponse(res)
-    return data.authors
+    return data
   },
 
   getAuthorDetail: async (authorId: string): Promise<AuthorWithBooks> => {
@@ -160,5 +160,10 @@ export const api = {
 
     return handleResponse(res)
 
+  },
+  getStatistics: async (): Promise<{ totalBooks: number; totalAuthors: number }> => {
+    const res = await fetch(`${API_BASE_URL}/statistics`)
+    const data = await handleResponse(res)
+    return data.statistics
   },
 }

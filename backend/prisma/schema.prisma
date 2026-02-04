@@ -117,13 +117,8 @@ model Book {
 model BookAuthor {
   id                 String          @id @default(uuid())
   author_first_name  String
-<<<<<<< HEAD
-  author_middle_name String?
-  author_last_name   String
-=======
   author_last_name   String
   author_middle_name String?
->>>>>>> origin/feature-language-transformers
   book_written_by    BookWrittenBy[]
 
   @@map("book_author")
@@ -171,12 +166,6 @@ model Review {
   book        Book   @relation(fields: [book_id], references: [id], onDelete: Cascade)
   user        User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-<<<<<<< HEAD
-  book Book @relation(fields: [book_id], references: [id], onDelete: Cascade)
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-=======
->>>>>>> origin/feature-language-transformers
   @@unique([book_id, user_id], name: "book_user_unique_review")
   @@map("review")
 }

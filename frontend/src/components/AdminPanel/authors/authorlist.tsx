@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Plus, Eye, Edit, Trash2, Search, User } from 'lucide-react'
 import type { AuthorWithBooks } from '../../../types/adminPanel'
+import { api } from '../../../apis/adminApi'
 
 interface AuthorListProps {
-  authors: AuthorWithBooks[]
   onAdd: () => void
   onEdit: (author: AuthorWithBooks) => void
   onDelete: (id: string) => void
@@ -11,14 +11,78 @@ interface AuthorListProps {
 }
 
 export const AuthorList: React.FC<AuthorListProps> = ({ 
-  authors, 
   onAdd, 
   onEdit, 
   onDelete, 
   onView 
 }) => {
+  const [authors, setAuthors] = useState<AuthorWithBooks[]>([])
   const [search, setSearch] = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const observer = useRef<IntersectionObserver | null>(null)
+  const lastAuthorRef = useRef<HTMLDivElement | null>(null)
+
+  // Fetch authors function
+  const fetchAuthors = async (pageNum: number) => {
+    setLoading(true)
+    try {
+      const data = await api.getAllAuthors(pageNum, 10)
+      
+      if (data.success) {
+        if (pageNum === 1) {
+          setAuthors(data.authors)
+        } else {
+          // Filter out duplicates before adding
+          setAuthors(prev => {
+            const existingIds = new Set(prev.map((a: AuthorWithBooks) => a.id))
+            const newAuthors = data.authors.filter((a: AuthorWithBooks) => !existingIds.has(a.id))
+            return [...prev, ...newAuthors]
+          })
+        }
+        setHasMore(data.pagination.hasMore)
+      }
+    } catch (error) {
+      console.error('Error fetching authors:', error)
+    }
+    setLoading(false)
+  }
+
+  // Initial load
+  useEffect(() => {
+    fetchAuthors(1)
+  }, [])
+
+  // Intersection observer for lazy loading
+  useEffect(() => {
+    if (loading) return
+    if (!hasMore) return
+
+    if (observer.current) observer.current.disconnect()
+
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        setPage(prev => prev + 1)
+      }
+    })
+
+    if (lastAuthorRef.current) {
+      observer.current.observe(lastAuthorRef.current)
+    }
+
+    return () => {
+      if (observer.current) observer.current.disconnect()
+    }
+  }, [loading, hasMore])
+
+  // Fetch new page
+  useEffect(() => {
+    if (page > 1) {
+      fetchAuthors(page)
+    }
+  }, [page])
   
   const filteredAuthors = authors.filter((author) => {
     const searchLower = search.toLowerCase().trim()
@@ -29,13 +93,13 @@ export const AuthorList: React.FC<AuthorListProps> = ({
     const lastName = author.last_name.toLowerCase()
     const fullName = `${firstName} ${middleName} ${lastName}`.replace(/\s+/g, ' ').trim()
     
-    // If full name includes the search, it's a match
     return fullName.includes(searchLower)
   })
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (deleteConfirm === id) {
-      onDelete(id)
+      await onDelete(id)
+      setAuthors(prev => prev.filter(author => author.id !== id))
       setDeleteConfirm(null)
     } else {
       setDeleteConfirm(id)
@@ -69,9 +133,10 @@ export const AuthorList: React.FC<AuthorListProps> = ({
 
       <div className="space-y-4">
         {filteredAuthors.length > 0 ? (
-          filteredAuthors.map((author) => (
+          filteredAuthors.map((author, index) => (
             <div 
-              key={author.id} 
+              key={author.id}
+              ref={index === filteredAuthors.length - 1 ? lastAuthorRef : null}
               className="border border-gray-200 rounded-lg p-4 flex justify-between items-start bg-white shadow-sm hover:shadow-md transition"
             >
               <div className="flex-1 min-w-0">
@@ -152,9 +217,15 @@ export const AuthorList: React.FC<AuthorListProps> = ({
         )}
       </div>
 
+      {loading && (
+        <div className="text-center py-4">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      )}
+
       {filteredAuthors.length > 0 && (
         <div className="mt-6 text-sm text-gray-500 text-center">
-          Showing {filteredAuthors.length} of {authors.length} author{authors.length !== 1 ? 's' : ''}
+          Showing {filteredAuthors.length} author{filteredAuthors.length !== 1 ? 's' : ''}
         </div>
       )}
     </div>

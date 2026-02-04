@@ -5,15 +5,17 @@ import type { Book, AuthorWithBooks } from '../../../types/adminPanel'
 interface OverviewProps {
   books: Book[]
   authors: AuthorWithBooks[]
+  totalBooks: number
+  totalAuthors: number
 }
 
-export const Overview: React.FC<OverviewProps> = ({ books, authors }) => {
-  // Calculate total books written by all authors
+export const Overview: React.FC<OverviewProps> = ({ books, authors, totalBooks, totalAuthors }) => {
+  // Calculate total books written by all authors (from recent authors only for display)
   const totalBooksFromAuthors = authors.reduce((sum, author) => sum + (author.books?.length || 0), 0)
-  
-  // Calculate average books per author
-  const avgBooksPerAuthor = authors.length > 0 
-    ? (totalBooksFromAuthors / authors.length).toFixed(1) 
+
+  // Calculate average books per author using total counts
+  const avgBooksPerAuthor = totalAuthors > 0
+    ? (totalBooks / totalAuthors).toFixed(1)
     : '0'
 
   return (
@@ -26,7 +28,7 @@ export const Overview: React.FC<OverviewProps> = ({ books, authors }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg shadow-sm border border-blue-200">
           <div className="flex items-center justify-between mb-2">
-            <div className="text-4xl font-bold text-blue-600">{books.length}</div>
+            <div className="text-4xl font-bold text-blue-600">{totalBooks}</div>
             <BookOpen size={32} className="text-blue-500" />
           </div>
           <div className="text-gray-700 font-medium">Total Books</div>
@@ -34,7 +36,7 @@ export const Overview: React.FC<OverviewProps> = ({ books, authors }) => {
 
         <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-lg shadow-sm border border-green-200">
           <div className="flex items-center justify-between mb-2">
-            <div className="text-4xl font-bold text-green-600">{authors.length}</div>
+            <div className="text-4xl font-bold text-green-600">{totalAuthors}</div>
             <Users size={32} className="text-green-500" />
           </div>
           <div className="text-gray-700 font-medium">Total Authors</div>
@@ -54,16 +56,16 @@ export const Overview: React.FC<OverviewProps> = ({ books, authors }) => {
           <BookOpen size={24} className="text-blue-600" />
           Recent Books
         </h2>
-        
+
         {books.length > 0 ? (
           <div className="space-y-3">
             {books.slice(0, 5).map((book) => (
               <div key={book.id} className="border border-gray-200 rounded-lg p-4 flex gap-4 hover:shadow-md transition">
                 {book.book_cover_image ? (
-                  <img 
-                    src={book.book_cover_image} 
-                    alt={book.book_title} 
-                    className="w-16 h-20 object-cover rounded shadow-sm flex-shrink-0" 
+                  <img
+                    src={book.book_cover_image}
+                    alt={book.book_title}
+                    className="w-16 h-20 object-cover rounded shadow-sm flex-shrink-0"
                   />
                 ) : (
                   <div className="w-16 h-20 bg-gray-200 rounded flex items-center justify-center flex-shrink-0">
@@ -78,7 +80,7 @@ export const Overview: React.FC<OverviewProps> = ({ books, authors }) => {
                   <div className="text-sm text-gray-600">
                     <span className="font-medium">Authors:</span>{' '}
                     {book.authors && book.authors.length > 0 ? (
-                      book.authors.map((a) => 
+                      book.authors.map((a) =>
                         `${a.author_first_name}${a.author_middle_name ? ` ${a.author_middle_name}` : ''} ${a.author_last_name}`
                       ).join(', ')
                     ) : (

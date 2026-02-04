@@ -1,10 +1,5 @@
 import express from "express";
-import { getProfileController } from "../controllers/profileController.js";
-import { postProfilePicController } from "../controllers/profilePicController.js";
-import { upload } from "../middlewares/multer.js";
 import { changePassword } from "../controllers/miscellaneousController.js";
-const profileRouter = express.Router();
-
 import { getProfileController } from "../controllers/profileController.js"
 import { postProfilePicController } from "../controllers/profilePicController.js"
 import { upload } from "../middlewares/multer.js"
