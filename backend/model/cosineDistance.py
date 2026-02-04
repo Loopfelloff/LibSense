@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException
 from fastapi.routing import APIRouter
 from sqlalchemy.orm import Session
-from model.db.database import (
+from db.database import (
     BookStatusVal,
     Favourite,
     SessionLocal,
@@ -9,8 +9,8 @@ from model.db.database import (
     Book,
     UserVector,
 )
+from sentenceTransformers import transformer_model
 from pathlib import Path
-from model.sentenceTransformers import transformer_model
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 

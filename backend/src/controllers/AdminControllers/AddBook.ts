@@ -1,6 +1,7 @@
 import type { Request, Response } from "express"
 import { prisma } from "../../config/prismaClientConfig.js"
 import { uploadToCloudinary } from "../../config/cloudinaryConfig.js"
+import axios from "axios"
 
 interface AddBookAuthor {
   author_id?: string
@@ -14,6 +15,57 @@ interface AddBookBody {
   book_title: string
   description?: string
   authors: AddBookAuthor[]
+  genres?: string[] // Added genres if you need them
+}
+
+// Helper function to insert embeddings
+const insertEmbeddings = async (vectorArray: number[], book_id: string) => {
+  const vectorString = `[${vectorArray.join(",")}]`
+  try {
+    await prisma.$executeRaw`
+      INSERT INTO book_vector (id, book_id, embedding)
+      VALUES (gen_random_uuid(), ${book_id}, ${vectorString}::vector)
+      ON CONFLICT (book_id) 
+      DO UPDATE SET embedding = ${vectorString}::vector, created_at = NOW()
+    `
+  } catch (error) {
+    console.error("Error inserting embeddings:", error)
+    throw error
+  }
+}
+
+// Helper function to create book text for embedding
+const createBookText = (book: any) => {
+  const parts: any = {}
+  parts.id = book.id
+  parts.title = book.book_title
+  parts.description = book.description || ""
+
+  if (book.book_written_by && book.book_written_by?.length > 0) {
+    const authorName = book.book_written_by
+      .map(({ book_author }: any) => {
+        return [
+          book_author.author_first_name,
+          book_author.author_middle_name,
+          book_author.author_last_name,
+        ]
+          .filter(Boolean)
+          .join(" ")
+      })
+      .join(" ")
+    parts.author = authorName
+  }
+
+  if (book.book_genres?.length > 0) {
+    const genres = book.book_genres
+      .map(({ genre }: any) => {
+        return genre.genre_name
+      })
+      .join(" ")
+    parts.genre = genres
+  }
+
+  return parts
 }
 
 export const addBook = async (
@@ -21,7 +73,6 @@ export const addBook = async (
   res: Response
 ) => {
   try {
-
     if (typeof req.body.authors === 'string') {
       req.body.authors = JSON.parse(req.body.authors)
     }
@@ -92,14 +143,42 @@ export const addBook = async (
       })
     }
 
+    // Fetch the complete book with all relations for embedding
     const createdBook = await prisma.book.findUnique({
       where: { id: book.id },
       include: {
         book_written_by: {
           include: { book_author: true },
         },
+        book_genres: {
+          include: { genre: true },
+        },
       },
     })
+
+    // Generate and store embedding
+    try {
+      const bookText = createBookText(createdBook)
+      
+      const embeddingResponse = await axios.post(
+        "http://127.0.0.1:8000/books/embedd",
+        bookText,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+
+      const { vector } = embeddingResponse.data
+      await insertEmbeddings(vector, book.id)
+      
+      console.log(`Successfully created embedding for book: ${book.id}`)
+    } catch (embeddingError) {
+      // Log the error but don't fail the book creation
+      console.error("Error generating embedding for book:", embeddingError)
+      // You might want to add the book to a retry queue here
+    }
 
     return res.status(201).json({
       success: true,
@@ -109,12 +188,11 @@ export const addBook = async (
     console.error("Error adding book:", error)
 
     if (error?.code === 'P2002') {
-      let field = 'field';
+      let field = 'field'
 
       if (typeof error?.message === 'string') {
-
-        const match = error.message.match(/\((`?)([^)`]+)\1\)/);
-        if (match?.[2]) field = match[2];
+        const match = error.message.match(/\((`?)([^)`]+)\1\)/)
+        if (match?.[2]) field = match[2]
       }
       return res.status(400).json({
         success: false,

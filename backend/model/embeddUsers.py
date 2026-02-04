@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from uuid import UUID
 from typing import List
-from .sentenceTransformers import transformer_model
+from sentenceTransformers import transformer_model
 
 router = APIRouter()
 

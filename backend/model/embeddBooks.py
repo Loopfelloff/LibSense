@@ -1,9 +1,9 @@
 from fastapi import APIRouter
-from .utils.processText import process_text
+from utils.processText import process_text  # No dot
 from pydantic import BaseModel
 from uuid import UUID
 from typing import List, Optional
-from .sentenceTransformers import transformer_model
+from sentenceTransformers import transformer_model# No dot
 
 router = APIRouter()
 
@@ -25,12 +25,21 @@ def processBook(book: Book):
 
 @router.post("/embedd/all")
 def embedd_books_for_db(books: List[Book]):
-    return [
+    print(f"📥 Received request to embed {len(books)} books")
+    result = [
         {"id": book_id, "vector": vector} for book_id, vector in map(processBook, books)
     ]
+    print(f"✅ Successfully generated {len(result)} embeddings")
+    return result
 
 
 @router.post("/embedd")
 def embedd_book(book: Book):
+    print(f"📥 Received embedding request for book: {book.id}")
+    print(f"📖 Title: {book.title}")
+    
     book_id, vector = processBook(book)
+    
+    print(f"✅ Generated vector with {len(vector)} dimensions")
+    
     return {"id": book_id, "vector": vector}
