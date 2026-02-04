@@ -1,6 +1,5 @@
 import { prisma } from "../../src/config/prismaClientConfig.js";
 import axios from "axios";
-import { Worker, Job } from "bullmq";
 
 const preprocessText = (text: string = ""): string => {
   return text
