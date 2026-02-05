@@ -1,6 +1,5 @@
 import type { Request, Response } from 'express'
 import { prisma } from '../../config/prismaClientConfig.js'
-import { json } from 'node:stream/consumers'
 
 interface AddAuthor {
     author_first_name: string
@@ -17,12 +16,11 @@ export const addAuthor = async (req: Request<{}, {}, AddAuthor>, res: Response) 
             return res.status(400).json({ success: false, msg: 'First name and last name are required' })
         }
 
-        const newAuthor = await prisma.bookAuthor.create({
+        const newAuthor = await prisma.book_author.create({  // Changed from bookAuthor to book_author
             data: {
                 author_first_name: author_first_name.trim(),
                 author_middle_name: author_middle_name?.trim() ?? null,
                 author_last_name: author_last_name.trim(),
-
             },
         })
 
@@ -32,13 +30,16 @@ export const addAuthor = async (req: Request<{}, {}, AddAuthor>, res: Response) 
         console.error(error)
 
         if (error instanceof Error) {
-
             return res.status(500).json({
                 success: false,
                 errName: error.name,
                 errMsg: error.message,
             })
-
         }
+
+        return res.status(500).json({
+            success: false,
+            errName: "UnknownError",
+        })
     }
 }

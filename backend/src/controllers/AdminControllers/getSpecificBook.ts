@@ -15,7 +15,7 @@ export const getBookDetail = async (req: Request<{ book_id: string }>, res: Resp
                 isbn: true,
                 book_cover_image: true,
                 description: true,
-                book_written_by: {
+                BookWrittenBy: {
                     select: {
                         book_author: {
                             select: {
@@ -34,7 +34,7 @@ export const getBookDetail = async (req: Request<{ book_id: string }>, res: Resp
             return res.status(404).json({ success: false, msg: "Book not found" })
         }
 
-        const authors = book.book_written_by.map((bw) => bw.book_author)
+        const authors = book.BookWrittenBy.map((bw) => bw.book_author)
 
         return res.status(200).json({
             success: true,

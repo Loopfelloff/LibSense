@@ -36,6 +36,12 @@ export const api = {
     return data
   },
 
+  searchBooks: async (query: string): Promise<any> => {
+    const res = await fetch(`${API_BASE_URL}/searchBooks?query=${encodeURIComponent(query)}`)
+    const data = await handleResponse(res)
+    return data
+  },
+
   getBookDetail: async (bookId: string): Promise<Book> => {
     const res = await fetch(`${API_BASE_URL}/bookDetail/${bookId}`)
     const data = await handleResponse(res)

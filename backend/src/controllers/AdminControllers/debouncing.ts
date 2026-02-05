@@ -14,7 +14,7 @@ export const suggestedAuthors = async (req: Request, res: Response) => {
     const words = query.trim().split(/\s+/);
 
     try {
-        const authors = await prisma.bookAuthor.findMany({
+        const authors = await prisma.book_author.findMany({  // Changed from bookAuthor to book_author
             where: {
                 AND: words.map((word) => ({
                     OR: [
@@ -27,7 +27,7 @@ export const suggestedAuthors = async (req: Request, res: Response) => {
                 id: true,
                 author_first_name: true,
                 author_last_name: true,
-                book_written_by: {
+                BookWrittenBy: {  // Changed from book_written_by to BookWrittenBy (PascalCase)
                     take: 2,
                     orderBy: {
                         book: { id: 'desc' },
@@ -49,7 +49,7 @@ export const suggestedAuthors = async (req: Request, res: Response) => {
             id: a.id,
             firstName: a.author_first_name,
             lastName: a.author_last_name,
-            recentBooks: a.book_written_by.map(b => ({
+            recentBooks: a.BookWrittenBy.map(b => ({  // Changed from book_written_by to BookWrittenBy
                 title: b.book.book_title,
                 coverImage: b.book.book_cover_image,
             })),
@@ -69,5 +69,10 @@ export const suggestedAuthors = async (req: Request, res: Response) => {
                 errMsg: error.message,
             })
         }
+
+        return res.status(500).json({
+            success: false,
+            errName: "UnknownError",
+        })
     }
 }

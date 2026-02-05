@@ -16,7 +16,7 @@ export const getAllBooks = async (req: Request, res: Response) => {
                 isbn: true,
                 book_cover_image: true,
                 description: true,
-                book_written_by: {
+                BookWrittenBy: {
                     select: {
                         book_author: {
                             select: {
@@ -30,7 +30,7 @@ export const getAllBooks = async (req: Request, res: Response) => {
                 },
             },
             orderBy: {
-                book_title: "asc",
+                createdAt: "desc",
             },
             skip: skip,
             take: limit,
@@ -42,7 +42,7 @@ export const getAllBooks = async (req: Request, res: Response) => {
             isbn: book.isbn,
             book_cover_image: book.book_cover_image,
             description: book.description,
-            authors: book.book_written_by.map((bw) => bw.book_author),
+            authors: book.BookWrittenBy.map((bw) => bw.book_author),
         }))
 
         const totalPages = Math.ceil(totalBooks / limit)

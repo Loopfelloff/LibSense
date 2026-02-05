@@ -24,6 +24,7 @@ export const BookList: React.FC<BookListProps> = ({
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
+  const [isSearching, setIsSearching] = useState(false)
   const observer = useRef<IntersectionObserver | null>(null)
   const lastBookRef = useRef<HTMLDivElement | null>(null)
 
@@ -52,15 +53,66 @@ export const BookList: React.FC<BookListProps> = ({
     setLoading(false)
   }
 
+  // Search books with vector similarity
+  const searchBooksWithVector = async (query: string) => {
+    if (!query.trim()) {
+      setIsSearching(false)
+      setPage(1)
+      fetchBooks(1)
+      return
+    }
+
+    setLoading(true)
+    setIsSearching(true)
+    try {
+      const data = await api.searchBooks(query)
+      
+      if (data.success && data.recommendations) {
+        // Map the recommendations to match Book format
+        const searchResults = await Promise.all(
+          data.recommendations.map(async (rec: any) => {
+            try {
+              const bookDetail = await api.getBookDetail(rec.book_id)
+              return bookDetail
+            } catch (error) {
+              console.error(`Error fetching book detail for ${rec.book_id}:`, error)
+              return null
+            }
+          })
+        )
+        
+        // Filter out any null results
+        setBooks(searchResults.filter((book): book is Book => book !== null))
+        setHasMore(false) // Disable pagination for search results
+      }
+    } catch (error) {
+      console.error('Error searching books:', error)
+    }
+    setLoading(false)
+  }
+
+  // Handle Enter key press
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      searchBooksWithVector(search)
+    }
+  }
+
+  // Handle search button click
+  const handleSearchClick = () => {
+    searchBooksWithVector(search)
+  }
+
   // Initial load
   useEffect(() => {
     fetchBooks(1)
   }, [])
 
-  // Intersection observer for lazy loading
+  // Intersection observer for lazy loading (only when not searching)
   useEffect(() => {
     if (loading) return
     if (!hasMore) return
+    if (isSearching) return // Don't use infinite scroll during search
 
     if (observer.current) observer.current.disconnect()
 
@@ -77,35 +129,14 @@ export const BookList: React.FC<BookListProps> = ({
     return () => {
       if (observer.current) observer.current.disconnect()
     }
-  }, [loading, hasMore])
+  }, [loading, hasMore, isSearching])
 
-  // Fetch new page
+  // Fetch new page (only when not searching)
   useEffect(() => {
-    if (page > 1) {
+    if (page > 1 && !isSearching) {
       fetchBooks(page)
     }
-  }, [page])
-
-  const filteredBooks = books.filter((book) => {
-    const searchLower = search.toLowerCase().trim()
-    if (!searchLower) return true
-
-    if (book.book_title.toLowerCase().includes(searchLower)) return true
-
-    if (book.isbn.toLowerCase().includes(searchLower)) return true
-
-    if (book.authors && book.authors.length > 0) {
-      return book.authors.some((author) => {
-        const firstName = author.author_first_name.toLowerCase()
-        const middleName = (author.author_middle_name || '').toLowerCase()
-        const lastName = author.author_last_name.toLowerCase()
-        const fullName = `${firstName} ${middleName} ${lastName}`.replace(/\s+/g, ' ').trim()
-        return fullName.includes(searchLower)
-      })
-    }
-
-    return false
-  })
+  }, [page, isSearching])
 
   const handleDelete = async (id: string) => {
     if (deleteConfirm === id) {
@@ -131,23 +162,38 @@ export const BookList: React.FC<BookListProps> = ({
         </button>
       </div>
 
-      <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-        <input
-          type="text"
-          placeholder="Search by title, ISBN, or author..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-        />
+      <div className="relative mb-6 flex gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <input
+            type="text"
+            placeholder="Search books using AI (e.g., 'fantasy with dragons', 'mystery thriller')... Press Enter to search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+          />
+          {loading && isSearching && (
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+            </div>
+          )}
+        </div>
+        <button
+          onClick={handleSearchClick}
+          disabled={loading}
+          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Search
+        </button>
       </div>
 
       <div className="space-y-4">
-        {filteredBooks.length > 0 ? (
-          filteredBooks.map((book, index) => (
+        {books.length > 0 ? (
+          books.map((book, index) => (
             <div
               key={book.id}
-              ref={index === filteredBooks.length - 1 ? lastBookRef : null}
+              ref={index === books.length - 1 ? lastBookRef : null}
               className="border border-gray-200 rounded-lg p-4 flex gap-4 bg-white shadow-sm hover:shadow-md transition"
             >
               {book.book_cover_image ? (
@@ -240,15 +286,16 @@ export const BookList: React.FC<BookListProps> = ({
         )}
       </div>
 
-      {loading && (
+      {loading && !isSearching && (
         <div className="text-center py-4">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       )}
 
-      {filteredBooks.length > 0 && (
+      {books.length > 0 && (
         <div className="mt-6 text-sm text-gray-500 text-center">
-          Showing {filteredBooks.length} book{filteredBooks.length !== 1 ? 's' : ''}
+          Showing {books.length} book{books.length !== 1 ? 's' : ''}
+          {isSearching && ' (AI-powered search results)'}
         </div>
       )}
     </div>

@@ -5,7 +5,7 @@ export const deleteAuthor = async (req: Request<{ author_id: string }>, res: Res
     try {
         const { author_id } = req.params
 
-        const author = await prisma.bookAuthor.findUnique({
+        const author = await prisma.book_author.findUnique({  // Changed from bookAuthor to book_author
             where: { id: author_id },
         })
 
@@ -13,7 +13,7 @@ export const deleteAuthor = async (req: Request<{ author_id: string }>, res: Res
             return res.status(404).json({ success: false, msg: "Author not found" })
         }
 
-        await prisma.bookAuthor.delete({
+        await prisma.book_author.delete({  // Changed from bookAuthor to book_author
             where: { id: author_id },
         })
 

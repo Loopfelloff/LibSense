@@ -16,13 +16,18 @@ interface UpdateBookAuthorsBody {
 
 // Helper function to create book text for embedding
 const createBookText = (book: any) => {
-  const parts: any = {}
-  parts.id = book.id
-  parts.title = book.book_title
-  parts.description = book.description || ""
+  const parts: string[] = []
+  
+  if (book.book_title) {
+    parts.push(book.book_title)
+  }
+  
+  if (book.description) {
+    parts.push(book.description)
+  }
 
-  if (book.book_written_by && book.book_written_by?.length > 0) {
-    const authorName = book.book_written_by
+  if (book.BookWrittenBy && book.BookWrittenBy?.length > 0) {
+    const authorNames = book.BookWrittenBy
       .map(({ book_author }: any) => {
         return [
           book_author.author_first_name,
@@ -33,23 +38,21 @@ const createBookText = (book: any) => {
           .join(" ")
       })
       .join(" ")
-    parts.author = authorName
+    parts.push(authorNames)
   }
 
-  if (book.book_genres?.length > 0) {
-    const genres = book.book_genres
-      .map(({ genre }: any) => {
-        return genre.genre_name
-      })
+  if (book.BookGenres?.length > 0) {
+    const genres = book.BookGenres
+      .map(({ genre }: any) => genre.genre_name)
       .join(" ")
-    parts.genre = genres
+    parts.push(genres)
   }
 
-  return parts
+  return parts.filter(Boolean).join(" ")
 }
 
-// Helper function to insert embeddings
-const insertEmbeddings = async (vectorArray: number[], book_id: string) => {
+// Helper function to update embeddings (uses ON CONFLICT to update, not insert new)
+const updateEmbeddings = async (vectorArray: number[], book_id: string) => {
   const vectorString = `[${vectorArray.join(",")}]`
   try {
     await prisma.$executeRaw`
@@ -58,8 +61,9 @@ const insertEmbeddings = async (vectorArray: number[], book_id: string) => {
       ON CONFLICT (book_id) 
       DO UPDATE SET embedding = ${vectorString}::vector, created_at = NOW()
     `
+    console.log(`✅ Vector updated for book: ${book_id}`)
   } catch (error) {
-    console.error("Error inserting embeddings:", error)
+    console.error("Error updating embeddings:", error)
     throw error
   }
 }
@@ -106,7 +110,7 @@ export const updateBookAuthors = async (
                 authorId = author.author_id
                 
                 // Verify author exists
-                const existingAuthor = await prisma.bookAuthor.findUnique({
+                const existingAuthor = await prisma.book_author.findUnique({
                     where: { id: authorId }
                 })
                 
@@ -125,7 +129,7 @@ export const updateBookAuthors = async (
                     })
                 }
 
-                const newAuthor = await prisma.bookAuthor.create({
+                const newAuthor = await prisma.book_author.create({
                     data: {
                         author_first_name: author.first_name.trim(),
                         author_middle_name: author.middle_name?.trim() || null,
@@ -151,10 +155,10 @@ export const updateBookAuthors = async (
         const updatedBook = await prisma.book.findUnique({
             where: { id: book_id },
             include: {
-                book_written_by: {
+                BookWrittenBy: {
                     include: { book_author: true },
                 },
-                book_genres: {
+                BookGenres: {
                     include: { genre: true },
                 },
             },
@@ -164,9 +168,15 @@ export const updateBookAuthors = async (
         try {
             const bookText = createBookText(updatedBook)
             
+            // Create the payload matching your Word2Vec API's Book model
+            const embeddingPayload = {
+                id: book_id,
+                text: bookText
+            }
+            
             const embeddingResponse = await axios.post(
                 "http://127.0.0.1:8000/books/embedd",
-                bookText,
+                embeddingPayload,
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -178,8 +188,10 @@ export const updateBookAuthors = async (
             const { vector } = embeddingResponse.data
             
             if (vector && Array.isArray(vector)) {
-                await insertEmbeddings(vector, book_id)
-                console.log(`✅ Updated embedding for book: ${book_id} after author change`)
+                // This will UPDATE the existing vector, not create a new one
+                // thanks to the ON CONFLICT clause in the updateEmbeddings function
+                await updateEmbeddings(vector, book_id)
+                console.log(`✅ Successfully updated embedding for book: ${book_id} after author change`)
             }
         } catch (embeddingError) {
             // Log error but don't fail the author update

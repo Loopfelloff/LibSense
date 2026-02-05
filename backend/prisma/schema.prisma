@@ -18,7 +18,7 @@ model BookGenres {
 }
 
 model BookWrittenBy {
-  id             String      @id
+  id             String      @id @default(uuid())
   book_author_id String
   book_id        String
   book_author    book_author @relation(fields: [book_author_id], references: [id], onDelete: Cascade)
@@ -48,7 +48,7 @@ model UserPreferences {
 }
 
 model book {
-  id                String            @id
+  id                String            @id @default(uuid())
   isbn              String            @unique
   book_title        String
   book_cover_image  String
@@ -61,10 +61,11 @@ model book {
   book_vector       book_vector?
   favourite         favourite[]
   review            review[]
+  createdAt  DateTime @default(now())
 }
 
 model book_author {
-  id                 String          @id
+  id                 String          @id @default(uuid())
   author_first_name  String
   author_last_name   String
   author_middle_name String?

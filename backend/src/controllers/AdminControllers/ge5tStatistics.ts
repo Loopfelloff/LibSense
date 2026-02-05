@@ -4,7 +4,7 @@ import { prisma } from '../../config/prismaClientConfig.js'
 export const getStatistics = async (req: Request, res: Response) => {
     try {
         const totalBooks = await prisma.book.count()
-        const totalAuthors = await prisma.bookAuthor.count()
+        const totalAuthors = await prisma.book_author.count()  // Changed from bookAuthor to book_author
 
         return res.status(200).json({
             success: true,

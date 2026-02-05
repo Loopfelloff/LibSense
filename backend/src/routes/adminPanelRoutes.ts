@@ -14,6 +14,7 @@ import { updateBookAuthors } from '../controllers/AdminControllers/updateBookAut
 import { updateBook } from '../controllers/AdminControllers/updateBookInformation.js'
 import { suggestedAuthors } from '../controllers/AdminControllers/debouncing.js'
 import { getStatistics } from '../controllers/AdminControllers/ge5tStatistics.js'
+import { searchBooks } from '../controllers/AdminControllers/searchBook.js'
 
 import { upload } from '../middlewares/multer.js'
 
@@ -30,4 +31,5 @@ router.put('/updateBook', upload.fields([{ name: "book_cover_image", maxCount: 1
 router.put('/updateBookAuthors', updateBookAuthors)
 router.get('/getSuggestedAuthor',suggestedAuthors)
 router.get('/statistics', getStatistics)
+router.get('/searchBooks', searchBooks)
 export { router }

@@ -6,14 +6,14 @@ export const getAuthorDetail = async (req: Request<{ author_id: string }>, res: 
   try {
     const { author_id } = req.params
 
-    const author = await prisma.bookAuthor.findUnique({
+    const author = await prisma.book_author.findUnique({  // Changed from bookAuthor to book_author
       where: { id: author_id },
       select: {
         id: true,
         author_first_name: true,
         author_middle_name: true,
         author_last_name: true,
-        book_written_by: {
+        BookWrittenBy: {  // Changed from book_written_by to BookWrittenBy
           select: {
             book: {
               select: {
@@ -33,7 +33,7 @@ export const getAuthorDetail = async (req: Request<{ author_id: string }>, res: 
       return res.status(404).json({ success: false, msg: "Author not found" })
     }
 
-    const books = author.book_written_by.map((bw) => bw.book)
+    const books = author.BookWrittenBy.map((bw) => bw.book)  // Changed from book_written_by to BookWrittenBy
 
     return res.status(200).json({
       success: true,

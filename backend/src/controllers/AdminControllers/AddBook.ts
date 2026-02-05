@@ -15,7 +15,7 @@ interface AddBookBody {
   book_title: string
   description?: string
   authors: AddBookAuthor[]
-  genres?: string[] // Added genres if you need them
+  genres?: string[]
 }
 
 // Helper function to insert embeddings
@@ -36,13 +36,18 @@ const insertEmbeddings = async (vectorArray: number[], book_id: string) => {
 
 // Helper function to create book text for embedding
 const createBookText = (book: any) => {
-  const parts: any = {}
-  parts.id = book.id
-  parts.title = book.book_title
-  parts.description = book.description || ""
+  const parts: string[] = []
+  
+  if (book.book_title) {
+    parts.push(book.book_title)
+  }
+  
+  if (book.description) {
+    parts.push(book.description)
+  }
 
-  if (book.book_written_by && book.book_written_by?.length > 0) {
-    const authorName = book.book_written_by
+  if (book.BookWrittenBy && book.BookWrittenBy?.length > 0) {
+    const authorNames = book.BookWrittenBy
       .map(({ book_author }: any) => {
         return [
           book_author.author_first_name,
@@ -53,19 +58,17 @@ const createBookText = (book: any) => {
           .join(" ")
       })
       .join(" ")
-    parts.author = authorName
+    parts.push(authorNames)
   }
 
-  if (book.book_genres?.length > 0) {
-    const genres = book.book_genres
-      .map(({ genre }: any) => {
-        return genre.genre_name
-      })
+  if (book.BookGenres?.length > 0) {
+    const genres = book.BookGenres
+      .map(({ genre }: any) => genre.genre_name)
       .join(" ")
-    parts.genre = genres
+    parts.push(genres)
   }
 
-  return parts
+  return parts.filter(Boolean).join(" ")
 }
 
 export const addBook = async (
@@ -124,7 +127,7 @@ export const addBook = async (
           })
         }
 
-        const newAuthor = await prisma.bookAuthor.create({
+        const newAuthor = await prisma.book_author.create({
           data: {
             author_first_name: author.first_name.trim(),
             author_middle_name: author.middle_name?.trim() ?? null,
@@ -143,26 +146,29 @@ export const addBook = async (
       })
     }
 
-    // Fetch the complete book with all relations for embedding
     const createdBook = await prisma.book.findUnique({
       where: { id: book.id },
       include: {
-        book_written_by: {
+        BookWrittenBy: {
           include: { book_author: true },
         },
-        book_genres: {
+        BookGenres: {
           include: { genre: true },
         },
       },
     })
 
-    // Generate and store embedding
     try {
       const bookText = createBookText(createdBook)
       
+      const embeddingPayload = {
+        id: book.id,
+        text: bookText
+      }
+      
       const embeddingResponse = await axios.post(
         "http://127.0.0.1:8000/books/embedd",
-        bookText,
+        embeddingPayload,
         {
           headers: {
             "Content-Type": "application/json",
@@ -175,9 +181,7 @@ export const addBook = async (
       
       console.log(`Successfully created embedding for book: ${book.id}`)
     } catch (embeddingError) {
-      // Log the error but don't fail the book creation
       console.error("Error generating embedding for book:", embeddingError)
-      // You might want to add the book to a retry queue here
     }
 
     return res.status(201).json({

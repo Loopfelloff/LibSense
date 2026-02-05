@@ -17,7 +17,7 @@ export const updateAuthor = async (
     try {
         const { author_id, author_first_name, author_middle_name, author_last_name } = req.body
 
-        const existingAuthor = await prisma.bookAuthor.findUnique({
+        const existingAuthor = await prisma.book_author.findUnique({
             where: { id: author_id },
         })
 
@@ -25,7 +25,7 @@ export const updateAuthor = async (
             return res.status(404).json({ success: false, msg: "Author not found" })
         }
 
-        const updatedAuthor = await prisma.bookAuthor.update({
+        const updatedAuthor = await prisma.book_author.update({
             where: { id: author_id },
             data: {
                 author_first_name: author_first_name?.trim() ?? existingAuthor.author_first_name,
