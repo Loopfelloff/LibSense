@@ -64,6 +64,9 @@ function Navbar({ onMenuClick }: NavbarProps) {
     setSearchQuery("");
     setSearchResults([]);
   };
+  const handleLogOut = () => {
+    const response = await 
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white border-b border-gray-300 z-50">
@@ -183,7 +186,9 @@ function Navbar({ onMenuClick }: NavbarProps) {
                     >
                       My Profile
                     </Link>
-                    <button className="w-full text-left px-3 py-2 border-t border-gray-300 hover:bg-gray-100">
+                    <button 
+                      onClick={handleLogOut}
+                      className="w-full text-left px-3 py-2 border-t border-gray-300 hover:bg-gray-100">
                       Logout
                     </button>
                   </div>

@@ -57,4 +57,20 @@ const changeProfilePic = async (formData: FormData) => {
   }
 };
 
-export { changeProfilePic, getUserProfile, changePassword };
+const logOut = async () => {
+  try {
+    const response = await axios.get("http://localhost:5000/users/profile", {
+      withCredentials: true,
+    });
+    return response.data.data;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      alert(`can't add the review due to ${err.name}`);
+      console.log(err.response?.data);
+      console.log(err.response?.status);
+    }
+    return null;
+  }
+}
+
+export { changeProfilePic, getUserProfile, changePassword , logOut};
