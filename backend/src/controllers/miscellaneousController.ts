@@ -333,6 +333,21 @@ const checkIfStatusExists = async (req: Request, res: Response) => {
   }
 };
 
+const updateTopBookGenre = async (req : Request , res : Response)=>{
+    try{
+    }
+    catch(err : unknown){
+	if (err instanceof Error){
+	    return res.status(500).json({
+		success:false,
+		errMsg : err.message,
+		errName : err.name,
+	    })
+	}
+    }
+}
+
+
 export {
   getMutualBooks,
   changePassword,

@@ -10,8 +10,6 @@ from .utils.processText import process_text
 MODEL_PATH = Path(__file__).parent / "artifacts" / "word2vec.model"
 model = Word2Vec.load(str(MODEL_PATH))
 router = APIRouter()
-
-
 class User(BaseModel):
     id: UUID
     text: str

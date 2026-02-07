@@ -49,7 +49,6 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
     { icon: Heart, label: "Favorites", key: "favorites" },
     { icon: Star, label: "Top Rated", key: "topRated" },
     { icon: Users, label: "Community", key: "community" },
-    { icon: MessageSquare, label: "Chats", key: "chats" },
     { icon: UserStar, label: "Your Interests", key: "interests" },
   ];
 
