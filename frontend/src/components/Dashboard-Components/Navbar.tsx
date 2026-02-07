@@ -8,6 +8,7 @@ import SearchResults from "../SearchResults";
 import { searchBooks} from "../../apis/searchApi";
 import type { SearchResult } from '../../types/searchResultTypes';
 import { useDebounce } from "../../hooks/useDebounce";
+import { logOut } from "../../apis/profile";
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -64,8 +65,11 @@ function Navbar({ onMenuClick }: NavbarProps) {
     setSearchQuery("");
     setSearchResults([]);
   };
-  const handleLogOut = () => {
-    const response = await 
+  const handleLogOut = async () => {
+    const response = await logOut();
+    if(response.success) {
+      navigate('/login');
+    }
   }
 
   return (
@@ -187,7 +191,7 @@ function Navbar({ onMenuClick }: NavbarProps) {
                       My Profile
                     </Link>
                     <button 
-                      onClick={handleLogOut}
+                      onClick={() => handleLogOut()}
                       className="w-full text-left px-3 py-2 border-t border-gray-300 hover:bg-gray-100">
                       Logout
                     </button>

@@ -59,10 +59,10 @@ const changeProfilePic = async (formData: FormData) => {
 
 const logOut = async () => {
   try {
-    const response = await axios.get("http://localhost:5000/users/profile", {
+    const response = await axios.get("http://localhost:5000/logout", {
       withCredentials: true,
     });
-    return response.data.data;
+    return response.data;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
       alert(`can't add the review due to ${err.name}`);
