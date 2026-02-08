@@ -1,9 +1,13 @@
 import { Search, Settings, Menu } from "lucide-react";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { UserContext } from "../../context/UserContext";
 import { Link, useNavigate } from "react-router-dom";
 import ChangePasswordModal from "../PasswordChangeModal";
 import ChangeProfilePicModal from "../ProfilePicChangeModal";
+import SearchResults from "../SearchResults";
+import { searchBooks} from "../../apis/searchApi";
+import type { SearchResult } from '../../types/searchResultTypes';
+import { useDebounce } from "../../hooks/useDebounce";
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -14,8 +18,52 @@ function Navbar({ onMenuClick }: NavbarProps) {
   const [showSettingsMenu, setShowSettingsMenu] = useState<boolean>(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showProfilePicModal, setShowProfilePicModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState<boolean>(false);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  
   const user = useContext(UserContext)?.contextState;
   const navigate = useNavigate();
+  
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
+  useEffect(() => {
+    const performSearch = async () => {
+      const trimmedQuery = debouncedSearchQuery.trim();
+      
+      if (trimmedQuery === "") {
+        setSearchResults([]);
+        setShowSearchResults(false);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const results = await searchBooks(trimmedQuery);
+        setSearchResults(results);
+        setShowSearchResults(true);
+      } catch (error) {
+        console.error("Search failed:", error);
+        setSearchResults([]);
+        setShowSearchResults(false);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    performSearch();
+  }, [debouncedSearchQuery]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const closeSearchResults = () => {
+    setShowSearchResults(false);
+    setSearchQuery("");
+    setSearchResults([]);
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white border-b border-gray-300 z-50">
@@ -35,15 +83,25 @@ function Navbar({ onMenuClick }: NavbarProps) {
           </div>
 
           {/* Search */}
-          <div className="flex-1 max-w-xl">
+          <div className="flex-1 max-w-xl relative">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
               <input
                 type="text"
                 placeholder="Search..."
+                value={searchQuery}
+                onChange={handleSearchChange}
                 className="w-full pl-9 pr-3 py-1.5 border border-gray-300 text-gray-900 focus:outline-none focus:border-gray-400"
               />
+              {isSearching && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+                </div>
+              )}
             </div>
+            {showSearchResults && (
+              <SearchResults results={searchResults} onClose={closeSearchResults} />
+            )}
           </div>
 
           {/* Right */}
@@ -120,7 +178,7 @@ function Navbar({ onMenuClick }: NavbarProps) {
                       <div className="text-gray-600 text-sm">Student</div>
                     </div>
                     <Link
-                      className="w-full block px-3 py-2 text-left hover:bg-gray"
+                      className="w-full block px-3 py-2 text-left hover:bg-gray-100"
                       to={`/profile/${user?.id}`}
                     >
                       My Profile
