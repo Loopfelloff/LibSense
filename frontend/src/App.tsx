@@ -8,6 +8,7 @@ import { BookReview } from "./pages/BookReview.js";
 import { Favorite } from "./components/Favorites.js";
 import { Layout } from "./pages/Layout.js";
 import { YourInterest } from "./pages/YourInterest.js";
+import { Community } from "./pages/Community.js";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="favorites" element={<Favorite />} />
           <Route path="/topRated" element={<TopRated />} />
           <Route path="/interests" element={<YourInterest />} />
+          <Route path="/community" element={<Community />} />
           <Route path="/bookReview/:bookId" element={<BookReview />} />
         </Route>
         {/* <Route path="/restrictedPage" element={<RestrictedPage />} /> */}
