@@ -33,6 +33,7 @@ import { getAllBooks } from "../prisma/vector_embedding/bookEmbedding.js";
 import { recommendationRouter } from "./routes/recommendationRoute.js";
 import { router as adminRoutes } from "./routes/adminPanelRoutes.js"
 
+import { logOutRouter } from "./routes/logoutRoute.js";
 
 const app = express();
 app.use(cors(corsOptions));
@@ -70,6 +71,7 @@ app.use("/verifyOtp", verifyOtpHandler);
 app.use("/users", authenticationMiddleware);
 app.use("/users/profile", profileRouter);
 app.use("/users/books/favorites", favouriteRouter);
+app.use("/logout",logOutRouter);
 app.use("/users/books/status", bookStatusRouter);
 app.use("/users/books/recommendations", recommendationRouter);
 app.use("/userClustering", authenticationMiddleware)
