@@ -3,7 +3,7 @@ import axios from 'axios'
 
 export const searchBooks = async (req: Request, res: Response) => {
   try {
-    const { query } = req.query
+    let { query } = req.query
 
     if (!query || typeof query !== 'string' || query.trim() === '') {
       return res.status(400).json({
@@ -11,6 +11,7 @@ export const searchBooks = async (req: Request, res: Response) => {
         msg: 'Search query is required',
       })
     }
+    query = query.toLowerCase()
 
     // Call your Python FastAPI endpoint
     const searchResponse = await axios.get(
