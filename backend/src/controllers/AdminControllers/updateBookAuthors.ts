@@ -110,7 +110,7 @@ export const updateBookAuthors = async (
                 authorId = author.author_id
                 
                 // Verify author exists
-                const existingAuthor = await prisma.book_author.findUnique({
+                const existingAuthor = await prisma.bookAuthor.findUnique({
                     where: { id: authorId }
                 })
                 
@@ -129,7 +129,7 @@ export const updateBookAuthors = async (
                     })
                 }
 
-                const newAuthor = await prisma.book_author.create({
+                const newAuthor = await prisma.bookAuthor.create({
                     data: {
                         author_first_name: author.first_name.trim(),
                         author_middle_name: author.middle_name?.trim() || null,
@@ -155,10 +155,10 @@ export const updateBookAuthors = async (
         const updatedBook = await prisma.book.findUnique({
             where: { id: book_id },
             include: {
-                BookWrittenBy: {
+                book_written_by: {
                     include: { book_author: true },
                 },
-                BookGenres: {
+                book_genres: {
                     include: { genre: true },
                 },
             },

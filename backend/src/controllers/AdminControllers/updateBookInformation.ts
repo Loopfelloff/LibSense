@@ -112,10 +112,10 @@ export const updateBook = async (
         book_cover_image: coverUrl,
       },
       include: {
-        BookWrittenBy: {  // Correct - PascalCase
+        book_written_by: {  // Correct - PascalCase
           include: { book_author: true },
         },
-        BookGenres: {  // Changed from book_genres to BookGenres
+        book_genres: {  // Changed from book_genres to BookGenres
           include: { genre: true },
         },
       },
