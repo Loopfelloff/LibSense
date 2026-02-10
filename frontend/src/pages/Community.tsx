@@ -37,6 +37,9 @@ export function Community() {
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
+  const handleUserAccountClick = (userId : string)=>{
+      navigation(`/profile/${userId}`)
+  } 
 
   return (
     <>
@@ -76,6 +79,7 @@ export function Community() {
                         <tr
                           key={user.id}
                           className="bg-white hover:bg-gray-50"
+			  onClick ={()=>{handleUserAccountClick(user.id)}}
                         >
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
