@@ -55,6 +55,7 @@ model book {
   description       String
   avg_book_rating   Float             @default(0)
   book_rating_count Float             @default(0)
+  createdAt         DateTime          @default(now())
   BookGenres        BookGenres[]
   BookWrittenBy     BookWrittenBy[]
   book_status_val   book_status_val[]
