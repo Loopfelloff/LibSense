@@ -7,6 +7,7 @@ export const searchBooks = async (description: string): Promise<SearchResult[]> 
     { description },
     { withCredentials: true }
   );
+  console.log(response.data.data)
   return response.data.data;
 };
 
@@ -16,6 +17,5 @@ export const searchSimilarBooks = async (description: string) => {
     { description },
     { withCredentials: true }
   );
-  console.log(response)
-  return response.data;
+  return response.data.data;
 }

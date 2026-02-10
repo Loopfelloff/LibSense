@@ -57,9 +57,10 @@ def cosine_similarity(search: str, db: Session = Depends(get_db)):
         "recommendations": [
             {
                 "title": bv.book.book_title,
-                "book_profile_pic" : bv.book.book_cover_image,
-                "description": bv.book.description[:100] + "...",
-                "book_id": bv.book_id,
+                "book_cover_image" : bv.book.book_cover_image,
+                "avg_book_rating" : bv.book.avg_book_rating,
+                "book_rating_count" : bv.book.book_rating_count,
+                "id": bv.book_id,
             }
             for bv in results
         ],

@@ -21,6 +21,7 @@ function Navbar({ onMenuClick }: NavbarProps) {
   const [showProfilePicModal, setShowProfilePicModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [similarBooks, setSimilarBooks] = useState<SearchResult[]>([]);
   const [showSearchResults, setShowSearchResults] = useState<boolean>(false);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   
@@ -43,7 +44,7 @@ function Navbar({ onMenuClick }: NavbarProps) {
       try {
         const similarResults = await searchSimilarBooks(trimmedQuery);
         const results = await searchBooks(trimmedQuery);
-        console.log(similarResults);
+        setSimilarBooks(similarResults);
         setSearchResults(results);
         setShowSearchResults(true);
       } catch (error) {
@@ -108,9 +109,13 @@ function Navbar({ onMenuClick }: NavbarProps) {
                 </div>
               )}
             </div>
-            {showSearchResults && (
-              <SearchResults results={searchResults} onClose={closeSearchResults} />
-            )}
+{showSearchResults && (
+  <SearchResults
+    semanticResults={similarBooks}
+    genreResults={searchResults}
+    onClose={closeSearchResults}
+  />
+)}
           </div>
 
           {/* Right */}
