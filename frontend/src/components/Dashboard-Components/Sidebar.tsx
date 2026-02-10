@@ -45,7 +45,6 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
     key: SelectValue;
   }[] = [
     { icon: Home, label: "Dashboard", key: "dashBoard" },
-    { icon: Library, label: "My Library", key: "myLibrary" },
     { icon: Heart, label: "Favorites", key: "favorites" },
     { icon: Star, label: "Top Rated", key: "topRated" },
     { icon: Users, label: "Community", key: "community" },

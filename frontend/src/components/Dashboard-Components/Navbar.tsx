@@ -109,13 +109,13 @@ function Navbar({ onMenuClick }: NavbarProps) {
                 </div>
               )}
             </div>
-{showSearchResults && (
-  <SearchResults
-    semanticResults={similarBooks}
-    genreResults={searchResults}
-    onClose={closeSearchResults}
-  />
-)}
+              {showSearchResults && (
+                <SearchResults
+                  semanticResults={similarBooks}
+                  genreResults={searchResults}
+                  onClose={closeSearchResults}
+                />
+              )}
           </div>
 
           {/* Right */}
