@@ -10,3 +10,11 @@ export type SearchResult = {
     };
   }[];
 };
+
+export type SimilarSearchBooks = {
+  id: string;
+  book_cover_image: string;
+  title : string;
+  avg_book_rating: number;
+  book_rating_count: number;
+}

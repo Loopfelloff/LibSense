@@ -115,17 +115,17 @@ const getFavouriteBook = async (req: Request, res: Response) => {
     });
   } catch (err: unknown) {
     if (err instanceof Error) {
-      console.error(err.message);
+      console.error(err.message)
       return res.status(500).json({
         success: false,
         error: {
           errName: err.name,
           errMsg: err.message,
         },
-      });
+      })
     }
   }
-};
+}
 
 const postFavouriteBook = async (req: Request, res: Response) => {
   try {
@@ -163,20 +163,20 @@ const postFavouriteBook = async (req: Request, res: Response) => {
     return res.status(200).json({
       success: true,
       data: favourite,
-    });
+    })
   } catch (err: unknown) {
     if (err instanceof Error) {
-      console.error(err.message);
+      console.error(err.message)
       return res.status(500).json({
         success: false,
         error: {
           errName: err.name,
           errMsg: err.message,
         },
-      });
+      })
     }
   }
-};
+}
 
 const removeFavouriteBook = async (req: Request, res: Response) => {
   try {
@@ -187,7 +187,7 @@ const removeFavouriteBook = async (req: Request, res: Response) => {
         book_id: bookId,
         user_id: id,
       },
-    });
+    })
 
     await queue.add(
       "user_embeddings",
@@ -206,19 +206,19 @@ const removeFavouriteBook = async (req: Request, res: Response) => {
     await redisClient.del(countKey);
     return res.status(200).json({
       success: true,
-    });
+    })
   } catch (err: unknown) {
     if (err instanceof Error) {
-      console.error(err.message);
+      console.error(err.message)
       return res.status(500).json({
         success: false,
         error: {
           errName: err.name,
           errMsg: err.message,
         },
-      });
+      })
     }
   }
-};
+}
 
-export { getFavouriteBook, postFavouriteBook, removeFavouriteBook };
+export { getFavouriteBook, postFavouriteBook, removeFavouriteBook }

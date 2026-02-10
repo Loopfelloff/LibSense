@@ -10,12 +10,15 @@ import { Layout } from "./pages/Layout.js";
 import { YourInterest } from "./pages/YourInterest.js";
 import { Community } from "./pages/Community.js";
 
+import { AdminPanel } from "./pages/adminPanel"
+
 function App() {
   return (
     <div className="flex min-w-screen min-h-screen  flex-col items-center bg-white relative">
       <Routes>
         {/* Of course you can add the routes up in here as of now this is just the bare one */}
-        <Route path="/" element={<Layout />}>
+        <Route path="/admin" element={<AdminPanel />} />
+	<Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="profile/:userId" element={<Profile />} />
