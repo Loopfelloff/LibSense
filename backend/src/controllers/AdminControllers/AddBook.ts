@@ -127,7 +127,7 @@ export const addBook = async (
           })
         }
 
-        const newAuthor = await prisma.book_author.create({
+        const newAuthor = await prisma.bookAuthor.create({
           data: {
             author_first_name: author.first_name.trim(),
             author_middle_name: author.middle_name?.trim() ?? null,
@@ -149,10 +149,10 @@ export const addBook = async (
     const createdBook = await prisma.book.findUnique({
       where: { id: book.id },
       include: {
-        BookWrittenBy: {
+        book_written_by: {
           include: { book_author: true },
         },
-        BookGenres: {
+        book_genres: {
           include: { genre: true },
         },
       },

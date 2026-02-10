@@ -49,7 +49,7 @@ def cosine_similarity(search: str, db: Session = Depends(get_db)):
         db.query(BookVector)
         .join(Book)
         .order_by(BookVector.embedding.cosine_distance(book_vector))
-        .limit(12)
+        .limit(5)
         .all()
     )
     return {
@@ -57,8 +57,10 @@ def cosine_similarity(search: str, db: Session = Depends(get_db)):
         "recommendations": [
             {
                 "title": bv.book.book_title,
-                "description": bv.book.description[:100] + "...",
-                "book_id": bv.book_id,
+                "book_cover_image" : bv.book.book_cover_image,
+                "avg_book_rating" : bv.book.avg_book_rating,
+                "book_rating_count" : bv.book.book_rating_count,
+                "id": bv.book_id,
             }
             for bv in results
         ],
@@ -85,7 +87,7 @@ def recommend_books(userId: str, db: Session = Depends(get_db)):
         .filter(BookStatusVal.id.is_(None))
         .filter(Favourite.id.is_(None))
         .order_by(BookVector.embedding.cosine_distance(user_vector.embedding))
-        .limit(6)
+        .limit(5)
         .all()
     )
 

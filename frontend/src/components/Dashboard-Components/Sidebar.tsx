@@ -45,7 +45,6 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
     key: SelectValue;
   }[] = [
     { icon: Home, label: "Dashboard", key: "dashBoard" },
-    { icon: Library, label: "My Library", key: "myLibrary" },
     { icon: Heart, label: "Favorites", key: "favorites" },
     { icon: Star, label: "Top Rated", key: "topRated" },
     { icon: Users, label: "Community", key: "community" },
@@ -102,16 +101,6 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
               );
             })}
           </nav>
-
-          {/* Footer Stats */}
-          <div className="mt-4 pt-4 border-t border-gray-300">
-            <div className="px-3 space-y-3">
-              <div>
-                <div className="text-gray-600 text-sm">Books Added</div>
-                <div className="text-gray-900 font-semibold text-lg">48</div>
-              </div>
-            </div>
-          </div>
         </div>
       </aside>
     </>

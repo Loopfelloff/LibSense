@@ -7,15 +7,15 @@ export const getAllAuthors = async (req: Request, res: Response) => {
         const limit = parseInt(req.query.limit as string) || 10
         const skip = (page - 1) * limit
 
-        const totalAuthors = await prisma.book_author.count()
+        const totalAuthors = await prisma.bookAuthor.count()
 
-        const authors = await prisma.book_author.findMany({
+        const authors = await prisma.bookAuthor.findMany({
             select: {
                 id: true,
                 author_first_name: true,
                 author_middle_name: true,
                 author_last_name: true,
-                BookWrittenBy: {
+                book_written_by: {
                     select: {
                         book: {
                             select: {
@@ -41,7 +41,7 @@ export const getAllAuthors = async (req: Request, res: Response) => {
             first_name: author.author_first_name,
             middle_name: author.author_middle_name,
             last_name: author.author_last_name,
-            books: author.BookWrittenBy.map((bw) => bw.book),
+            books: author.book_written_by.map((bw) => bw.book),
         }))
 
         const totalPages = Math.ceil(totalAuthors / limit)

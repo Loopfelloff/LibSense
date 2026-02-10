@@ -40,15 +40,6 @@ const getMutualBooks = async (req: Request, res: Response) => {
           },
         ],
       },
-      // include: {
-      //   user_statuses: {
-      //     where: {
-      //       user_id: {
-      //         in: [userId, id],
-      //       },
-      //     },
-      //   },
-      // },
     })
 
     return res.status(200).json({
