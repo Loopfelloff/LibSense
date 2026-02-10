@@ -19,6 +19,11 @@ export function Dashboard() {
   const BOOKS_TO_SHOW = 6;
   useEffect(() => {
     if (!authContext?.loggedIn) navigation("/login");
+    if(authContext?.userRole === "SUPERADMIN"){
+	navigation("/admin")
+	return
+    }
+    
     if (!authContext) return;
     console.log("running");
     const fetchRecommendations = async () => {

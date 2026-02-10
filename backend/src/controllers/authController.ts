@@ -24,7 +24,20 @@ const authHandler = async (req : Request , res : Response)=>{
 	    }
 	})
 
-	const payloadToSend = {loggedIn : true ,profilePicLink : result?.profile_pic_link, ...user}
+	const userRole = await prisma.user.findUnique({
+	    where : {
+		id : user.id
+	    },
+	    include : {
+		user_role:{
+		    select:{
+			role : true
+		    }
+		}
+	    }
+	})
+
+	const payloadToSend = {loggedIn : true ,profilePicLink : result?.profile_pic_link, ...user , userRole : userRole?.user_role.role}
 
 	return res.status(200).json({
 	    data : payloadToSend

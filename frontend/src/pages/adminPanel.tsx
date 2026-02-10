@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import type { Book, AuthorWithBooks } from '../types/adminPanel'
 import { api } from '../apis/adminApi'
+import { UserContext } from "../context/UserContext";
+import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
 
 // Layout Components
 import { Sidebar } from '../components/AdminPanel/layout/sidebar'
@@ -36,6 +39,8 @@ const AdminPanel: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [refreshBookList, setRefreshBookList] = useState(0)
   const [refreshAuthorList, setRefreshAuthorList] = useState(0)
+  const navigation = useNavigate() 
+  const authContext = useContext(UserContext)?.contextState;
 
   // Load statistics (total counts)
   const loadStatistics = async () => {
@@ -73,6 +78,14 @@ const AdminPanel: React.FC = () => {
   }
 
   useEffect(() => {
+    if(!authContext?.loggedIn) {
+	navigation("/login")
+	return
+    }
+    if(authContext.userRole === "USER"){
+	navigation("/")
+	return
+    }
     loadStatistics()
     loadRecentAuthors()
     loadRecentBooks()
