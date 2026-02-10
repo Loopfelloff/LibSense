@@ -72,10 +72,10 @@ export const BookList: React.FC<BookListProps> = ({
         const searchResults = await Promise.all(
           data.recommendations.map(async (rec: any) => {
             try {
-              const bookDetail = await api.getBookDetail(rec.book_id)
+              const bookDetail = await api.getBookDetail(rec.id)
               return bookDetail
             } catch (error) {
-              console.error(`Error fetching book detail for ${rec.book_id}:`, error)
+              console.error(`Error fetching book detail for ${rec.id}:`, error)
               return null
             }
           })

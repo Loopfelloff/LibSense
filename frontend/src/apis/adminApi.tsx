@@ -5,6 +5,7 @@ const API_BASE_URL = "http://localhost:5000/admin"
 async function handleResponse(res: Response) {
   const data = await res.json()
 
+  console.log(data)
   if (!res.ok) {
     console.log(data)
     throw new Error(data?.errMsg || data?.errName || "Request failed")
