@@ -10,6 +10,7 @@ import type { SearchResult } from '../../types/searchResultTypes';
 import { useDebounce } from "../../hooks/useDebounce";
 import { logOut } from "../../apis/profile";
 
+
 interface NavbarProps {
   onMenuClick: () => void;
 }

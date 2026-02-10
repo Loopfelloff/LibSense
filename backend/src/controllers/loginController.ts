@@ -4,6 +4,13 @@ import type {Request , Response } from 'express'
 import {prisma} from '../config/prismaClientConfig.js'
 import jwt from 'jsonwebtoken'
 import { compareSync } from 'bcrypt-ts'
+import { Roles } from "../../generated/prisma/index.js";
+
+const userStatus : Record<string, Roles> ={
+    user : Roles.USER,
+    superUser : Roles.SUPERADMIN
+}
+
 const loginHandler = async (req : Request , res : Response)=>{
     
     try{
@@ -35,9 +42,12 @@ const loginHandler = async (req : Request , res : Response)=>{
 		first_name: true,
 		middle_name : true,
 		last_name : true,
-		profile_pic_link : true
+		profile_pic_link : true,
+		user_role_id : true,
 	    }
 	})
+
+
 
 	errJson.errDetail.errMsg= 'the user is not reigstered'
 
@@ -48,6 +58,12 @@ const loginHandler = async (req : Request , res : Response)=>{
 	errJson.errDetail.errMsg = `the password is incorrect`
 
 	if(!isAMatch) return res.status(401).json(errJson)
+
+	const userRole = (await prisma.userRole.findUnique({
+	    where : {
+		id : foundUser.user_role_id
+	    }
+	}))
 
 	const accessTokenSecret : string = String(process.env.ACCESS_TOKEN_SECRET)
 	const refreshTokenSecret : string = String(process.env.REFRESH_TOKEN_SECRET)
@@ -67,6 +83,21 @@ const loginHandler = async (req : Request , res : Response)=>{
 	    httpOnly : true
 	})
 
+	console.log("added from the user side this is ")
+	console.log(userRole?.role)
+
+	console.log({
+		id : foundUser.id,
+		loggedIn : true,
+		profilePicLink : foundUser.profile_pic_link,
+		email : foundUser.email,
+		firstName : foundUser.first_name,
+		middleName : foundUser.middle_name,
+		lastName : foundUser.last_name,
+		userRole : (userRole?.role === userStatus.user)? Roles.USER : Roles.SUPERADMIN, 
+	    }
+	)
+
 
 	return res.status(200).json({
 	    success : true,
@@ -78,6 +109,7 @@ const loginHandler = async (req : Request , res : Response)=>{
 		firstName : foundUser.first_name,
 		middleName : foundUser.middle_name,
 		lastName : foundUser.last_name,
+		userRole : (userRole?.role === userStatus.user)? Roles.USER : Roles.SUPERADMIN, 
 	    }
 	})
 

@@ -7,6 +7,7 @@ export type userContext = {
   middleName: string;
   lastName: string;
   profilePicLink: string;
+  userRole : string;
 };
 export type UserContextType = {
   contextState: userContext | null;

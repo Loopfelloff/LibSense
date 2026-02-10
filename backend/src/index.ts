@@ -25,6 +25,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { bookStatusRouter } from "./routes/bookStatusRoute.js";
 import { authHandler } from "./controllers/authController.js";
+import { genSaltSync, hashSync } from "bcrypt-ts"
 import {
   getAllUserProfile,
   getUserProfile,

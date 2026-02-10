@@ -5,7 +5,7 @@ import { Eye, EyeOff, Book, Mail, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axios from 'axios'
 import type { ChangeEvent } from 'react';
-
+import type { userContext } from '../context/UserContext';
 type formData ={
     email : string;
     password : string;
@@ -46,9 +46,15 @@ export default function LoginForm() {
 	  console.log(response.data)
 	  if(setContextState !== undefined){
 	      console.log('from the login set context one')
-	      console.log(response.data.data)
-	      setContextState(response.data.data)
-	      navigation("/")
+	      const userData = response.data.data as userContext 
+	      setContextState(userData)
+	      if(userData.userRole === "USER"){
+		  navigation("/")
+	      }
+	      else if(userData.userRole === "SUPERUSER"){
+		  navigation("/admin")
+	      }
+
 	  }
 	  
       }
