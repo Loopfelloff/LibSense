@@ -9,3 +9,13 @@ export const searchBooks = async (description: string): Promise<SearchResult[]> 
   );
   return response.data.data;
 };
+
+export const searchSimilarBooks = async (description: string) => {
+  const response = await axios.post(
+    'http://localhost:5000/books/search',
+    { description },
+    { withCredentials: true }
+  );
+  console.log(response)
+  return response.data;
+}

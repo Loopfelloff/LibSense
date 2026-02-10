@@ -34,6 +34,7 @@ import { recommendationRouter } from "./routes/recommendationRoute.js";
 import { router as adminRoutes } from "./routes/adminPanelRoutes.js"
 
 import { logOutRouter } from "./routes/logoutRoute.js";
+import { searchRouter } from "./routes/searchRoutes.js";
 
 const app = express();
 app.use(cors(corsOptions));
@@ -68,12 +69,17 @@ app.use("/genreClassification", authenticationMiddleware);
 app.use("/genreClassification", genreClassificationHandler);
 app.use("/registerAccount", verifyEmailHandler);
 app.use("/verifyOtp", verifyOtpHandler);
+
 app.use("/users", authenticationMiddleware);
+app.use("/books", authenticationMiddleware);
+
 app.use("/users/profile", profileRouter);
 app.use("/users/books/favorites", favouriteRouter);
-app.use("/logout",logOutRouter);
+app.use("users/logout",logOutRouter);
 app.use("/users/books/status", bookStatusRouter);
 app.use("/users/books/recommendations", recommendationRouter);
+app.use("/books/search/",searchRouter);
+
 app.use("/userClustering", authenticationMiddleware)
 app.use("/userClustering", userCommunityHandler)
 app.use('/admin', adminRoutes)

@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import ChangePasswordModal from "../PasswordChangeModal";
 import ChangeProfilePicModal from "../ProfilePicChangeModal";
 import SearchResults from "../SearchResults";
-import { searchBooks} from "../../apis/searchApi";
+import { searchBooks, searchSimilarBooks} from "../../apis/searchApi";
 import type { SearchResult } from '../../types/searchResultTypes';
 import { useDebounce } from "../../hooks/useDebounce";
 import { logOut } from "../../apis/profile";
@@ -41,7 +41,9 @@ function Navbar({ onMenuClick }: NavbarProps) {
 
       setIsSearching(true);
       try {
+        const similarResults = await searchSimilarBooks(trimmedQuery);
         const results = await searchBooks(trimmedQuery);
+        console.log(similarResults);
         setSearchResults(results);
         setShowSearchResults(true);
       } catch (error) {
