@@ -79,6 +79,7 @@ app.use("/userClustering", authenticationMiddleware)
 app.use("/userClustering", userCommunityHandler)
 app.use('/admin', adminRoutes)
 
+
 app.listen(process.env.PORT, () => {
   console.log("Listening to port ", process.env.PORT);
 });

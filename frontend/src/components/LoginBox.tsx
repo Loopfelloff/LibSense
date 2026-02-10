@@ -51,7 +51,7 @@ export default function LoginForm() {
 	      if(userData.userRole === "USER"){
 		  navigation("/")
 	      }
-	      else if(userData.userRole === "SUPERUSER"){
+	      else if(userData.userRole === "SUPERADMIN"){
 		  navigation("/admin")
 	      }
 
