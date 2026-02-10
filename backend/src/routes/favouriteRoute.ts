@@ -1,13 +1,13 @@
-import express from "express";
+import express from "express"
 import {
   getFavouriteBook,
   postFavouriteBook,
   removeFavouriteBook,
-} from "../controllers/favouritesBookController.js";
-const favouriteRouter = express.Router();
+} from "../controllers/favouritesBookController.js"
+const favouriteRouter = express.Router()
 
-favouriteRouter.get("/", getFavouriteBook);
-favouriteRouter.post("/", postFavouriteBook);
-favouriteRouter.delete("/", removeFavouriteBook);
+favouriteRouter.get("/", getFavouriteBook)
+favouriteRouter.post("/", postFavouriteBook)
+favouriteRouter.delete("/", removeFavouriteBook)
 
-export { favouriteRouter };
+export { favouriteRouter }

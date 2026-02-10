@@ -1,0 +1,73 @@
+import type { Request, Response } from 'express'
+import { prisma } from '../../config/prismaClientConfig.js'
+
+export const getAllAuthors = async (req: Request, res: Response) => {
+    try {
+        const page = parseInt(req.query.page as string) || 1
+        const limit = parseInt(req.query.limit as string) || 10
+        const skip = (page - 1) * limit
+
+        const totalAuthors = await prisma.book_author.count()
+
+        const authors = await prisma.book_author.findMany({
+            select: {
+                id: true,
+                author_first_name: true,
+                author_middle_name: true,
+                author_last_name: true,
+                BookWrittenBy: {
+                    select: {
+                        book: {
+                            select: {
+                                id: true,
+                                book_title: true,
+                                isbn: true,
+                                book_cover_image: true,
+                                description: true,
+                            },
+                        },
+                    },
+                },
+            },
+            orderBy: {
+                author_first_name: "asc",
+            },
+            skip: skip,
+            take: limit,
+        })
+
+        const formattedAuthors = authors.map((author) => ({
+            id: author.id,
+            first_name: author.author_first_name,
+            middle_name: author.author_middle_name,
+            last_name: author.author_last_name,
+            books: author.BookWrittenBy.map((bw) => bw.book),
+        }))
+
+        const totalPages = Math.ceil(totalAuthors / limit)
+        const hasMore = page < totalPages
+
+        return res.status(200).json({
+            success: true,
+            authors: formattedAuthors,
+            pagination: {
+                currentPage: page,
+                totalPages,
+                totalAuthors,
+                hasMore,
+            },
+        })
+    } catch (error: unknown) {
+        console.error(error)
+
+        if (error instanceof Error) {
+            return res.status(500).json({
+                success: false,
+                errName: error.name,
+                errMsg: error.message,
+            })
+        }
+
+        return res.status(500).json({ success: false, errName: "UnknownError" })
+    }
+}

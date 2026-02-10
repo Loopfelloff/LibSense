@@ -3,13 +3,13 @@ import { prisma } from "../config/prismaClientConfig.js";
 import { Status } from "../../generated/prisma/index.js";
 import { redisClient } from "../config/redisConfiguration.js";
 
-type BookStatus = "read" | "willread" | "reading";
+type BookStatus = "read" | "willread" | "reading"
 
 const statusMap: Record<string, Status> = {
   read: Status.READ,
   reading: Status.READING,
   willread: Status.WILLREAD,
-};
+}
 
 const getBooksByStatus = async (req: Request, res: Response) => {
   try {
@@ -22,9 +22,9 @@ const getBooksByStatus = async (req: Request, res: Response) => {
         error: {
           errorMsg: "No status type specified",
         },
-      });
+      })
 
-    const prismaStatus = statusMap[String(type).toLowerCase()];
+    const prismaStatus = statusMap[String(type).toLowerCase()]
     const getRecordByStatus = await prisma.book.findMany({
       where: {
         user_statuses: {
@@ -34,25 +34,25 @@ const getBooksByStatus = async (req: Request, res: Response) => {
           },
         },
       },
-    });
+    })
 
     return res.status(200).json({
       success: true,
       data: getRecordByStatus,
-    });
+    })
   } catch (err: unknown) {
     if (err instanceof Error) {
-      console.error(err.message);
+      console.error(err.message)
       return res.status(500).json({
         success: false,
         error: {
           errName: err.name,
           errMsg: err.message,
         },
-      });
+      })
     }
   }
-};
+}
 
 const editBookByStatus = async (req: Request, res: Response) => {
   try {
@@ -67,16 +67,16 @@ const editBookByStatus = async (req: Request, res: Response) => {
         error: {
           errorMsg: "status type or book not specified",
         },
-      });
+      })
 
-    const prismaStatus = statusMap[String(type).toLowerCase()];
+    const prismaStatus = statusMap[String(type).toLowerCase()]
     if (!prismaStatus)
       return res.status(401).json({
         success: false,
         error: {
           errorMsg: "Invalid status type",
         },
-      });
+      })
 
     const editRecord = await prisma.bookStatusVal.upsert({
       where: {
@@ -93,27 +93,27 @@ const editBookByStatus = async (req: Request, res: Response) => {
         book_id: bookId,
         status: prismaStatus,
       },
-    });
+    })
 
     const countKey = `user:${id}:recommendations`;
     await redisClient.del(countKey);
     return res.status(200).json({
       success: true,
       data: editRecord,
-    });
+    })
   } catch (err: unknown) {
     if (err instanceof Error) {
-      console.error(err.message);
+      console.error(err.message)
       return res.status(500).json({
         success: false,
         error: {
           errName: err.name,
           errMsg: err.message,
         },
-      });
+      })
     }
   }
-};
+}
 
 const deleteBookByStatus = async (req: Request, res: Response) => {
   try {
@@ -127,7 +127,7 @@ const deleteBookByStatus = async (req: Request, res: Response) => {
         error: {
           errorMsg: "status type or book not specified",
         },
-      });
+      })
     await prisma.bookStatusVal.deleteMany({
       where: {
         book_id: bookId,
@@ -138,19 +138,19 @@ const deleteBookByStatus = async (req: Request, res: Response) => {
     await redisClient.del(countKey);
     return res.status(200).json({
       success: true,
-    });
+    })
   } catch (err: unknown) {
     if (err instanceof Error) {
-      console.error(err.message);
+      console.error(err.message)
       return res.status(500).json({
         success: false,
         error: {
           errName: err.name,
           errMsg: err.message,
         },
-      });
+      })
     }
   }
-};
+}
 
-export { getBooksByStatus, editBookByStatus, deleteBookByStatus };
+export { getBooksByStatus, editBookByStatus, deleteBookByStatus }
