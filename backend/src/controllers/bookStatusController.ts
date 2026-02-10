@@ -13,8 +13,8 @@ const statusMap: Record<string, Status> = {
 
 const getBooksByStatus = async (req: Request, res: Response) => {
   try {
-    const { type } = req.query as { type?: BookStatus };
-    const { id } = req.user as { id: string };
+    const { type , userId} = req.query as { type?: BookStatus , userId?:string };
+    const id = userId
 
     if (!type)
       return res.status(401).json({
