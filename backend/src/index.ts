@@ -75,7 +75,7 @@ app.use("/books", authenticationMiddleware);
 
 app.use("/users/profile", profileRouter);
 app.use("/users/books/favorites", favouriteRouter);
-app.use("users/logout",logOutRouter);
+app.use("/users/logout",logOutRouter);
 app.use("/users/books/status", bookStatusRouter);
 app.use("/users/books/recommendations", recommendationRouter);
 app.use("/books/search/",searchRouter);
