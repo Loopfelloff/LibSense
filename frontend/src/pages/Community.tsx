@@ -12,6 +12,10 @@ export function Community() {
 
   useEffect(() => {
     if (!authContext?.loggedIn) navigation("/login");
+    if(authContext?.userRole === "SUPERADMIN"){
+	navigation("/admin")
+	return
+    }
     if (!authContext) return;
 
     const fetchCommunityUsers = async () => {

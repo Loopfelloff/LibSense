@@ -1,16 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState , useContext} from "react";
 import { Heart, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { deleteFavorite, getFavorites } from "../apis/favorite.js";
-import type { BookItem } from "../types/favoriteBooks.js";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../context/UserContext.js";
+import type { BookItem } from "../types/favoriteBooks.js";
 
 export function Favorite() {
   const [favoriteBooks, setFavoriteBooks] = useState<BookItem[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const authContext = useContext(UserContext)?.contextState
+  const navigation = useNavigate() 
 
   useEffect(() => {
+    if(!authContext?.loggedIn){
+	navigation("/login")
+	return
+    }
+    if(authContext?.userRole === "SUPERADMIN"){
+	navigation("/admin")
+	return
+    }
     const fetchFavorites = async () => {
       const favoriteList = await getFavorites(currentPage);
       console.log(favoriteList.data);
@@ -19,7 +30,6 @@ export function Favorite() {
     };
     fetchFavorites();
   }, [currentPage]);
-  const navigation = useNavigate();
 
   const handleRemoveBook = async (id: string) => {
     setFavoriteBooks(favoriteBooks.filter((book) => book.id !== id));

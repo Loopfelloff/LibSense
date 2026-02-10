@@ -27,6 +27,10 @@ export function YourInterest() {
 
   useEffect(() => {
     if (!authContext?.loggedIn) navigation("/login");
+    if(authContext?.userRole === "SUPERADMIN"){
+	navigation("/admin")
+	return
+    }
 
     getUserPreference(setIsLoading)
       .then((response: userPreferredGenre[]) => {

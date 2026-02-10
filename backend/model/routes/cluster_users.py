@@ -28,6 +28,11 @@ def user_clustering(user_id: str, db: Session = Depends(get_db)):
     vector_embeddings = np.array([bv.embedding for bv in results]) 
 
     user_id_in_list = [bv.user_id for bv in results]
+    if user_id not in user_id_in_list:
+        raise HTTPException(
+            status_code=404,
+            detail="User has no vector embedding yet"
+        )
 
     user_id_index = user_id_in_list.index(user_id)
 

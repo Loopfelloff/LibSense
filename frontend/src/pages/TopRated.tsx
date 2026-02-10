@@ -23,6 +23,10 @@ export function TopRated() {
   
   useEffect(()=>{
     if(!authContext?.loggedIn) navigation('/login')	 
+    if(authContext?.userRole === "SUPERADMIN"){
+	navigation("/admin")
+	return
+    }
     getTopRated(startIndex , 10, setIsLoading )
     .then(resolve => {
       setTopRatedBooks(resolve?.data?.data)
