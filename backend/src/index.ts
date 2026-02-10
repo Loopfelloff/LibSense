@@ -25,6 +25,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { bookStatusRouter } from "./routes/bookStatusRoute.js";
 import { authHandler } from "./controllers/authController.js";
+import { userAuthenticationMiddleware } from "./middlewares/userAuthenticationMiddleware.js";
+import {adminAuthenticationMiddleware} from "./middlewares/adminAuthenticationMiddleware.js";
 import { genSaltSync, hashSync } from "bcrypt-ts"
 import {
   getAllUserProfile,
@@ -50,33 +52,34 @@ app.use("/mock", mockDataHandler); // remove the underlying handler and stuff af
 // we have to later on add middleware instead to verify if this is from a verified request or not.
 
 
-app.use("/book", authenticationMiddleware);
+app.use("/book", authenticationMiddleware, userAuthenticationMiddleware);
 app.use("/auth", authenticationMiddleware);
 app.use("/auth", authHandler);
-app.use("/review", authenticationMiddleware);
+app.use("/review", authenticationMiddleware , userAuthenticationMiddleware);
 app.use("/review", bookReviewHandler);
-app.use("/topRated", authenticationMiddleware);
+app.use("/topRated", authenticationMiddleware , userAuthenticationMiddleware);
 app.use("/topRated", topRatedBooksHandler);
-app.use("/viewBook", authenticationMiddleware);
+app.use("/viewBook", authenticationMiddleware , userAuthenticationMiddleware);
 app.use("/viewBook", viewBookHandler);
-app.use("/interest", authenticationMiddleware);
+app.use("/interest", authenticationMiddleware , userAuthenticationMiddleware);
 app.use("/interest", interestHandler);
-app.use("/addToWillRead", authenticationMiddleware);
+app.use("/addToWillRead", authenticationMiddleware , userAuthenticationMiddleware);
 app.use("/addToWillRead", addToWillReadHandler);
-app.use("/checkIfStatusExist", authenticationMiddleware);
+app.use("/checkIfStatusExist", authenticationMiddleware , userAuthenticationMiddleware);
 app.use("/checkIfStatusExist", checkIfStatusExistHandler);
-app.use("/genreClassification", authenticationMiddleware);
+app.use("/genreClassification", authenticationMiddleware , userAuthenticationMiddleware);
 app.use("/genreClassification", genreClassificationHandler);
 app.use("/registerAccount", verifyEmailHandler);
 app.use("/verifyOtp", verifyOtpHandler);
-app.use("/users", authenticationMiddleware);
+app.use("/users", authenticationMiddleware , userAuthenticationMiddleware);
 app.use("/users/profile", profileRouter);
 app.use("/users/books/favorites", favouriteRouter);
 app.use("/logout",logOutRouter);
 app.use("/users/books/status", bookStatusRouter);
 app.use("/users/books/recommendations", recommendationRouter);
-app.use("/userClustering", authenticationMiddleware)
+app.use("/userClustering", authenticationMiddleware, userAuthenticationMiddleware)
 app.use("/userClustering", userCommunityHandler)
+app.use("/admin", authenticationMiddleware , adminAuthenticationMiddleware)
 app.use('/admin', adminRoutes)
 
 
